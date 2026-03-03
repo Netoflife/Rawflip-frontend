@@ -505,16 +505,15 @@ const userSchema = new mongoose.Schema({
   about_understood_at:      { type:Date,    default:null  },
 }, { timestamps:true });
 
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password') || !this.password) return next();
+userSchema.pre('save', async function() {
+  if (!this.isModified('password') || !this.password) return;
   this.password = await bcrypt.hash(this.password, 12);
-  next();
 });
 userSchema.methods.comparePassword = function(pw) {
   return this.password ? bcrypt.compare(pw, this.password) : Promise.resolve(false);
 };
 // Generate referral code if missing
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function() {
   if (!this.referralCode) {
     // Retry loop to prevent collision on unique index
     const UserModel = mongoose.model('User');
@@ -527,7 +526,6 @@ userSchema.pre('save', async function(next) {
     } while (await UserModel.exists({ referralCode: code }));
     this.referralCode = code;
   }
-  next();
 });
 
 // ── Subscription schema ────────────────────────────────────────────────────────
@@ -3915,14 +3913,13 @@ const supportTicketSchema = new mongoose.Schema({
 }, { timestamps:true });
 
 // Auto-generate ticket number like RF-A3F29B before save
-supportTicketSchema.pre('save', async function(next) {
+supportTicketSchema.pre('save', async function() {
   if (!this.ticketNumber) {
     // Use random hex + timestamp suffix to keep it short and unique
     const rand = Math.random().toString(36).slice(2,5).toUpperCase();
     const ts   = Date.now().toString(36).slice(-3).toUpperCase();
     this.ticketNumber = 'RF-' + rand + ts;
   }
-  next();
 });
 
 const SupportTicket = mongoose.model('SupportTicket', supportTicketSchema);
