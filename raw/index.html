@@ -1666,6 +1666,13 @@ table{font-size:.8rem}
 <div class="page" id="page-settings" style="display:none">
   <div class="pg" style="max-width:680px">
     <div class="pg-hdr"><div class="pg-title">⚙️ Settings</div></div>
+    <div class="card mb-3">
+      <div class="card-hdr"><span class="fw7">🌐 Language</span></div>
+      <div class="card-body">
+        <p class="text-sm text-2" style="margin-bottom:12px">Choose your preferred language for the app.</p>
+        <div id="lang-picker-container"></div>
+      </div>
+    </div>
     <div class="card mb-3"><div class="card-hdr"><span class="fw7">Change Password</span></div>
       <div class="card-body">
         <div class="fg"><label class="fl">Current Password</label><input class="fc" type="password" id="s-cur-pw" autocomplete="current-password"/></div>
@@ -1863,7 +1870,7 @@ table{font-size:.8rem}
 'use strict';
 /* ── Config ─────────────────────────────────────────────── */
 var _h=window.location.hostname;
-var API_BASE=(window.RF_CONFIG&&window.RF_CONFIG.apiBase)||'https://rawflip-backend.onrender.com';
+var API_BASE=(window.RF_CONFIG&&window.RF_CONFIG.apiBase)||'http://localhost:5000';
 // To use a local backend instead, set: window.RF_CONFIG = { apiBase: 'http://localhost:5000' }
 
 /* ── Token ───────────────────────────────────────────────── */
@@ -4615,6 +4622,8 @@ loadAnalytics = function() { ensureChartJS(function() { _loadAnalyticsOrig(); })
 
 /* ── Settings page (Feature 2 UI + password change) ─────── */
 async function loadSettings() {
+  // Inject language picker
+  if (typeof injectLangPicker === 'function') injectLangPicker('lang-picker-container');
   // Load 2FA status
   await load2FAStatus();
   // Load login sessions

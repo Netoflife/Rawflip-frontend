@@ -1,24 +1,3 @@
-'use strict';
-/**
- * RawFlip Marketplace — Backend v7
- * Upgrades over v6:
- *   - Dynamic block-fee engine (₦100 per ₦5,000 block)
- *   - Subscription system: Free / Basic (₦1,500/mo) / Pro (₦4,500/mo)
- *   - Referral program with milestones, atomic rewards, abuse protection
- *   - Telegram bot integration for proof submission & admin approval
- *   - Wallet deposit/withdraw with admin approval workflow
- *   - Transaction lifecycle: pending→proof_submitted→approved→completed
- *   - All financial ops atomic via MongoDB sessions
- *
- * npm install (additions over v6):
- *   node-telegram-bot-api
- *
- * New .env:
- *   TELEGRAM_BOT_TOKEN=<your-bot-token>
- *   TELEGRAM_ADMIN_CHAT_ID=<admin-chat-id>
- *   MIN_DEPOSIT=5000
- *   MIN_WITHDRAWAL=5000
- */
 require('dotenv').config();
 
 const express      = require('express');
@@ -883,7 +862,7 @@ const signTemp    = id => jwt.sign({ id, temp:true }, JWT_SECRET, { expiresIn:'5
 const setAuthCookies = (res, userId) => {
   const access  = signAccess(userId, true);
   const refresh = signRefresh(userId);
-  const opts = { httpOnly:true, secure:IS_PROD, sameSite:IS_PROD?'strict':'lax' };
+  const opts = { httpOnly:true, secure:IS_PROD, sameSite:IS_PROD?'none':'lax' };
   res.cookie('rf_access',  access,  { ...opts, maxAge:15*60*1000 });
   res.cookie('rf_refresh', refresh, { ...opts, maxAge:7*24*60*60*1000 });
   return { access, refresh };
@@ -2221,9 +2200,21 @@ router.post('/listings/:id/favorite', auth, [param('id').isMongoId()], validate,
   if (!l) return res.status(404).json({ error:t('not_found') });
   const uid = req.user._id;
   const idx = l.favoritedBy.findIndex(id=>id.equals(uid));
-  idx>=0 ? l.favoritedBy.splice(idx,1) : l.favoritedBy.push(uid);
-  await l.save();
-  res.json({ favorited:idx<0, count:l.favoritedBy.length });
+  const adding = idx < 0;
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      if (adding) {
+        l.favoritedBy.push(uid);
+        await User.findByIdAndUpdate(uid, { $addToSet:{ wishlist:l._id } }, { session });
+      } else {
+        l.favoritedBy.splice(idx, 1);
+        await User.findByIdAndUpdate(uid, { $pull:{ wishlist:l._id } }, { session });
+      }
+      await l.save({ session });
+    });
+  } finally { await session.endSession(); }
+  res.json({ favorited:adding, count:l.favoritedBy.length });
 }));
 
 router.get('/listings/:id/similar', asyncH(async (req,res) => {
@@ -4144,50 +4135,3 @@ mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS:5000 })
   .catch(err=>{ console.error('[DB] Error:', err.message); process.exit(1); });
 
 module.exports = { app, server };
-
-/*
-==========================================================
-UPDATED .env for v7
-==========================================================
-MONGO_URI=mongodb://localhost:27017/rawflip
-JWT_SECRET=<min-32-chars>
-JWT_REFRESH_SECRET=<different-min-32-chars>
-TOTP_ENCRYPTION_KEY=<min-32-chars>
-PORT=5000
-NODE_ENV=development
-CLIENT_ORIGIN=http://localhost:3000
-APP_URL=http://localhost:5000
-NGN_USD_RATE=1600
-MIN_DEPOSIT=5000
-MIN_WITHDRAWAL=5000
-
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your@gmail.com
-SMTP_PASS=your_app_password
-EMAIL_FROM=RawFlip <noreply@rawflip.com>
-
-GOOGLE_CLIENT_ID=xxx
-GOOGLE_CLIENT_SECRET=xxx
-GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
-
-ELASTIC_NODE=http://localhost:9200
-ELASTIC_API_KEY=
-
-TELEGRAM_BOT_TOKEN=your-bot-token
-TELEGRAM_ADMIN_CHAT_ID=your-admin-chat-id
-
-BANK_NAME=RawFlip Payments Ltd
-BANK_ACCOUNT=0000000000
-BANK_ACCOUNT_NAME=RawFlip Escrow
-
-# Support — added v20
-# The support email address is protected in source code.
-# It is built at runtime from character array — do not add it here.
-==========================================================
-
-Additional npm install:
-npm install node-telegram-bot-api
-==========================================================
-*/
