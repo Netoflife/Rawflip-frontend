@@ -4,6 +4,7 @@
   "description": "",
   "main": "retrade.js",
   "scripts": {
+    "start": "node retrade.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
