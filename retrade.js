@@ -1,3 +1,24 @@
+'use strict';
+/**
+ * RawFlip Marketplace — Backend v7
+ * Upgrades over v6:
+ *   - Dynamic block-fee engine (₦100 per ₦5,000 block)
+ *   - Subscription system: Free / Basic (₦1,500/mo) / Pro (₦4,500/mo)
+ *   - Referral program with milestones, atomic rewards, abuse protection
+ *   - Telegram bot integration for proof submission & admin approval
+ *   - Wallet deposit/withdraw with admin approval workflow
+ *   - Transaction lifecycle: pending→proof_submitted→approved→completed
+ *   - All financial ops atomic via MongoDB sessions
+ *
+ * npm install (additions over v6):
+ *   node-telegram-bot-api
+ *
+ * New .env:
+ *   TELEGRAM_BOT_TOKEN=<your-bot-token>
+ *   TELEGRAM_ADMIN_CHAT_ID=<admin-chat-id>
+ *   MIN_DEPOSIT=5000
+ *   MIN_WITHDRAWAL=5000
+ */
 require('dotenv').config();
 
 const express      = require('express');
@@ -482,20 +503,7 @@ const userSchema = new mongoose.Schema({
   terms_version:            { type:String,  default:null  },
   about_understood:         { type:Boolean, default:false },
   about_understood_at:      { type:Date,    default:null  },
-}, { timestamps:true })
-;
-userSchema.pre('save', function(next) {
-    if (!this.isModified('password')) return next();
-
-    const bcrypt = require('bcryptjs');
-
-    bcrypt.hash(this.password, 12, (err, hash) => {
-        if (err) return next(err);
-
-        this.password = hash;
-        next();
-    });
-});
+}, { timestamps:true });
 
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password') || !this.password) return next();
@@ -506,7 +514,7 @@ userSchema.methods.comparePassword = function(pw) {
   return this.password ? bcrypt.compare(pw, this.password) : Promise.resolve(false);
 };
 // Generate referral code if missing
-userSchema.pre('save', async function() {
+userSchema.pre('save', async function(next) {
   if (!this.referralCode) {
     // Retry loop to prevent collision on unique index
     const UserModel = mongoose.model('User');
@@ -519,6 +527,7 @@ userSchema.pre('save', async function() {
     } while (await UserModel.exists({ referralCode: code }));
     this.referralCode = code;
   }
+  next();
 });
 
 // ── Subscription schema ────────────────────────────────────────────────────────
@@ -1173,13 +1182,13 @@ router.get('/plans', (_,res) => res.json({ plans:PLANS }));
 // ══ AUTH ══════════════════════════════════════════════════════════════════════
 
 router.post('/auth/register', [
-  body('username').trim().isLength({ min:3, max:30 }).matches(/^[a-zA-Z0-9_.-]+$/),
-  body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min:8 }).matches(/[A-Z]/).matches(/[0-9]/),
+  body('username').trim().isLength({ min:3, max:30 }).withMessage('Username must be 3–30 characters').matches(/^[a-zA-Z0-9_.-]+$/).withMessage('Username can only contain letters, numbers, _ . -'),
+  body('email').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
+  body('password').isLength({ min:8 }).withMessage('Password must be at least 8 characters').matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter').matches(/[0-9]/).withMessage('Password must contain at least one number'),
   body('referralCode').optional().trim().isLength({ max:20 }),
-  body('phone').notEmpty().withMessage('Phone number is required').trim().matches(/^\+234[0-9]{10}$/).withMessage('Phone must be in +234XXXXXXXXXX format'),
-  body('whatsapp').notEmpty().withMessage('WhatsApp number is required').trim().matches(/^\+234[0-9]{10}$/).withMessage('WhatsApp must be in +234XXXXXXXXXX format'),
-  body('location').notEmpty().withMessage('Location is required').trim().isLength({ max:100 }),
+  body('phone').notEmpty().withMessage('Phone number is required').trim().matches(/^\+234[0-9]{10}$/).withMessage('Phone must be in format +2348012345678'),
+  body('whatsapp').notEmpty().withMessage('WhatsApp number is required').trim().matches(/^\+234[0-9]{10}$/).withMessage('WhatsApp must be in format +2348012345678'),
+  body('location').notEmpty().withMessage('Location is required').trim().isLength({ max:100 }).withMessage('Location too long'),
 ], validate, asyncH(async (req,res) => {
   const { username, email, password, referralCode } = req.body;
   if (await User.findOne({ $or:[{ email },{ username }] }))
