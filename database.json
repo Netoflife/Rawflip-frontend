@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "username": "A",
+      "password": "111111",
+      "joined": "2026-01-13T22:27:22.142Z",
+      "rating": 5,
+      "sales": 0
+    }
+  ],
+  "listings": [],
+  "messages": [],
+  "tokens": [
+    {
+      "token": "4wfl4vuxsbikh4l0y0k0i",
+      "username": "A"
+    },
+    {
+      "token": "lxyzk7er2hlyltj1pcx9y",
+      "username": "A"
+    },
+    {
+      "token": "8hwl7ug6riw16i0vjffzjx",
+      "username": "A"
+    },
+    {
+      "token": "9594w72nr2acmyj51z0tz6",
+      "username": "A"
+    }
+  ],
+  "favorites": []
+}

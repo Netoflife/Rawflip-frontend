@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReTrade Admin | Management Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        body { background: #f1f5f9; color: #1e293b; }
+    </style>
+</head>
+<body class="min-h-screen flex">
+
+    <nav class="w-64 bg-slate-900 text-white flex flex-col p-6 space-y-8">
+        <h1 class="text-2xl font-bold tracking-tight text-blue-400">RETRADE <span class="text-xs text-white block">ADMIN</span></h1>
+        <div class="flex flex-col space-y-4">
+            <button onclick="showTab('users')" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition"><i class="fas fa-users w-6"></i> <span>Users</span></button>
+            <button onclick="showTab('kyc')" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition"><i class="fas fa-id-card w-6"></i> <span>KYC Requests</span></button>
+            <button onclick="showTab('deposits')" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition"><i class="fas fa-wallet w-6"></i> <span>Deposits</span></button>
+            <button onclick="showTab('withdrawals')" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition"><i class="fas fa-hand-holding-usd w-6"></i> <span>Withdrawals</span></button>
+        </div>
+        <button onclick="logout()" class="mt-auto flex items-center space-x-3 p-3 text-red-400 hover:bg-red-500/10 rounded-lg"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></button>
+    </nav>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="flex justify-between items-center mb-8">
+            <h2 id="tab-title" class="text-3xl font-bold">User Management</h2>
+            <div id="admin-info" class="text-sm font-medium bg-white px-4 py-2 rounded-full shadow-sm border">Admin Session Active</div>
+        </header>
+
+        <div id="content" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <table class="w-full text-left">
+                <thead id="table-head" class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs font-semibold">
+                    </thead>
+                <tbody id="table-body" class="divide-y divide-slate-100">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const API = "http://localhost:3000/api/admin";
+        const token = localStorage.getItem('adminToken');
+
+        if (!token) window.location.href = "/login.html"; // Basic protection
+
+        async function fetchData(endpoint) {
+            const res = await fetch(`${API}/${endpoint}`, {
+                headers: { 'Authorization': token }
+            });
+            return await res.json();
+        }
+
+        async function action(endpoint, id, status) {
+            const res = await fetch(`${API}/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify({ id, status })
+            });
+            if (res.ok) alert("Action successful");
+            location.reload();
+        }
+
+        async function showTab(tab) {
+            const tbody = document.getElementById('table-body');
+            const thead = document.getElementById('table-head');
+            const title = document.getElementById('tab-title');
+            tbody.innerHTML = `<div class="p-10 text-center">Loading...</div>`;
+
+            if (tab === 'users') {
+                title.innerText = "User Management";
+                const users = await fetchData('users');
+                thead.innerHTML = `<tr><th class="p-4">User</th><th class="p-4">Balance</th><th class="p-4">Role</th><th class="p-4">Actions</th></tr>`;
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td class="p-4"><b>${u.username}</b><br><span class="text-xs text-slate-400">${u.email}</span></td>
+                        <td class="p-4">$${u.balance.toFixed(2)}</td>
+                        <td class="p-4"><span class="px-2 py-1 rounded text-xs ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">${u.role}</span></td>
+                        <td class="p-4">
+                            <button onclick="action('users/role', '${u._id}', 'admin')" class="text-xs text-blue-600 font-bold">Make Admin</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            if (tab === 'kyc') {
+                title.innerText = "KYC Verification";
+                const reqs = await fetchData('kyc');
+                thead.innerHTML = `<tr><th class="p-4">User</th><th class="p-4">Document</th><th class="p-4">Actions</th></tr>`;
+                tbody.innerHTML = reqs.map(u => `
+                    <tr>
+                        <td class="p-4">${u.username}</td>
+                        <td class="p-4"><a href="http://localhost:3000/${u.kycFile}" target="_blank" class="text-blue-500 underline text-sm">View ID Card</a></td>
+                        <td class="p-4 flex space-x-2">
+                            <button onclick="action('kyc/approve', '${u._id}', 'verified')" class="bg-green-500 text-white px-3 py-1 rounded text-xs">Approve</button>
+                            <button onclick="action('kyc/approve', '${u._id}', 'unverified')" class="bg-red-500 text-white px-3 py-1 rounded text-xs">Reject</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            if (tab === 'deposits') {
+                title.innerText = "Pending Deposits";
+                const txns = await fetchData('deposits');
+                thead.innerHTML = `<tr><th class="p-4">User ID</th><th class="p-4">Amount</th><th class="p-4">Proof</th><th class="p-4">Actions</th></tr>`;
+                tbody.innerHTML = txns.map(t => `
+                    <tr>
+                        <td class="p-4">${t.userId}</td>
+                        <td class="p-4 text-green-600 font-bold">$${t.amount}</td>
+                        <td class="p-4"><a href="http://localhost:3000/${t.proof}" target="_blank" class="text-blue-500 underline text-sm">View Receipt</a></td>
+                        <td class="p-4 flex space-x-2">
+                            <button onclick="action('deposits/approve', '${t._id}', 'completed')" class="bg-green-500 text-white px-3 py-1 rounded text-xs text-xs">Approve</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            if (tab === 'withdrawals') {
+                title.innerText = "Withdrawal Requests";
+                const txns = await fetchData('withdrawals');
+                thead.innerHTML = `<tr><th class="p-4">User</th><th class="p-4">Amount</th><th class="p-4">Info</th><th class="p-4">Actions</th></tr>`;
+                tbody.innerHTML = txns.map(t => `
+                    <tr>
+                        <td class="p-4">${t.userId}</td>
+                        <td class="p-4 text-red-600 font-bold">$${Math.abs(t.amount)}</td>
+                        <td class="p-4 text-xs">${t.reference}</td>
+                        <td class="p-4">
+                            <button onclick="action('withdrawals/approve', '${t._id}', 'completed')" class="bg-slate-800 text-white px-3 py-1 rounded text-xs">Mark Paid</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = "/login.html"; }
+
+        // Load default tab
+        showTab('users');
+    </script>
+</body>
+</html>

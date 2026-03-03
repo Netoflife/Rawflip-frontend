@@ -1,0 +1,293 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Re-Trade</title>
+
+<style>
+:root{
+  --dark:#020617;
+  --accent:#22c55e;
+  --bg:#f1f5f9;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui;background:var(--bg)}
+.page{display:none;min-height:100vh}
+.hidden{display:none}
+button{border:none;border-radius:14px;padding:12px 16px;font-weight:700}
+input,textarea{
+  width:100%;padding:12px;border-radius:14px;
+  border:1px solid #ccc;margin-bottom:12px
+}
+.card{
+  background:#fff;border-radius:18px;padding:16px;
+  box-shadow:0 8px 25px rgba(0,0,0,.08)
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:14px
+}
+
+/* HERO */
+#home{
+  background:linear-gradient(135deg,#020617,#1e293b);
+  color:#fff;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  padding:24px;text-align:center
+}
+#home h1{font-size:3rem;margin:0}
+#home p{max-width:520px;color:#cbd5f5}
+#home button{background:var(--accent);margin-top:24px}
+
+/* AUTH */
+#auth{
+  display:flex;justify-content:center;align-items:center
+}
+.auth-box{
+  background:#fff;padding:32px;border-radius:24px;
+  width:100%;max-width:380px
+}
+
+/* APP */
+#app header{
+  background:var(--dark);color:#fff;
+  padding:16px;display:flex;
+  justify-content:space-between;align-items:center
+}
+main{padding:16px;padding-bottom:90px}
+
+/* CHAT */
+.chat-box{
+  height:260px;overflow-y:auto;
+  border:1px solid #ddd;border-radius:14px;
+  padding:10px;margin-bottom:10px
+}
+
+/* NAV */
+nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fff;border-top:1px solid #ddd;
+  display:flex
+}
+nav button{
+  flex:1;background:none;font-size:12px
+}
+nav button.active{color:var(--accent)}
+img{width:100%;border-radius:14px}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<section id="home" class="page">
+  <h1>RE-TRADE</h1>
+  <p>Buy, sell, and trade second-hand gear directly with real people. No middlemen. No bullshit.</p>
+  <button onclick="go('#auth')">Get Started</button>
+</section>
+
+<!-- AUTH -->
+<section id="auth" class="page">
+  <div class="auth-box">
+    <h2>Login / Register</h2>
+    <input id="email" placeholder="Email">
+    <input id="name" placeholder="Name (new users)">
+    <button style="background:var(--dark);color:#fff;width:100%" onclick="login()">Continue</button>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="app" class="page">
+<header>
+  <strong>RE-TRADE</strong>
+  <span id="wallet"></span>
+</header>
+
+<main>
+
+<!-- BROWSE -->
+<div id="browse">
+  <input placeholder="Search gear" oninput="renderListings(this.value)">
+  <div class="grid" id="listings"></div>
+</div>
+
+<!-- SELL -->
+<div id="sell" class="hidden card">
+  <h3>Sell Gear</h3>
+  <input id="gTitle" placeholder="Title">
+  <input type="file" id="gImg">
+  <input type="number" id="gPrice" placeholder="Price">
+  <textarea id="gDesc" placeholder="Description"></textarea>
+  <button style="background:var(--accent);width:100%" onclick="postGear()">Post</button>
+</div>
+
+<!-- TRADES -->
+<div id="trades" class="hidden">
+  <h3>Trade Requests</h3>
+  <div id="tradeList"></div>
+</div>
+
+<!-- CHAT -->
+<div id="chat" class="hidden card">
+  <h3>Chat</h3>
+  <div class="chat-box" id="chatBox"></div>
+  <input id="chatTo" placeholder="User email">
+  <input id="chatMsg" placeholder="Message">
+  <button style="background:var(--accent);width:100%" onclick="sendChat()">Send</button>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="hidden card">
+  <p id="pName"></p>
+  <p id="pEmail"></p>
+  <p id="pWallet"></p>
+  <button style="background:#ef4444;color:#fff;width:100%" onclick="logout()">Logout</button>
+</div>
+
+</main>
+
+<nav>
+  <button class="active" onclick="tab('browse',this)">Browse</button>
+  <button onclick="tab('sell',this)">Sell</button>
+  <button onclick="tab('trades',this)">Trades</button>
+  <button onclick="tab('chat',this)">Chat</button>
+  <button onclick="tab('profile',this)">Profile</button>
+</nav>
+</section>
+
+<script>
+const pages=document.querySelectorAll('.page')
+const sections=['browse','sell','trades','chat','profile']
+
+let users=JSON.parse(localStorage.users||'{}')
+let listings=JSON.parse(localStorage.listings||'[]')
+let trades=JSON.parse(localStorage.trades||'[]')
+let chats=JSON.parse(localStorage.chats||'[]')
+let me=JSON.parse(localStorage.me||'null')
+
+function go(h){location.hash=h}
+function route(){
+  pages.forEach(p=>p.style.display='none')
+  const id=(location.hash||'#home').slice(1)
+  document.getElementById(id).style.display='block'
+}
+window.onhashchange=route
+
+function login(){
+  if(!email.value)return alert('Email required')
+  if(!users[email.value]){
+    users[email.value]={email:email.value,name:name.value||'User',wallet:100000}
+  }
+  me=users[email.value]
+  save();init()
+}
+
+function init(){
+  go('#app')
+  wallet.textContent='₦'+me.wallet.toLocaleString()
+  pName.textContent='Name: '+me.name
+  pEmail.textContent='Email: '+me.email
+  pWallet.textContent='Wallet: ₦'+me.wallet.toLocaleString()
+  renderListings('')
+  renderTrades()
+  renderChat()
+}
+
+function tab(id,btn){
+  sections.forEach(s=>document.getElementById(s).classList.add('hidden'))
+  document.getElementById(id).classList.remove('hidden')
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+}
+
+function renderListings(q){
+  const res=listings.filter(l=>l.title.toLowerCase().includes(q.toLowerCase()))
+  listingsDiv.innerHTML=res.map((l,i)=>`
+    <div class="card">
+      <img src="${l.img}">
+      <h4>${l.title}</h4>
+      <p>${l.desc}</p>
+      <strong>₦${l.price}</strong><br><br>
+      ${l.seller!==me.email?`
+        <button onclick="buy(${i})">Buy</button>
+        <button onclick="trade(${i})">Trade</button>
+      `:'<em>Your listing</em>'}
+    </div>
+  `).join('')||'<p>No gear yet</p>'
+}
+
+function postGear(){
+  const r=new FileReader()
+  r.onload=()=>{
+    listings.push({
+      title:gTitle.value,
+      price:+gPrice.value,
+      desc:gDesc.value,
+      img:r.result,
+      seller:me.email
+    })
+    save();tab('browse',document.querySelector('nav button'))
+    renderListings('')
+  }
+  r.readAsDataURL(gImg.files[0])
+}
+
+function buy(i){
+  if(me.wallet<listings[i].price)return alert('Insufficient balance')
+  me.wallet-=listings[i].price
+  listings.splice(i,1)
+  save();init()
+}
+
+function trade(i){
+  trades.push({from:me.email,item:listings[i].title})
+  save();renderTrades()
+}
+
+function renderTrades(){
+  tradeList.innerHTML=trades.map((t,i)=>`
+    <div class="card">
+      ${t.from} wants ${t.item}<br><br>
+      <button onclick="acceptTrade(${i})">Accept</button>
+      <button onclick="rejectTrade(${i})">Reject</button>
+    </div>
+  `).join('')||'<p>No trade requests</p>'
+}
+
+function acceptTrade(i){
+  trades.splice(i,1);save();renderTrades()
+}
+function rejectTrade(i){
+  trades.splice(i,1);save();renderTrades()
+}
+
+function sendChat(){
+  chats.push({from:me.email,to:chatTo.value,msg:chatMsg.value})
+  chatMsg.value=''
+  save();renderChat()
+}
+
+function renderChat(){
+  chatBox.innerHTML=chats
+    .filter(c=>c.from===me.email||c.to===me.email)
+    .map(c=>`<p><b>${c.from}</b>: ${c.msg}</p>`).join('')
+}
+
+function logout(){
+  me=null;save();go('#home')
+}
+
+function save(){
+  localStorage.users=JSON.stringify(users)
+  localStorage.listings=JSON.stringify(listings)
+  localStorage.trades=JSON.stringify(trades)
+  localStorage.chats=JSON.stringify(chats)
+  localStorage.me=JSON.stringify(me)
+}
+
+route(); if(me)init()
+</script>
+</body>
+</html>

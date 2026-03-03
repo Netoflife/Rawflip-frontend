@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RE-TRADE | System Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f1a; color: #e2e8f0; }
+        .glass { background: rgba(23, 32, 53, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-btn { transition: all 0.2s; border-radius: 12px; }
+        .sidebar-btn:hover { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .sidebar-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; uppercase; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { border-top-color: #3b82f6; animation: spinner 0.6s linear infinite; }
+        @keyframes spinner { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <aside class="w-72 glass border-r border-slate-800 p-6 flex flex-col fixed h-full z-50">
+        <div class="flex items-center gap-3 mb-10 px-2">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
+                <i class="fas fa-microchip text-white text-xl"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight">RE-TRADE <span class="text-blue-500 underline">CORE</span></h1>
+        </div>
+
+        <nav class="space-y-2 flex-1">
+            <button onclick="showTab('finance')" class="sidebar-btn active w-full flex items-center gap-4 px-4 py-3.5">
+                <i class="fas fa-university w-5"></i> <span>Financial Node</span>
+            </button>
+            <button onclick="showTab('kyc')" class="sidebar-btn w-full flex items-center gap-4 px-4 py-3.5 text-slate-400">
+                <i class="fas fa-id-badge w-5"></i> <span>KYC Verification</span>
+            </button>
+            <button onclick="showTab('escrow')" class="sidebar-btn w-full flex items-center gap-4 px-4 py-3.5 text-slate-400">
+                <i class="fas fa-handshake w-5"></i> <span>Escrow Center</span>
+            </button>
+        </nav>
+
+        <div class="pt-6 border-t border-slate-800">
+            <button onclick="logout()" class="w-full flex items-center gap-4 px-4 py-3.5 text-red-400 hover:bg-red-500/10 rounded-xl">
+                <i class="fas fa-power-off"></i> <span>Terminate Session</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-72 p-10">
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h2 id="tab-title" class="text-3xl font-bold text-white mb-1">Financial Node</h2>
+                <p class="text-slate-500">Global manual deposit and withdrawal oversight.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-xs text-blue-500 font-bold tracking-widest uppercase">Root Admin</p>
+                    <p class="text-sm font-medium text-slate-300">System Controller</p>
+                </div>
+                <img src="https://ui-avatars.com/api/?name=Admin&background=1e293b&color=3b82f6" class="w-12 h-12 rounded-full border-2 border-slate-700 shadow-xl">
+            </div>
+        </header>
+
+        <div id="finance-tab" class="tab-content active">
+            <div id="finance-list" class="grid grid-cols-1 gap-4">
+                </div>
+        </div>
+
+        <div id="kyc-tab" class="tab-content">
+            <div id="kyc-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                </div>
+        </div>
+
+        <div id="escrow-tab" class="tab-content">
+            <div class="glass rounded-2xl overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-900/50 text-slate-500 text-xs uppercase font-bold">
+                        <tr>
+                            <th class="p-5">Trade Item</th>
+                            <th class="p-5">Buyer/Seller</th>
+                            <th class="p-5">Value</th>
+                            <th class="p-5">Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody id="escrow-list" class="divide-y divide-slate-800">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = "http://localhost:3000/api";
+        const TOKEN = localStorage.getItem('token');
+
+        // Initial check
+        if (!TOKEN) window.location.href = '/login.html';
+
+        async function fetchDashboard() {
+            try {
+                const res = await fetch(`${API_URL}/admin/dashboard`, {
+                    headers: { 'Authorization': TOKEN }
+                });
+                if (res.status === 403) {
+                    alert("Unauthorized Access. Root credentials required.");
+                    window.location.href = '/login.html';
+                }
+                const data = await res.json();
+                renderFinance(data.finances);
+                renderKYC(data.kycs);
+                renderEscrow(data.escrows);
+            } catch (err) {
+                console.error("Critical System Fetch Error", err);
+            }
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.currentTarget.classList.add('active');
+            document.getElementById('tab-title').innerText = event.currentTarget.innerText;
+        }
+
+        function renderFinance(items) {
+            const container = document.getElementById('finance-list');
+            if (items.length === 0) {
+                container.innerHTML = `<div class="p-10 text-center text-slate-600 italic">No pending financial requests found.</div>`;
+                return;
+            }
+            container.innerHTML = items.map(f => `
+                <div class="glass p-6 rounded-2xl flex justify-between items-center hover:border-slate-700 transition">
+                    <div class="flex items-center gap-6">
+                        <div class="w-14 h-14 rounded-full bg-slate-900 flex items-center justify-center text-2xl ${f.type === 'deposit' ? 'text-green-500' : 'text-orange-500'}">
+                            <i class="fas ${f.type === 'deposit' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-widest ${f.type === 'deposit' ? 'text-green-500' : 'text-orange-500'}">${f.type}</span>
+                                <span class="text-slate-600">•</span>
+                                <span class="text-slate-400 text-sm">${new Date(f.date).toLocaleDateString()}</span>
+                            </div>
+                            <h4 class="text-xl font-bold text-white">${f.username}</h4>
+                            <p class="text-2xl font-mono text-blue-400 mt-1">$${f.amount.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        ${f.proof ? `<a href="http://localhost:3000/${f.proof}" target="_blank" class="text-blue-400 hover:text-blue-300 underline text-sm mr-4">View Proof</a>` : ''}
+                        <button onclick="handleRequest('finance', 'approve', '${f._id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition">Approve</button>
+                        <button onclick="handleRequest('finance', 'reject', '${f._id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-6 py-3 rounded-xl font-bold transition">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderKYC(items) {
+            const container = document.getElementById('kyc-list');
+            if (items.length === 0) {
+                container.innerHTML = `<div class="p-10 text-center text-slate-600 italic col-span-2">No pending identity verifications.</div>`;
+                return;
+            }
+            container.innerHTML = items.map(k => `
+                <div class="glass p-6 rounded-2xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="text-lg font-bold">${k.username}</h4>
+                        <span class="status-badge bg-amber-500/10 text-amber-500">Verification Pending</span>
+                    </div>
+                    <div class="aspect-video bg-black rounded-xl mb-4 overflow-hidden border border-slate-800">
+                        <img src="http://localhost:3000/${k.kyc_file}" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/600x400/1e293b/64748b?text=ID+Image+Not+Found'">
+                    </div>
+                    <button onclick="handleRequest('kyc', 'verify', '${k._id}')" class="w-full bg-blue-600 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Authorize Identity</button>
+                </div>
+            `).join('');
+        }
+
+        function renderEscrow(items) {
+            const container = document.getElementById('escrow-list');
+            if (!items || items.length === 0) {
+                container.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-600">No active trades in escrow.</td></tr>`;
+                return;
+            }
+            container.innerHTML = items.map(e => `
+                <tr class="hover:bg-white/5 transition">
+                    <td class="p-5">
+                        <div class="font-bold text-white">${e.title}</div>
+                        <div class="text-xs text-slate-500">TXID: ${e._id.slice(-8)}</div>
+                    </td>
+                    <td class="p-5">
+                        <div class="text-sm">B: <span class="text-blue-400">${e.buyer}</span></div>
+                        <div class="text-sm">S: <span class="text-blue-400">${e.seller}</span></div>
+                    </td>
+                    <td class="p-5 font-mono text-green-500">$${e.amount}</td>
+                    <td class="p-5">
+                        <span class="status-badge ${e.status === 'disputed' ? 'bg-red-500 text-white' : 'bg-blue-500/20 text-blue-400'}">
+                            ${e.status.toUpperCase()}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function handleRequest(type, action, id) {
+            try {
+                const res = await fetch(`${API_URL}/admin/${type}/${action}/${id}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': TOKEN }
+                });
+                if (res.ok) {
+                    fetchDashboard();
+                }
+            } catch (err) {
+                alert("Operation failed. Server unreachable.");
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        // Initialize Node
+        fetchDashboard();
+    </script>
+</body>
+</html>
