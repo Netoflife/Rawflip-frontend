@@ -1,24 +1,3 @@
-'use strict';
-/**
- * RawFlip Marketplace — Backend v7
- * Upgrades over v6:
- *   - Dynamic block-fee engine (₦100 per ₦5,000 block)
- *   - Subscription system: Free / Basic (₦1,500/mo) / Pro (₦4,500/mo)
- *   - Referral program with milestones, atomic rewards, abuse protection
- *   - Telegram bot integration for proof submission & admin approval
- *   - Wallet deposit/withdraw with admin approval workflow
- *   - Transaction lifecycle: pending→proof_submitted→approved→completed
- *   - All financial ops atomic via MongoDB sessions
- *
- * npm install (additions over v6):
- *   node-telegram-bot-api
- *
- * New .env:
- *   TELEGRAM_BOT_TOKEN=<your-bot-token>
- *   TELEGRAM_ADMIN_CHAT_ID=<admin-chat-id>
- *   MIN_DEPOSIT=5000
- *   MIN_WITHDRAWAL=5000
- */
 require('dotenv').config();
 
 const express      = require('express');
@@ -503,7 +482,20 @@ const userSchema = new mongoose.Schema({
   terms_version:            { type:String,  default:null  },
   about_understood:         { type:Boolean, default:false },
   about_understood_at:      { type:Date,    default:null  },
-}, { timestamps:true });
+}, { timestamps:true })
+;
+userSchema.pre('save', function(next) {
+    if (!this.isModified('password')) return next();
+
+    const bcrypt = require('bcryptjs');
+
+    bcrypt.hash(this.password, 12, (err, hash) => {
+        if (err) return next(err);
+
+        this.password = hash;
+        next();
+    });
+});
 
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password') || !this.password) return next();

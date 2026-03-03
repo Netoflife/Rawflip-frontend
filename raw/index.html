@@ -1863,8 +1863,8 @@ table{font-size:.8rem}
 'use strict';
 /* ── Config ─────────────────────────────────────────────── */
 var _h=window.location.hostname;
-var API_BASE=(window.RF_CONFIG&&window.RF_CONFIG.apiBase)||
-  (_h==='localhost'||_h==='127.0.0.1'||_h===''?'http://localhost:5000':window.location.origin);
+var API_BASE=(window.RF_CONFIG&&window.RF_CONFIG.apiBase)||'https://rawflip-backend.onrender.com';
+// To use a local backend instead, set: window.RF_CONFIG = { apiBase: 'http://localhost:5000' }
 
 /* ── Token ───────────────────────────────────────────────── */
 var _tok=null;
@@ -1927,7 +1927,13 @@ async function api(method,path,body,isForm){
     throw new Error('Invalid JSON response from server');
   }
   if(!res.ok){
-    var msg=data.error||(data.errors&&data.errors[0]&&data.errors[0].message)||'Request failed ('+res.status+')';
+    var msg;
+    if(data.errors&&data.errors.length){
+      // Show all validation errors joined
+      msg=data.errors.map(function(e){return (e.field?e.field+': ':'')+e.message;}).join(' | ');
+    } else {
+      msg=data.error||'Request failed ('+res.status+')';
+    }
     console.error('[api] error:',method,path,res.status,msg);
     throw new Error(msg);
   }
