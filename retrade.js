@@ -1,26 +1,3 @@
-'use strict';
-/**
- * RawFlip Marketplace — Backend v7
- * Upgrades over v6:
- *   - Dynamic block-fee engine (₦100 per ₦5,000 block)
- *   - Subscription system: Free / Basic (₦1,500/mo) / Pro (₦4,500/mo)
- *   - Referral program with milestones, atomic rewards, abuse protection
- *   - Telegram bot integration for proof submission & admin approval
- *   - Wallet deposit/withdraw with admin approval workflow
- *   - Transaction lifecycle: pending→proof_submitted→approved→completed
- *   - All financial ops atomic via MongoDB sessions
- *
- * npm install (additions over v6):
- *   node-telegram-bot-api
- *
- * New .env:
- *   SMTP_USER=your_gmail@gmail.com
- *   SMTP_PASS=your_gmail_app_password
-  TELEGRAM_BOT_TOKEN=<your-bot-token>
- *   TELEGRAM_ADMIN_CHAT_ID=<admin-chat-id>
- *   MIN_DEPOSIT=5000
- *   MIN_WITHDRAWAL=5000
- */
 require('dotenv').config();
 
 const express      = require('express');
