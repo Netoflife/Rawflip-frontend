@@ -1,3 +1,26 @@
+'use strict';
+/**
+ * RawFlip Marketplace — Backend v7
+ * Upgrades over v6:
+ *   - Dynamic block-fee engine (₦100 per ₦5,000 block)
+ *   - Subscription system: Free / Basic (₦1,500/mo) / Pro (₦4,500/mo)
+ *   - Referral program with milestones, atomic rewards, abuse protection
+ *   - Telegram bot integration for proof submission & admin approval
+ *   - Wallet deposit/withdraw with admin approval workflow
+ *   - Transaction lifecycle: pending→proof_submitted→approved→completed
+ *   - All financial ops atomic via MongoDB sessions
+ *
+ * npm install (additions over v6):
+ *   node-telegram-bot-api
+ *   resend
+ *
+ * New .env:
+ *   RESEND_API_KEY=<your-resend-api-key>
+  TELEGRAM_BOT_TOKEN=<your-bot-token>
+ *   TELEGRAM_ADMIN_CHAT_ID=<admin-chat-id>
+ *   MIN_DEPOSIT=5000
+ *   MIN_WITHDRAWAL=5000
+ */
 require('dotenv').config();
 
 const express      = require('express');
@@ -17,7 +40,7 @@ const helmet       = require('helmet');
 const rateLimit    = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const crypto       = require('crypto');
-const nodemailer   = require('nodemailer');
+const { Resend }   = require('resend');
 const speakeasy    = require('speakeasy');
 const QRCode       = require('qrcode');
 const passport     = require('passport');
@@ -33,7 +56,7 @@ const PORT               = parseInt(process.env.PORT)  || 5000;
 const MONGO_URI          = process.env.MONGO_URI       || 'mongodb://localhost:27017/rawflip';
 const JWT_SECRET         = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-const CLIENT_ORIGIN      = process.env.CLIENT_ORIGIN   || 'http://localhost:3000';
+const CLIENT_ORIGIN      = process.env.CLIENT_ORIGIN   || 'https://rawflip.netlify.app';
 const APP_URL            = process.env.APP_URL          || 'http://localhost:5000';
 const IS_PROD            = process.env.NODE_ENV         === 'production';
 const UPLOADS_DIR        = path.join(__dirname, 'uploads');
@@ -317,29 +340,73 @@ const emailTemplates = {
     <h2>Dispute Resolved</h2><p>Hi ${u}, decision: <strong>${decision==='release'?'Payment released to seller':'Refund to buyer'}</strong>.</p>`) }),
 };
 
-// ── Email service ──────────────────────────────────────────────────────────────
-let transporter = null;
-function getMailer() {
-  if (transporter) return transporter;
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  });
-  return transporter;
+// ── Email service (Resend) ────────────────────────────────────────────────────
+// Universal email sender — all notifications go through here.
+// Requires: RESEND_API_KEY environment variable.
+// Sender: RawFlip <notifications@rawflip.netlify.app>
+//
+// Usage examples:
+//   Registration:   sendEmail(email, emailTemplates.verifyEmail(username, token))
+//   Password reset: sendEmail(email, { subject:'Reset your password', html:'...' })
+//   Tx alert:       sendEmail(email, emailTemplates.newOrderReceived(username, tx, title))
+//   General:        sendEmail(email, { subject:'Important update', html:'<p>Hi...</p>' })
+
+let _resend = null;
+function getResend() {
+  if (_resend) return _resend;
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('[Email] RESEND_API_KEY not set — emails will be skipped');
+    return null;
+  }
+  _resend = new Resend(process.env.RESEND_API_KEY);
+  return _resend;
 }
-async function sendEmail(to, { subject, html }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn('[Email] SMTP not configured — skipped:', subject); return;
+
+// sendEmail supports both call signatures:
+//   sendEmail(to, { subject, html })           — legacy (used throughout codebase)
+//   sendEmail({ to, subject, html })           — object form (spec requirement)
+async function sendEmail(toOrObj, templateObj) {
+  let to, subject, html;
+  if (typeof toOrObj === 'object' && toOrObj !== null && !Array.isArray(toOrObj) && toOrObj.to) {
+    // Object form: sendEmail({ to, subject, html })
+    ({ to, subject, html } = toOrObj);
+  } else {
+    // Legacy form: sendEmail(to, { subject, html })
+    to = toOrObj;
+    ({ subject, html } = templateObj || {});
   }
-  try {
-    await getMailer().sendMail({ from: process.env.EMAIL_FROM || 'RawFlip <noreply@rawflip.com>', to, subject, html });
-    console.log(`[Email] sent "${subject}" → ${to}`);
-  } catch(e) {
-    console.error(`[Email] FAILED to "${to}" | subject: "${subject}" | ${e.message}`);
-    if (e.stack) console.error('[Email] Stack:', e.stack);
+
+  const resend = getResend();
+  if (!resend) {
+    console.warn(`[Email] skipped (no API key) — subject: "${subject}" → ${to}`);
+    return;
   }
+  if (!to || !subject || !html) {
+    console.warn('[Email] missing required fields (to/subject/html) — skipped');
+    return;
+  }
+
+  // Retry up to 3 times with exponential backoff
+  const MAX_RETRIES = 3;
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const { data, error } = await resend.emails.send({
+        from:    'RawFlip <notifications@rawflip.netlify.app>',
+        to:      Array.isArray(to) ? to : [to],
+        subject,
+        html,
+      });
+      if (error) throw new Error(error.message || JSON.stringify(error));
+      console.log(`[Email] sent "${subject}" → ${to} (id: ${data && data.id})`);
+      return; // success
+    } catch(e) {
+      lastErr = e;
+      console.warn(`[Email] attempt ${attempt}/${MAX_RETRIES} failed: ${e.message}`);
+      if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, attempt * 1000));
+    }
+  }
+  console.error(`[Email] FAILED after ${MAX_RETRIES} attempts — subject: "${subject}" → ${to} | ${lastErr && lastErr.message}`);
 }
 
 // ── App / Socket ───────────────────────────────────────────────────────────────
@@ -4135,3 +4202,45 @@ mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS:5000 })
   .catch(err=>{ console.error('[DB] Error:', err.message); process.exit(1); });
 
 module.exports = { app, server };
+
+/*
+==========================================================
+UPDATED .env for v7
+==========================================================
+MONGO_URI=mongodb://localhost:27017/rawflip
+JWT_SECRET=<min-32-chars>
+JWT_REFRESH_SECRET=<different-min-32-chars>
+TOTP_ENCRYPTION_KEY=<min-32-chars>
+PORT=5000
+NODE_ENV=development
+CLIENT_ORIGIN=https://rawflip.netlify.app
+APP_URL=https://rawflip-backend.onrender.com
+NGN_USD_RATE=1600
+MIN_DEPOSIT=5000
+MIN_WITHDRAWAL=5000
+
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
+
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+
+ELASTIC_NODE=http://localhost:9200
+ELASTIC_API_KEY=
+
+TELEGRAM_BOT_TOKEN=your-bot-token
+TELEGRAM_ADMIN_CHAT_ID=your-admin-chat-id
+
+BANK_NAME=RawFlip Payments Ltd
+BANK_ACCOUNT=0000000000
+BANK_ACCOUNT_NAME=RawFlip Escrow
+
+# Support — added v20
+# The support email address is protected in source code.
+# It is built at runtime from character array — do not add it here.
+==========================================================
+
+Additional npm install:
+npm install node-telegram-bot-api
+==========================================================
+*/
