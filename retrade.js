@@ -12,10 +12,10 @@
  *
  * npm install (additions over v6):
  *   node-telegram-bot-api
- *   resend
  *
  * New .env:
- *   RESEND_API_KEY=<your-resend-api-key>
+ *   SMTP_USER=your_gmail@gmail.com
+ *   SMTP_PASS=your_gmail_app_password
   TELEGRAM_BOT_TOKEN=<your-bot-token>
  *   TELEGRAM_ADMIN_CHAT_ID=<admin-chat-id>
  *   MIN_DEPOSIT=5000
@@ -40,7 +40,7 @@ const helmet       = require('helmet');
 const rateLimit    = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const crypto       = require('crypto');
-const { Resend }   = require('resend');
+const nodemailer   = require('nodemailer');
 const speakeasy    = require('speakeasy');
 const QRCode       = require('qrcode');
 const passport     = require('passport');
@@ -340,74 +340,40 @@ const emailTemplates = {
     <h2>Dispute Resolved</h2><p>Hi ${u}, decision: <strong>${decision==='release'?'Payment released to seller':'Refund to buyer'}</strong>.</p>`) }),
 };
 
-// ── Email service (Resend) ────────────────────────────────────────────────────
-// Universal email sender — all notifications go through here.
-// Requires: RESEND_API_KEY environment variable.
-// Sender: RawFlip <notifications@rawflip.netlify.app>
-//
-// Usage examples:
-//   Registration:   sendEmail(email, emailTemplates.verifyEmail(username, token))
-//   Password reset: sendEmail(email, { subject:'Reset your password', html:'...' })
-//   Tx alert:       sendEmail(email, emailTemplates.newOrderReceived(username, tx, title))
-//   General:        sendEmail(email, { subject:'Important update', html:'<p>Hi...</p>' })
+// -- Email service (Nodemailer + Gmail SMTP) --
+// Env vars: SMTP_USER = gmail address, SMTP_PASS = Gmail App Password
+// Generate App Password: Google Account > Security > App Passwords
 
-let _resend = null;
-function getResend() {
-  if (_resend) return _resend;
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('[Email] RESEND_API_KEY not set — emails will be skipped');
+let _transporter = null;
+function getMailer() {
+  if (_transporter) return _transporter;
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn('[Email] SMTP_USER or SMTP_PASS not set - emails skipped');
     return null;
   }
-  _resend = new Resend(process.env.RESEND_API_KEY);
-  return _resend;
+  _transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+  return _transporter;
 }
 
-// sendEmail supports both call signatures:
-//   sendEmail(to, { subject, html })           — legacy (used throughout codebase)
-//   sendEmail({ to, subject, html })           — object form (spec requirement)
-async function sendEmail(toOrObj, templateObj) {
-  let to, subject, html;
-  if (typeof toOrObj === 'object' && toOrObj !== null && !Array.isArray(toOrObj) && toOrObj.to) {
-    // Object form: sendEmail({ to, subject, html })
-    ({ to, subject, html } = toOrObj);
-  } else {
-    // Legacy form: sendEmail(to, { subject, html })
-    to = toOrObj;
-    ({ subject, html } = templateObj || {});
+async function sendEmail(to, { subject, html }) {
+  const mailer = getMailer();
+  if (!mailer) { console.warn('[Email] skipped -', subject); return; }
+  try {
+    const info = await mailer.sendMail({
+      from: `RawFlip <${process.env.SMTP_USER}>`,
+      to, subject, html,
+    });
+    console.log(`[Email] sent "${subject}" -> ${to} (${info.messageId})`);
+  } catch(e) {
+    console.error(`[Email] FAILED "${subject}" -> ${to} | ${e.message}`);
   }
-
-  const resend = getResend();
-  if (!resend) {
-    console.warn(`[Email] skipped (no API key) — subject: "${subject}" → ${to}`);
-    return;
-  }
-  if (!to || !subject || !html) {
-    console.warn('[Email] missing required fields (to/subject/html) — skipped');
-    return;
-  }
-
-  // Retry up to 3 times with exponential backoff
-  const MAX_RETRIES = 3;
-  let lastErr;
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const { data, error } = await resend.emails.send({
-        from:    'RawFlip <notifications@rawflip.netlify.app>',
-        to:      Array.isArray(to) ? to : [to],
-        subject,
-        html,
-      });
-      if (error) throw new Error(error.message || JSON.stringify(error));
-      console.log(`[Email] sent "${subject}" → ${to} (id: ${data && data.id})`);
-      return; // success
-    } catch(e) {
-      lastErr = e;
-      console.warn(`[Email] attempt ${attempt}/${MAX_RETRIES} failed: ${e.message}`);
-      if (attempt < MAX_RETRIES) await new Promise(r => setTimeout(r, attempt * 1000));
-    }
-  }
-  console.error(`[Email] FAILED after ${MAX_RETRIES} attempts — subject: "${subject}" → ${to} | ${lastErr && lastErr.message}`);
 }
+
 
 // ── App / Socket ───────────────────────────────────────────────────────────────
 const app    = express();
@@ -681,15 +647,14 @@ transactionSchema.index({ buyerId:1, state:1 });
 transactionSchema.index({ sellerId:1, state:1 });
 transactionSchema.index({ state:1, createdAt:-1 }); // admin queries by state
 
-transactionSchema.pre('save', function(next) {
+transactionSchema.pre('save', function() {
   if (this.isModified('state') && !this.isNew) {
     const prev = this.__previousState;
     if (prev && prev !== this.state && !canTransition(prev, this.state)) {
-      return next(new Error(`Invalid state transition: ${prev} → ${this.state}`));
+      throw new Error(`Invalid state transition: ${prev} → ${this.state}`);
     }
   }
   this.__previousState = this.state;
-  next();
 });
 
 // ── Offer schema ───────────────────────────────────────────────────────────────
@@ -771,17 +736,16 @@ walletTxSchema.index({ status:1, type:1, createdAt:-1 });
 walletTxSchema.index({ type:1, status:1, createdAt:-1 }); // admin pending filter
 
 // Enforce state transitions in pre-save
-walletTxSchema.pre('save', function(next) {
+walletTxSchema.pre('save', function() {
   // Use cached previous state to avoid extra DB round-trip
   if (this.isModified('status') && !this.isNew) {
     const prevStatus = this._prevStatus;
     if (prevStatus && prevStatus !== this.status && !canWalletTransition(prevStatus, this.status)) {
-      return next(new Error(`Invalid wallet tx transition: ${prevStatus} → ${this.status}`));
+      throw new Error(`Invalid wallet tx transition: ${prevStatus} → ${this.status}`);
     }
   }
   // Cache current status for next save
   this._prevStatus = this.status;
-  next();
 });
 
 // Cache status on load so pre-save can diff without a DB query
@@ -4219,7 +4183,8 @@ NGN_USD_RATE=1600
 MIN_DEPOSIT=5000
 MIN_WITHDRAWAL=5000
 
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
+SMTP_USER=your_gmail@gmail.com
+SMTP_PASS=your_gmail_app_password
 
 GOOGLE_CLIENT_ID=xxx
 GOOGLE_CLIENT_SECRET=xxx
