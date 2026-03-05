@@ -1224,12 +1224,14 @@ table{font-size:.8rem}
             <button type="button" class="tab-btn" onclick="adminTab('referrals',this)">Referrals</button>
             <button type="button" class="tab-btn" onclick="adminTab('logs',this)">Logs</button>
             <button type="button" class="tab-btn" onclick="adminTab('agreements',this)">Agreements</button>
+            <button type="button" class="tab-btn" onclick="adminTab('kyc',this)">KYC Review</button>
           </div>
           <div id="admin-stats-pnl"></div>
           <div id="admin-users-pnl" class="admin-pnl"></div>
           <div id="admin-listings-pnl" class="admin-pnl"></div>
           <div id="admin-reports-pnl" class="admin-pnl"></div>
           <div id="admin-transactions-pnl" class="admin-pnl"><div id="admin-tx-container"></div></div>
+          <div id="admin-kyc-pnl" class="admin-pnl" style="display:none"></div>
 
     <div id="admin-deposits-pnl" style="display:none">
       <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
@@ -1666,6 +1668,53 @@ table{font-size:.8rem}
 <div class="page" id="page-settings" style="display:none">
   <div class="pg" style="max-width:680px">
     <div class="pg-hdr"><div class="pg-title">⚙️ Settings</div></div>
+    <div class="card mb-3" id="kyc-card">
+      <div class="card-hdr"><span class="fw7">🪪 KYC Verification</span></div>
+      <div class="card-body" id="kyc-card-body">
+        <div id="kyc-status-display" style="margin-bottom:14px">
+          <span class="text-2">Loading KYC status...</span>
+        </div>
+        <div id="kyc-form-wrap">
+          <p class="text-sm text-2" style="margin-bottom:12px">Complete KYC to enable withdrawals. All fields are required.</p>
+          <div class="form-group">
+            <label class="form-label">Full Legal Name</label>
+            <input id="kyc-fullname" class="fc" type="text" placeholder="As on your ID document">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <input id="kyc-dob" class="fc" type="date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Type</label>
+            <select id="kyc-idtype" class="fc">
+              <option value="">-- Select ID Type --</option>
+              <option value="nin">NIN (National ID Number)</option>
+              <option value="bvn">BVN (Bank Verification Number)</option>
+              <option value="passport">International Passport</option>
+              <option value="drivers_license">Driver's License</option>
+              <option value="voters_card">Voter's Card</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Number</label>
+            <input id="kyc-idnumber" class="fc" type="text" placeholder="Enter your ID number">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Home Address</label>
+            <input id="kyc-address" class="fc" type="text" placeholder="Full residential address">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Document URL</label>
+            <input id="kyc-iddoc-url" class="fc" type="url" placeholder="Upload your ID doc and paste link here">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Selfie with ID URL</label>
+            <input id="kyc-selfie-url" class="fc" type="url" placeholder="Upload selfie holding ID and paste link here">
+          </div>
+          <button class="btn btn-primary" onclick="submitKYC()">Submit KYC</button>
+        </div>
+      </div>
+    </div>
     <div class="card mb-3">
       <div class="card-hdr"><span class="fw7">🌐 Language</span></div>
       <div class="card-body">
@@ -1870,7 +1919,7 @@ table{font-size:.8rem}
 'use strict';
 /* ── Config ─────────────────────────────────────────────── */
 var _h=window.location.hostname;
-var API_BASE=(window.RF_CONFIG&&window.RF_CONFIG.apiBase)||'https://rawflip-backend.onrender.com';
+var API_BASE=(window.RF_CONFIG&&window.RF_CONFIG.apiBase)||'http://localhost:5000';
 // To use a local backend instead, set: window.RF_CONFIG = { apiBase: 'http://localhost:5000' }
 
 /* ── Token ───────────────────────────────────────────────── */
@@ -2027,6 +2076,9 @@ function initSocket(){
   socket.on('notification', function(n){
     fetchNotifCount();
     toast(n.title, n.message, 'info');
+  });
+  socket.on('notif:ping', function(){
+    fetchNotifCount();
   });
   socket.on('transaction:updated', function(tx){
     toast('Order updated', (tx.state||'').replace(/_/g,' '), 'info');
@@ -3465,7 +3517,7 @@ function statCard(label,val,ic){
 }
 
 function adminTab(tab,btn){
-  ['stats','users','listings','reports','transactions','deposits'].forEach(function(t){
+  ['stats','users','listings','reports','transactions','deposits','kyc'].forEach(function(t){
     var p=document.getElementById('admin-'+t+'-pnl');if(p)p.style.display='none';
   });
   document.querySelectorAll('#page-admin .tab-btn').forEach(function(b){b.classList.remove('act');});
@@ -3477,6 +3529,7 @@ function adminTab(tab,btn){
   else if(tab==='reports')loadAdminReports();
   else if(tab==='transactions')loadAdminTransactions();
   else if(tab==='deposits')loadAdminDeposits();
+  else if(tab==='kyc')loadAdminKYC();
 }
 
 async function loadAdminUsers(){
@@ -4624,6 +4677,24 @@ loadAnalytics = function() { ensureChartJS(function() { _loadAnalyticsOrig(); })
 async function loadSettings() {
   // Inject language picker
   if (typeof injectLangPicker === 'function') injectLangPicker('lang-picker-container');
+  // Load KYC status
+  loadKYCStatus().then(function(d){
+    var display = document.getElementById('kyc-status-display');
+    var formWrap = document.getElementById('kyc-form-wrap');
+    if(!display) return;
+    var status = d.kycStatus || 'none';
+    var badges = {
+      none:     '<span style="color:var(--text2)">⬜ Not submitted</span>',
+      pending:  '<span style="color:#f59e0b">🟡 Under review — we will notify you once reviewed.</span>',
+      approved: '<span style="color:#22c55e">✅ Verified — you can now make withdrawals.</span>',
+      rejected: '<span style="color:#ef4444">❌ Rejected'+(d.kycRejectionNote?' — '+d.kycRejectionNote:'')+'<br>Please resubmit with correct documents.</span>',
+    };
+    display.innerHTML = badges[status] || badges.none;
+    if(formWrap){
+      // Hide form if pending or approved; show for none or rejected
+      formWrap.style.display = (status==='pending'||status==='approved') ? 'none' : 'block';
+    }
+  });
   // Load 2FA status
   await load2FAStatus();
   // Load login sessions
@@ -7774,6 +7845,120 @@ async function revokeAllSessions(){
     if(S.currentPage==='settings')loadSettings();
   }catch(e){toast('Failed',e.message,'error');}
 }
+
+// ── KYC Admin Functions ────────────────────────────────────
+async function loadAdminKYC(status){
+  status = status || 'pending';
+  var ct = document.getElementById('admin-kyc-pnl');
+  if(!ct) return;
+  ct.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    var d = await api('GET', '/admin/kyc?status='+status+'&limit=50');
+    var docs = d.docs || [];
+    var btnCls = { pending:'', approved:'', rejected:'', all:'' };
+    btnCls[status] = ' btn-primary';
+    var filterHtml = [
+      '<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">',
+      '<span class="fw7" style="font-size:1.05rem">&#x1F5AA; KYC Review</span>',
+      '<button class="btn btn-sm'+btnCls.pending+'" onclick="loadAdminKYC(this.dataset.v)" data-v="pending">Pending</button>',
+      '<button class="btn btn-sm'+btnCls.approved+'" onclick="loadAdminKYC(this.dataset.v)" data-v="approved">Approved</button>',
+      '<button class="btn btn-sm'+btnCls.rejected+'" onclick="loadAdminKYC(this.dataset.v)" data-v="rejected">Rejected</button>',
+      '<button class="btn btn-sm'+btnCls.all+'" onclick="loadAdminKYC(this.dataset.v)" data-v="all">All</button>',
+      '</div>'
+    ].join('');
+    if(!docs.length){
+      ct.innerHTML = filterHtml + '<div class="card"><div class="card-body text-2">No KYC submissions found.</div></div>';
+      return;
+    }
+    var rows = docs.map(function(k){
+      var u = k.user || {};
+      var statusBadge = k.status === 'approved'
+        ? '<span class="badge badge-success">Approved</span>'
+        : k.status === 'rejected'
+        ? '<span class="badge badge-danger">Rejected</span>'
+        : '<span class="badge badge-warning">Pending</span>';
+      var idTypes = {nin:'NIN',bvn:'BVN',passport:'Passport',drivers_license:"Driver's License",voters_card:"Voter's Card"};
+      var uid = u._id || '';
+      var actions = k.status === 'pending' ? (
+        '<button class="btn btn-sm btn-success" onclick="adminApproveKYC(this.dataset.uid)" data-uid="'+uid+'">&#x2713; Approve</button> '
+        + '<button class="btn btn-sm btn-danger" onclick="adminRejectKYC(this.dataset.uid)" data-uid="'+uid+'">&#x2717; Reject</button>'
+      ) : '<span class="text-2" style="font-size:.8rem">Reviewed '+(k.reviewedAt?new Date(k.reviewedAt).toLocaleDateString():'')+'</span>';
+      return '<tr>'
+        + '<td><strong>'+esc(u.username||'?')+'</strong><br><span class="text-2" style="font-size:.75rem">'+esc(u.email||'')+'</span></td>'
+        + '<td>'+statusBadge+'</td>'
+        + '<td>'+esc(k.fullName||'')+'<br><span class="text-2" style="font-size:.75rem">DOB: '+esc(k.dob||'')+'</span></td>'
+        + '<td>'+(idTypes[k.idType]||k.idType||'')+'<br><span class="text-2" style="font-size:.75rem">'+esc(k.idNumber||'')+'</span></td>'
+        + '<td>'
+          +(k.idDocUrl?'<a href="'+esc(k.idDocUrl)+'" target="_blank" class="btn btn-sm">ID Doc</a> ':'')
+          +(k.selfieUrl?'<a href="'+esc(k.selfieUrl)+'" target="_blank" class="btn btn-sm">Selfie</a>':'')
+        +'</td>'
+        + '<td>'+esc(k.address||'')+'</td>'
+        + '<td>'+(k.adminNote?'<span class="text-2" style="font-size:.8rem">'+esc(k.adminNote)+'</span>':'&#8212;')+'</td>'
+        + '<td>'+actions+'</td>'
+        + '</tr>';
+    }).join('');
+    ct.innerHTML = filterHtml + '<div class="card" style="overflow-x:auto"><table class="tbl"><thead><tr>'
+      + '<th>User</th><th>Status</th><th>Full Name / DOB</th><th>ID Type / Number</th><th>Documents</th><th>Address</th><th>Admin Note</th><th>Actions</th>'
+      + '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  } catch(e) {
+    ct.innerHTML = '<div class="card"><div class="card-body text-2">Error loading KYC submissions.</div></div>';
+  }
+}
+
+
+async function adminApproveKYC(userId){
+  var note = prompt('Optional note for approval (leave blank if none):') || '';
+  if(!confirm('Approve KYC for this user?')) return;
+  try {
+    await api('POST', '/admin/kyc/'+userId+'/approve', { note });
+    toast('KYC Approved', 'User has been notified.', 'success');
+    loadAdminKYC('pending');
+  } catch(e) {
+    toast('Error', e.message||'Failed to approve KYC', 'error');
+  }
+}
+
+async function adminRejectKYC(userId){
+  var reason = prompt('Reason for rejection (required):');
+  if(!reason || !reason.trim()) { toast('Required', 'Please enter a rejection reason.', 'warning'); return; }
+  if(!confirm('Reject this KYC submission?')) return;
+  try {
+    await api('POST', '/admin/kyc/'+userId+'/reject', { reason });
+    toast('KYC Rejected', 'User has been notified.', 'info');
+    loadAdminKYC('pending');
+  } catch(e) {
+    toast('Error', e.message||'Failed to reject KYC', 'error');
+  }
+}
+
+// ── KYC User Submission Functions ─────────────────────────
+async function loadKYCStatus(){
+  try {
+    var d = await api('GET', '/kyc/status');
+    return d;
+  } catch(e) { return { kycStatus:'none' }; }
+}
+
+async function submitKYC(){
+  var fullName   = (document.getElementById('kyc-fullname')||{}).value||'';
+  var dob        = (document.getElementById('kyc-dob')||{}).value||'';
+  var idType     = (document.getElementById('kyc-idtype')||{}).value||'';
+  var idNumber   = (document.getElementById('kyc-idnumber')||{}).value||'';
+  var address    = (document.getElementById('kyc-address')||{}).value||'';
+  var idDocUrl   = (document.getElementById('kyc-iddoc-url')||{}).value||'';
+  var selfieUrl  = (document.getElementById('kyc-selfie-url')||{}).value||'';
+  if(!fullName||!dob||!idType||!idNumber||!address||!idDocUrl||!selfieUrl){
+    toast('Missing Fields','Please fill in all KYC fields.','warning'); return;
+  }
+  try {
+    await api('POST','/kyc/submit',{fullName,dob,idType,idNumber,address,idDocUrl,selfieUrl});
+    toast('KYC Submitted','Your documents are under review. We will notify you.','success');
+    loadSettings();
+  } catch(e) {
+    toast('Error', e.message||'Failed to submit KYC','error');
+  }
+}
+
 </script>
 <!-- Purchase Confirm Modal -->
 <div class="modal-ov" id="purchase-confirm-modal">

@@ -1,3 +1,26 @@
+'use strict';
+/**
+ * RawFlip Marketplace — Backend v7
+ * Upgrades over v6:
+ *   - Dynamic block-fee engine (₦100 per ₦5,000 block)
+ *   - Subscription system: Free / Basic (₦1,500/mo) / Pro (₦4,500/mo)
+ *   - Referral program with milestones, atomic rewards, abuse protection
+ *   - Telegram bot integration for proof submission & admin approval
+ *   - Wallet deposit/withdraw with admin approval workflow
+ *   - Transaction lifecycle: pending→proof_submitted→approved→completed
+ *   - All financial ops atomic via MongoDB sessions
+ *
+ * npm install (additions over v6):
+ *   node-telegram-bot-api
+ *
+ * New .env:
+ *   SMTP_USER=your_gmail@gmail.com
+ *   SMTP_PASS=your_gmail_app_password
+  TELEGRAM_BOT_TOKEN=<your-bot-token>
+ *   TELEGRAM_ADMIN_CHAT_ID=<admin-chat-id>
+ *   MIN_DEPOSIT=5000
+ *   MIN_WITHDRAWAL=5000
+ */
 require('dotenv').config();
 
 const express      = require('express');
@@ -484,6 +507,12 @@ const userSchema = new mongoose.Schema({
   isEarlyAdopter:           { type:Boolean, default:false },
   earlyAdopterNumber:       { type:Number,  default:null  },
   earlyAdopterGrantedAt:    { type:Date,    default:null  },
+  // KYC
+  kycStatus:        { type:String, enum:['none','pending','approved','rejected'], default:'none' },
+  kycSubmittedAt:   { type:Date,   default:null },
+  kycReviewedAt:    { type:Date,   default:null },
+  kycReviewedBy:    { type:mongoose.Schema.Types.ObjectId, ref:'User', default:null },
+  kycRejectionNote: { type:String, default:'' },
   // Legal agreements
   privacy_policy_agreed:    { type:Boolean, default:false },
   privacy_policy_agreed_at: { type:Date,    default:null  },
@@ -863,6 +892,18 @@ const requireAgreements = (req,res,next) => {
   next();
 };
 
+// KYC gate — user must have approved KYC before withdrawing
+const requireKYC = (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error:'Unauthorized' });
+  if (req.user.kycStatus !== 'approved')
+    return res.status(403).json({
+      error: 'kyc_required',
+      message: 'You must complete KYC verification before making withdrawals.',
+      kycStatus: req.user.kycStatus || 'none',
+    });
+  next();
+};
+
 const signAccess  = (id, twoFAVerified=false) => jwt.sign({ id, twoFAVerified }, JWT_SECRET, { expiresIn:'15m' });
 const signRefresh = id => jwt.sign({ id }, JWT_REFRESH_SECRET, { expiresIn:'7d' });
 const signTemp    = id => jwt.sign({ id, temp:true }, JWT_SECRET, { expiresIn:'5m' });
@@ -880,7 +921,11 @@ const clearAuthCookies = res => { res.clearCookie('rf_access'); res.clearCookie(
 const sendNotification = async (data) => {
   const n   = await Notification.create(data);
   const pop = await Notification.findById(n._id).populate('sender','username avatar');
+  // Real-time push via socket.io — delivered instantly if user is online,
+  // otherwise retrieved from DB when user next connects (offline-safe)
   io.to(`user:${data.recipient}`).emit('notification', pop);
+  // Also emit a lightweight ping so SW/tab can badge the icon
+  io.to(`user:${data.recipient}`).emit('notif:ping', { count: 1 });
   return pop;
 };
 
@@ -1159,6 +1204,24 @@ async function closeConvForTx(txId, reason='') {
   } catch(e) { /* non-critical */ }
 }
 
+
+// ── KYC Document Schema ────────────────────────────────────────────────────────
+const kycSchema = new mongoose.Schema({
+  user:         { type:mongoose.Schema.Types.ObjectId, ref:'User', required:true, unique:true },
+  fullName:     { type:String, required:true, trim:true },
+  dob:          { type:String, required:true },           // date of birth YYYY-MM-DD
+  idType:       { type:String, required:true, enum:['nin','bvn','passport','drivers_license','voters_card'] },
+  idNumber:     { type:String, required:true, trim:true },
+  idDocUrl:     { type:String, required:true },           // uploaded doc image path
+  selfieUrl:    { type:String, required:true },           // selfie with ID image path
+  address:      { type:String, required:true, trim:true },
+  status:       { type:String, enum:['pending','approved','rejected'], default:'pending' },
+  adminNote:    { type:String, default:'' },
+  reviewedBy:   { type:mongoose.Schema.Types.ObjectId, ref:'User', default:null },
+  reviewedAt:   { type:Date, default:null },
+}, { timestamps:true });
+const KycDoc = mongoose.model('KycDoc', kycSchema);
+
 const router = express.Router();
 router.get('/health', (_,res) => res.json({ ok:true, ts:Date.now(), env:process.env.NODE_ENV||'development', ngnUsdRate:currencyConfig.rate }));
 router.get('/currency/rate', (_,res) => res.json({ rate:currencyConfig.rate, currency:'NGN', secondary:'USD' }));
@@ -1274,7 +1337,7 @@ router.post('/auth/login', [
   }
   // Reset failed count on successful password match
   if (user.loginFailedCount) await User.findByIdAndUpdate(user._id, { loginFailedCount: 0, loginLockedUntil: null });
-  if (!user.emailVerified) return res.status(403).json({ error:t('auth.login.unverified') });
+  // Email verification no longer required to login
   if (!user.isActive) return res.status(403).json({ error:t('auth.login.suspended') });
 
   if (user.twoFAEnabled) {
@@ -1732,7 +1795,7 @@ router.post('/wallet/deposit/:txId/proof', auth, uploadProof.single('proof'), [p
 }));
 
 // POST /wallet/withdraw/request
-router.post('/wallet/withdraw/request', auth, requireAgreements, [
+router.post('/wallet/withdraw/request', auth, requireAgreements, requireKYC, [
   body('amount').isFloat({ min:1 }),
   // Accept bank details flat OR nested inside paymentDetails (frontend sends nested)
   body('bankName').optional().trim(),
@@ -4127,6 +4190,145 @@ router.put('/admin/support/tickets/:id/status', auth, adminOnly,
 // ── /SUPPORT ROUTES ───────────────────────────────────────────
 
 // ══ STARTUP ══════════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════
+// KYC ROUTES — internal, no third-party services
+// ══════════════════════════════════════════════════════════════
+
+// POST /kyc/submit — user submits KYC documents
+router.post('/kyc/submit', auth, asyncH(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (user.kycStatus === 'approved')
+    return res.status(400).json({ error:'KYC already approved.' });
+  if (user.kycStatus === 'pending')
+    return res.status(400).json({ error:'KYC submission already under review.' });
+
+  const { fullName, dob, idType, idNumber, idDocUrl, selfieUrl, address } = req.body;
+  if (!fullName || !dob || !idType || !idNumber || !idDocUrl || !selfieUrl || !address)
+    return res.status(400).json({ error:'All KYC fields are required.' });
+
+  // Upsert — allow resubmission after rejection
+  await KycDoc.findOneAndUpdate(
+    { user: user._id },
+    { fullName, dob, idType, idNumber, idDocUrl, selfieUrl, address,
+      status:'pending', adminNote:'', reviewedBy:null, reviewedAt:null },
+    { upsert:true, new:true }
+  );
+
+  user.kycStatus      = 'pending';
+  user.kycSubmittedAt = new Date();
+  user.kycReviewedAt  = null;
+  user.kycRejectionNote = '';
+  await user.save();
+
+  // Notify all admins instantly via socket
+  const admins = await User.find({ role:'admin', isActive:true }).select('_id');
+  admins.forEach(a => {
+    sendNotification({
+      recipient: a._id, type:'system',
+      title: 'New KYC Submission',
+      message: `${user.username} submitted KYC documents for review.`,
+      link: '/admin',
+    }).catch(() => {});
+  });
+
+  res.json({ ok:true, message:'KYC submitted successfully. Under review.' });
+}));
+
+// GET /kyc/status — user checks their own KYC status
+router.get('/kyc/status', auth, asyncH(async (req, res) => {
+  const user = await User.findById(req.user._id).select('kycStatus kycSubmittedAt kycReviewedAt kycRejectionNote');
+  res.json({
+    kycStatus:        user.kycStatus,
+    kycSubmittedAt:   user.kycSubmittedAt,
+    kycReviewedAt:    user.kycReviewedAt,
+    kycRejectionNote: user.kycRejectionNote,
+  });
+}));
+
+// GET /admin/kyc — admin lists all pending KYC submissions
+router.get('/admin/kyc', auth, adminOnly, asyncH(async (req, res) => {
+  const { status = 'pending', page = 1, limit = 20 } = req.query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const filter = status === 'all' ? {} : { status };
+  const [docs, total] = await Promise.all([
+    KycDoc.find(filter)
+      .populate('user', 'username email phone avatar createdAt kycStatus')
+      .populate('reviewedBy', 'username')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean(),
+    KycDoc.countDocuments(filter),
+  ]);
+  res.json({ docs, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) });
+}));
+
+// POST /admin/kyc/:userId/approve — admin approves KYC (manual only, no automation)
+router.post('/admin/kyc/:userId/approve', auth, adminOnly, asyncH(async (req, res) => {
+  const kycDoc = await KycDoc.findOne({ user: req.params.userId });
+  if (!kycDoc) return res.status(404).json({ error:'KYC submission not found.' });
+
+  kycDoc.status     = 'approved';
+  kycDoc.reviewedBy = req.user._id;
+  kycDoc.reviewedAt = new Date();
+  kycDoc.adminNote  = req.body.note || '';
+  await kycDoc.save();
+
+  await User.findByIdAndUpdate(req.params.userId, {
+    kycStatus:      'approved',
+    kycReviewedAt:  new Date(),
+    kycReviewedBy:  req.user._id,
+    kycRejectionNote: '',
+  });
+
+  await logAdmin(req.user._id, 'kyc_approve', 'User', req.params.userId, req.body.note || 'KYC approved');
+
+  // Notify user instantly via socket
+  sendNotification({
+    recipient: req.params.userId, type:'system',
+    title: '✅ KYC Approved',
+    message: 'Your KYC verification has been approved. You can now make withdrawals.',
+    link: '/wallet',
+  }).catch(() => {});
+
+  res.json({ ok:true, message:'KYC approved.' });
+}));
+
+// POST /admin/kyc/:userId/reject — admin rejects KYC with reason (manual only)
+router.post('/admin/kyc/:userId/reject', auth, adminOnly, asyncH(async (req, res) => {
+  const reason = (req.body.reason || '').trim();
+  if (!reason) return res.status(400).json({ error:'Rejection reason is required.' });
+
+  const kycDoc = await KycDoc.findOne({ user: req.params.userId });
+  if (!kycDoc) return res.status(404).json({ error:'KYC submission not found.' });
+
+  kycDoc.status     = 'rejected';
+  kycDoc.reviewedBy = req.user._id;
+  kycDoc.reviewedAt = new Date();
+  kycDoc.adminNote  = reason;
+  await kycDoc.save();
+
+  await User.findByIdAndUpdate(req.params.userId, {
+    kycStatus:        'rejected',
+    kycReviewedAt:    new Date(),
+    kycReviewedBy:    req.user._id,
+    kycRejectionNote: reason,
+  });
+
+  await logAdmin(req.user._id, 'kyc_reject', 'User', req.params.userId, reason);
+
+  // Notify user instantly via socket
+  sendNotification({
+    recipient: req.params.userId, type:'system',
+    title: '❌ KYC Rejected',
+    message: `Your KYC was rejected: ${reason}. Please resubmit with correct documents.`,
+    link: '/settings',
+  }).catch(() => {});
+
+  res.json({ ok:true, message:'KYC rejected.' });
+}));
+
 mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS:5000 })
   .then(async () => {
     console.log('[DB] MongoDB connected');
