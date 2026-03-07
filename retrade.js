@@ -12,8 +12,12 @@
  *
  * npm install (additions over v6):
  *   node-telegram-bot-api
+ *   web-push
  *
  * New .env:
+ *   VAPID_PUBLIC_KEY=<run: npx web-push generate-vapid-keys>
+ *   VAPID_PRIVATE_KEY=<run: npx web-push generate-vapid-keys>
+ *   VAPID_EMAIL=mailto:admin@rawflip.com
  *   SMTP_USER=your_gmail@gmail.com
  *   SMTP_PASS=your_gmail_app_password
   TELEGRAM_BOT_TOKEN=<your-bot-token>
@@ -41,6 +45,7 @@ const rateLimit    = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const crypto       = require('crypto');
 const nodemailer   = require('nodemailer');
+const webpush      = require('web-push');
 const speakeasy    = require('speakeasy');
 const QRCode       = require('qrcode');
 const passport     = require('passport');
@@ -59,7 +64,18 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const CLIENT_ORIGIN      = process.env.CLIENT_ORIGIN   || 'https://rawflip.netlify.app';
 const APP_URL            = process.env.APP_URL          || 'http://localhost:5000';
 const IS_PROD            = process.env.NODE_ENV         === 'production';
+const VAPID_PUBLIC_KEY   = process.env.VAPID_PUBLIC_KEY  || '';
+const VAPID_PRIVATE_KEY  = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_EMAIL        = process.env.VAPID_EMAIL       || 'mailto:admin@rawflip.com';
 const UPLOADS_DIR        = path.join(__dirname, 'uploads');
+
+// ── Web Push VAPID Setup ──────────────────────────────────
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  console.log('[Push] VAPID configured ✓');
+} else {
+  console.warn('[Push] VAPID keys missing — web push disabled. Set VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL');
+}
 const OFFER_EXPIRY_DAYS  = 7;
 const AUTO_RELEASE_HOURS = 48;
 const DISPATCH_WINDOW_DAYS = 3;
@@ -338,6 +354,21 @@ const emailTemplates = {
 
   disputeResolved: (u, tx, decision) => ({ subject:'Dispute Resolved', html: emailBase(`
     <h2>Dispute Resolved</h2><p>Hi ${u}, decision: <strong>${decision==='release'?'Payment released to seller':'Refund to buyer'}</strong>.</p>`) }),
+
+  foundingMember: (u, eaNumber) => ({ subject:'🔓 You\'re in! Welcome to the RawFlip Inner Circle (1 of 200)', html: emailBase(`
+    <h2>Welcome to the flip side, ${u}!</h2>
+    <p>We're thrilled to have you as one of the first 200 members of RawFlip Marketplace. Because you're joining us at the very beginning, we've upgraded your account to <strong>Founding Member</strong> status — completely on the house.</p>
+    <div class="meta">
+      <p><strong>🚫 Zero Fees:</strong> Keep 100% of what you sell.</p>
+      <p><strong>♾️ Infinite Listings:</strong> Post as much as you want, no limits.</p>
+      <p><strong>🚀 Premium Visibility:</strong> Your items get "First-Look" placement in the feed.</p>
+      <p><strong>🎯 Direct Access:</strong> Your feedback will literally help us build the future of this app.</p>
+    </div>
+    <p>You have full, unrestricted access to every premium feature for the next <strong>6 months</strong>. No strings attached — just our way of saying thanks for helping us get RawFlip off the ground.</p>
+    <p style="font-size:.82rem;color:#8888aa">You are Founding Member <strong style="color:#f0ad4e">No. ${eaNumber} of 200</strong>.</p>
+    <a href="${CLIENT_ORIGIN}" class="btn">Open RawFlip &amp; Start Selling</a>
+    <p style="margin-top:20px;font-size:.8rem;color:#4a4a6a">P.S. Since you're one of the original 200, keep an eye on your profile for a special "Founding Member" badge — it's already there! 🏆</p>
+    <p style="font-size:.85rem;color:#8888aa">Cheers,<br/>The RawFlip Team</p>`) }),
 };
 
 // -- Email service (Nodemailer + Gmail SMTP) --
@@ -921,13 +952,43 @@ const clearAuthCookies = res => { res.clearCookie('rf_access'); res.clearCookie(
 const sendNotification = async (data) => {
   const n   = await Notification.create(data);
   const pop = await Notification.findById(n._id).populate('sender','username avatar');
-  // Real-time push via socket.io — delivered instantly if user is online,
-  // otherwise retrieved from DB when user next connects (offline-safe)
+  // Real-time delivery via socket.io (instant when tab open)
   io.to(`user:${data.recipient}`).emit('notification', pop);
-  // Also emit a lightweight ping so SW/tab can badge the icon
   io.to(`user:${data.recipient}`).emit('notif:ping', { count: 1 });
+  // Web Push delivery (reaches user even when tab is closed)
+  sendPushToUser(data.recipient, {
+    title: data.title   || 'RawFlip',
+    body:  data.message || '',
+    url:   data.link    || '/'
+  }).catch(() => {});
   return pop;
 };
+
+// ── Web Push: send to all subscriptions for a user ──────────────────────
+async function sendPushToUser(userId, payload) {
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return;
+  try {
+    const subs = await PushSub.find({ user: userId }).lean();
+    if (!subs.length) return;
+    const promises = subs.map(sub =>
+      webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } },
+        JSON.stringify(payload)
+      ).catch(async err => {
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          // Subscription expired or invalid — clean up
+          await PushSub.deleteOne({ _id: sub._id });
+          console.log('[Push] removed stale subscription');
+        } else {
+          console.error('[Push] send error:', err.message);
+        }
+      })
+    );
+    await Promise.allSettled(promises);
+  } catch (e) {
+    console.error('[Push] sendPushToUser error:', e.message);
+  }
+}
 
 const logAdmin = (adminId, action, targetType, targetId, note, meta={}, source='web') =>
   AdminLog.create({ adminId, action, targetType, targetId, note, meta, source }).catch(()=>{});
@@ -1222,6 +1283,18 @@ const kycSchema = new mongoose.Schema({
 }, { timestamps:true });
 const KycDoc = mongoose.model('KycDoc', kycSchema);
 
+
+// ── Web Push Subscription Schema ────────────────────────────────────────────
+const pushSubscriptionSchema = new mongoose.Schema({
+  user:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  endpoint: { type: String, required: true, unique: true },
+  keys: {
+    p256dh: { type: String, required: true },
+    auth:   { type: String, required: true },
+  },
+}, { timestamps: true });
+const PushSub = mongoose.model('PushSub', pushSubscriptionSchema);
+
 const router = express.Router();
 router.get('/health', (_,res) => res.json({ ok:true, ts:Date.now(), env:process.env.NODE_ENV||'development', ngnUsdRate:currencyConfig.rate }));
 router.get('/currency/rate', (_,res) => res.json({ rate:currencyConfig.rate, currency:'NGN', secondary:'USD' }));
@@ -1299,6 +1372,10 @@ router.post('/auth/register', [
   }
 
   sendEmail(email, emailTemplates.verifyEmail(username, token)).catch(()=>{});
+  // Send Founding Member welcome email to first 200 users
+  if (isEA && eaNumber) {
+    sendEmail(email, emailTemplates.foundingMember(username, eaNumber)).catch(()=>{});
+  }
   res.status(201).json({ ok:true, message:t('auth.register.success') });
 }));
 
@@ -2625,6 +2702,7 @@ router.get('/transactions/:id/contact', auth, [param('id').isMongoId()], validat
   res.json({
     _id:          tx._id,
     itemTitle:    tx.itemTitle,
+    amount:       tx.amount,
     viewerRole:   isBuyer ? 'buyer' : 'seller',
     sellerContact: isBuyer  ? sellerContactPayload : undefined,
     buyerContact:  isSeller ? buyerContactPayload  : undefined,
@@ -3509,7 +3587,7 @@ const processEarlyAdopterExpiry = async () => {
     const hasSub = await Subscription.exists({ userId: u._id, status: 'active', endDate: { $gt: new Date() } });
     if (!hasSub) {
       await User.findByIdAndUpdate(u._id, { activePlan: 'free', planExpiresAt: null });
-      sendNotification({ recipient: u._id, type: 'system', title: 'Early Adopter Perks Ended', message: 'Your 6-month free-fee early adopter period has ended. Upgrade to a plan to continue enjoying benefits.', link: '/subscription' }).catch(() => {});
+      sendNotification({ recipient: u._id, type: 'system', title: 'Founding Member Perks Ended', message: 'Your 6-month Founding Member free-fee period has ended. Upgrade to a plan to continue enjoying benefits.', link: '/subscription' }).catch(() => {});
       console.log(`[EarlyAdopter] Perks expired for ${u.username}`);
     }
   }
@@ -4191,6 +4269,45 @@ router.put('/admin/support/tickets/:id/status', auth, adminOnly,
 
 // ══ STARTUP ══════════════════════════════════════════════════════════════════
 
+
+// ══════════════════════════════════════════════════════════════
+// WEB PUSH SUBSCRIPTION ENDPOINTS
+// ══════════════════════════════════════════════════════════════
+
+// GET /push/vapid-key — public VAPID key for frontend subscription
+router.get('/push/vapid-key', (req, res) => {
+  if (!VAPID_PUBLIC_KEY)
+    return res.status(503).json({ error: 'Push notifications not configured on this server.' });
+  res.json({ publicKey: VAPID_PUBLIC_KEY });
+});
+
+// POST /push-subscription — save a push subscription (requires auth)
+router.post('/push-subscription', auth, asyncH(async (req, res) => {
+  const { endpoint, keys } = req.body || {};
+  if (!endpoint || !keys?.p256dh || !keys?.auth)
+    return res.status(400).json({ error: 'Invalid push subscription object.' });
+
+  await PushSub.findOneAndUpdate(
+    { endpoint },
+    { user: req.user._id, endpoint, keys },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  console.log(`[Push] subscription saved for user ${req.user._id}`);
+  res.json({ ok: true });
+}));
+
+// DELETE /push-subscription — remove subscription (user unsubscribed or permission revoked)
+router.delete('/push-subscription', auth, asyncH(async (req, res) => {
+  const { endpoint } = req.body || {};
+  if (endpoint) {
+    await PushSub.deleteOne({ user: req.user._id, endpoint });
+  } else {
+    // Remove ALL subscriptions for this user (e.g. permission fully revoked)
+    await PushSub.deleteMany({ user: req.user._id });
+  }
+  res.json({ ok: true });
+}));
+
 // ══════════════════════════════════════════════════════════════
 // KYC ROUTES — internal, no third-party services
 // ══════════════════════════════════════════════════════════════
@@ -4345,46 +4462,3 @@ mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS:5000 })
   .catch(err=>{ console.error('[DB] Error:', err.message); process.exit(1); });
 
 module.exports = { app, server };
-
-/*
-==========================================================
-UPDATED .env for v7
-==========================================================
-MONGO_URI=mongodb://localhost:27017/rawflip
-JWT_SECRET=<min-32-chars>
-JWT_REFRESH_SECRET=<different-min-32-chars>
-TOTP_ENCRYPTION_KEY=<min-32-chars>
-PORT=5000
-NODE_ENV=development
-CLIENT_ORIGIN=https://rawflip.netlify.app
-APP_URL=https://rawflip-backend.onrender.com
-NGN_USD_RATE=1600
-MIN_DEPOSIT=5000
-MIN_WITHDRAWAL=5000
-
-SMTP_USER=your_gmail@gmail.com
-SMTP_PASS=your_gmail_app_password
-
-GOOGLE_CLIENT_ID=xxx
-GOOGLE_CLIENT_SECRET=xxx
-GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
-
-ELASTIC_NODE=http://localhost:9200
-ELASTIC_API_KEY=
-
-TELEGRAM_BOT_TOKEN=your-bot-token
-TELEGRAM_ADMIN_CHAT_ID=your-admin-chat-id
-
-BANK_NAME=RawFlip Payments Ltd
-BANK_ACCOUNT=0000000000
-BANK_ACCOUNT_NAME=RawFlip Escrow
-
-# Support — added v20
-# The support email address is protected in source code.
-# It is built at runtime from character array — do not add it here.
-==========================================================
-
-Additional npm install:
-npm install node-telegram-bot-api
-==========================================================
-*/
