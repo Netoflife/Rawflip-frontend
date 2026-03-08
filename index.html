@@ -149,43 +149,131 @@ select.fc{cursor:pointer;-webkit-appearance:none;appearance:none;background-imag
 .stars{color:#f0a000;letter-spacing:.5px;font-size:.8rem}
 .verified-badge{display:inline-flex;align-items:center;font-size:.65rem;background:rgba(0,212,180,.12);color:var(--accent3);padding:1px 7px;border-radius:10px;font-weight:700;margin-left:5px}
 .ea-badge{display:none}/* replaced by rf-badge */
-/* ── Raw Industrial Founding Member Badge ─────────────────── */
+/* ── Raw Industrial Founding Member Badge ─────────────────────────────────────
+   Three scales:
+     rf-badge-lg   — 110px, Profile page header
+     rf-badge-md   — 40px,  Listing card overlay (bottom-right)
+     rf-badge-mini — 24px,  Inline next to username in feed
+   Badge renders for ALL isEarlyAdopter users — it never expires.
+   "FREE FEES" badge (.ea-free-badge) separately tracks the 6-month window.
+   ─────────────────────────────────────────────────────────────────────────── */
 :root{--raw-charcoal:#1a1a1a;--raw-steel:#3d3d3d;--raw-gold:#f0ad4e;--raw-silver:#d1d1d1}
+
+/* ─── Shared badge structural styles ─────────────────────── */
 .rf-badge-container{display:inline-block;padding:6px;vertical-align:middle}
-.rf-metal-plate{background:linear-gradient(135deg,#444,#222);border-radius:50%;border:4px solid var(--raw-charcoal);box-shadow:5px 5px 15px rgba(0,0,0,.6),inset 2px 2px 2px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;position:relative}
-.rf-inner-etching{border-radius:50%;border:1px solid rgba(240,173,78,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#2a2a2a,#111)}
-.rf-monogram{font-family:'Arial Black',sans-serif;line-height:1;color:var(--raw-silver);text-shadow:2px 2px 0 #000}
-.rf-label{font-family:'Courier New',monospace;font-weight:900;color:#666;margin-top:2px;letter-spacing:1px}
-.rf-divider{background:var(--raw-gold);opacity:.6;margin:3px 0}
-.rf-serial{font-family:'Trebuchet MS',sans-serif;font-weight:bold;color:var(--raw-gold)}
-/* Large (110px) — profile page */
+.rf-metal-plate{
+  background:linear-gradient(145deg,#555 0%,#2a2a2a 40%,#444 60%,#1e1e1e 100%);
+  border-radius:50%;
+  border:4px solid var(--raw-charcoal);
+  box-shadow:
+    0 0 0 2px var(--raw-gold),
+    inset 0 2px 4px rgba(255,255,255,.15),
+    inset 0 -2px 4px rgba(0,0,0,.6),
+    4px 6px 16px rgba(0,0,0,.8),
+    0 0 24px rgba(240,173,78,.18);
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  transition:box-shadow .3s ease;
+}
+.rf-metal-plate:hover{
+  box-shadow:
+    0 0 0 2px var(--raw-gold),
+    inset 0 2px 4px rgba(255,255,255,.2),
+    inset 0 -2px 4px rgba(0,0,0,.6),
+    4px 6px 20px rgba(0,0,0,.9),
+    0 0 32px rgba(240,173,78,.35);
+}
+.rf-inner-etching{
+  border-radius:50%;
+  border:1.5px solid rgba(240,173,78,.5);
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.08),transparent 65%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.5);
+}
+.rf-monogram{
+  font-size:34px;letter-spacing:-2px;
+  background:linear-gradient(180deg,#fffbe6 0%,var(--raw-gold) 45%,#b8860b 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  font-family:'Courier New',Trebuchet MS,sans-serif;font-weight:bold;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));
+  line-height:1;
+}
+.rf-label{
+  font-size:6px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--raw-gold);font-family:'Courier New',monospace;font-weight:700;
+  text-shadow:0 0 4px rgba(240,173,78,.6);
+}
+.rf-divider{width:40%;height:1px;background:linear-gradient(90deg,transparent,var(--raw-gold),transparent)}
+.rf-serial{
+  font-size:8px;color:rgba(240,173,78,.8);font-family:'Courier New',monospace;
+  letter-spacing:.5px;
+}
+
+/* ─── Large: 110px — Profile page ─────────────────────────── */
 .rf-badge-lg .rf-metal-plate{width:110px;height:110px}
 .rf-badge-lg .rf-inner-etching{width:90px;height:90px}
 .rf-badge-lg .rf-monogram{font-size:34px;letter-spacing:-2px}
 .rf-badge-lg .rf-label{font-size:6px}
 .rf-badge-lg .rf-divider{width:40%;height:1px}
 .rf-badge-lg .rf-serial{font-size:8px}
-/* Medium (40px) — listing overlay */
+
+/* ─── Medium: 40px — Listing card overlay ─────────────────── */
 .rf-badge-md .rf-metal-plate{width:40px;height:40px;border-width:2px}
 .rf-badge-md .rf-inner-etching{width:32px;height:32px}
 .rf-badge-md .rf-monogram{font-size:12px;letter-spacing:-1px}
 .rf-badge-md .rf-label,.rf-badge-md .rf-divider,.rf-badge-md .rf-serial{display:none}
 .rf-badge-md-wrap{position:absolute;bottom:6px;right:6px;z-index:3}
-/* Mini (24px) — feed / comments */
+
+/* ─── Mini: 24px — Inline next to username in feed ────────── */
 .rf-badge-mini .rf-badge-container{padding:2px}
-.rf-badge-mini .rf-metal-plate{width:24px;height:24px;border-width:2px;box-shadow:2px 2px 6px rgba(0,0,0,.6)}
+.rf-badge-mini .rf-metal-plate{
+  width:24px;height:24px;border-width:2px;
+  box-shadow:2px 2px 6px rgba(0,0,0,.6),0 0 8px rgba(240,173,78,.2);
+}
 .rf-badge-mini .rf-inner-etching{width:18px;height:18px}
 .rf-badge-mini .rf-monogram{font-size:7px;letter-spacing:-1px}
 .rf-badge-mini .rf-label,.rf-badge-mini .rf-divider,.rf-badge-mini .rf-serial{display:none}
 .rf-badge-mini{position:relative;display:inline-block;cursor:default}
-.rf-badge-mini .rf-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#f0ad4e;font-size:.68rem;font-weight:700;padding:4px 8px;border-radius:6px;white-space:nowrap;border:1px solid rgba(240,173,78,.4);pointer-events:none;z-index:99}
+.rf-badge-mini .rf-tooltip{
+  display:none;position:absolute;bottom:calc(100% + 6px);left:50%;
+  transform:translateX(-50%);background:#1a1a2e;color:#f0ad4e;
+  font-size:.68rem;font-weight:700;padding:4px 8px;border-radius:6px;
+  white-space:nowrap;border:1px solid rgba(240,173,78,.4);
+  pointer-events:none;z-index:99;
+  box-shadow:0 4px 12px rgba(0,0,0,.6);
+}
 .rf-badge-mini:hover .rf-tooltip{display:block}
-/* Welcome Carousel */
-#rf-carousel-bar{width:100%;background:linear-gradient(90deg,#ff4e1f,#ff8c00);overflow:hidden;height:0;transition:height .3s ease;position:relative;z-index:99}
-#rf-carousel-bar.visible{height:32px}
-#rf-carousel-track{display:flex;align-items:center;height:32px;white-space:nowrap;animation:rfCarouselScroll 38s linear 1 forwards}
-@keyframes rfCarouselScroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100vw)}}
-.rf-carousel-text{font-size:.78rem;font-weight:700;color:#fff;letter-spacing:.2px;padding:0 32px}
+
+/* ─── Legacy ribbon (below badge, post-window legacy plan) ── */
+.rf-legacy-ribbon{
+  position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(90deg,#b8860b,#f0ad4e,#b8860b);
+  color:#1a1a1a;font-size:5.5px;font-weight:900;letter-spacing:1.2px;
+  padding:2px 8px;border-radius:4px;white-space:nowrap;
+  box-shadow:0 2px 6px rgba(0,0,0,.5);text-transform:uppercase;
+}
+
+/* ─── FREE FEES badge (6-month window only) ────────────────── */
+.ea-free-badge{
+  display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.5px;
+  background:linear-gradient(135deg,rgba(240,173,78,.22),rgba(240,173,78,.12));
+  border:1px solid rgba(240,173,78,.5);
+  color:var(--raw-gold);padding:2px 8px;border-radius:10px;
+  vertical-align:middle;margin-left:6px;
+  text-shadow:0 0 8px rgba(240,173,78,.4);
+}
+
+/* ─── Welcome carousel ─────────────────────────────────────── */
+/* Bar: block, hidden by default. Track: absolute so it escapes */
+/* any parent flex/grid constraints and can scroll unrestricted. */
+#rf-carousel-bar{display:none;overflow:hidden;height:30px;flex-shrink:0;position:relative;background:linear-gradient(90deg,#1a1208,#2a1f08,#1a1208);border-bottom:1px solid rgba(240,173,78,.3)}
+#rf-carousel-bar.visible{display:block}
+#rf-carousel-bar::before,#rf-carousel-bar::after{content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none}
+#rf-carousel-bar::before{left:0;background:linear-gradient(90deg,#1a1208,transparent)}
+#rf-carousel-bar::after{right:0;background:linear-gradient(270deg,#1a1208,transparent)}
+#rf-carousel-track{position:absolute;top:0;left:0;height:30px;white-space:nowrap;will-change:transform;display:flex;align-items:center}
+.rf-carousel-text{font-size:.78rem;font-weight:700;color:#fff;letter-spacing:.3px;padding:0 40px;white-space:nowrap}
+
 /* Founding Member popup */
 #rf-founding-popup{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;align-items:center;justify-content:center;padding:16px}
 #rf-founding-popup.show{display:flex}
@@ -193,6 +281,20 @@ select.fc{cursor:pointer;-webkit-appearance:none;appearance:none;background-imag
 .rf-founding-card h2{font-family:var(--df);font-size:1.35rem;font-weight:900;margin-bottom:14px;color:#fff}
 .rf-founding-card p{color:var(--text2);font-size:.88rem;line-height:1.7;margin-bottom:18px}
 .rf-founding-card .btn-go{background:linear-gradient(135deg,#ff4e1f,#ff8c00);color:#fff;border:none;border-radius:var(--r);padding:14px 32px;font-size:1rem;font-weight:800;cursor:pointer;width:100%;font-family:var(--df)}
+/* Legacy ribbon on badge */
+.rf-legacy-ribbon{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--raw-gold),#c8860a);color:#1a1a1a;font-size:.55rem;font-weight:900;padding:2px 10px;border-radius:6px;white-space:nowrap;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+/* Legacy offer comparison modal */
+#legacy-offer-modal .legacy-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+#legacy-offer-modal .lc-plan{background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;position:relative}
+#legacy-offer-modal .lc-plan.featured{border-color:var(--raw-gold);background:rgba(240,173,78,.05)}
+#legacy-offer-modal .lc-plan-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--raw-gold);color:#1a1a1a;font-size:.6rem;font-weight:900;padding:2px 10px;border-radius:10px;white-space:nowrap}
+#legacy-offer-modal .lc-plan-name{font-family:var(--df);font-size:.95rem;font-weight:800;margin-bottom:4px;color:var(--text)}
+#legacy-offer-modal .lc-plan-price{font-size:1.5rem;font-weight:900;color:var(--raw-gold);margin-bottom:2px}
+#legacy-offer-modal .lc-plan-price span{font-size:.72rem;color:var(--text3);font-weight:400}
+#legacy-offer-modal .lc-plan-orig{font-size:.72rem;color:var(--text3);text-decoration:line-through;margin-bottom:10px}
+#legacy-offer-modal .lc-plan-feat{font-size:.78rem;color:var(--text2);line-height:1.9}
+/* Subscription page legacy section */
+.legacy-section-hdr{background:linear-gradient(135deg,rgba(240,173,78,.12),rgba(240,173,78,.04));border:1.5px solid rgba(240,173,78,.3);border-radius:var(--r);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
 .ea-free-badge{background:var(--success);color:#fff;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-flex;align-items:center;vertical-align:middle;margin-left:3px}
 /* ── New feature styles ── */
 .facet-item{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:var(--r-sm);cursor:pointer;font-size:.82rem;transition:var(--t)}
@@ -604,6 +706,12 @@ table{font-size:.8rem}
         <a href="#" onclick="openForgotPassword()" style="color:var(--text2);font-size:.82rem">Forgot password?</a>
       </div>
       <div style="text-align:center;font-size:.85rem;color:var(--text2);margin-top:10px">No account? <a href="#" onclick="toggleAuth('reg')" style="color:var(--accent);font-weight:600">Register</a></div>
+      <div id="login-resend-wrap" style="display:none;margin-top:14px;background:rgba(240,180,0,.10);border:1px solid rgba(240,180,0,.35);border-radius:8px;padding:12px 14px">
+        <div style="font-size:.82rem;color:var(--warning);font-weight:700;margin-bottom:6px">&#9993; Email not verified</div>
+        <div style="font-size:.78rem;color:var(--text2);margin-bottom:8px">Check your inbox and click the verification link. Didn't receive it?</div>
+        <input type="hidden" id="login-resend-email"/>
+        <button type="button" class="btn btn-s" style="width:100%;justify-content:center;font-size:.82rem" onclick="resendVerifEmail()">Resend Verification Email</button>
+      </div>
     </div>
     <div id="reg-frm" style="display:none">
       <div class="form-row">
@@ -636,7 +744,7 @@ table{font-size:.8rem}
         <div class="fg"><label class="fl" for="r-whatsapp">WhatsApp Number *</label><input class="fc" type="tel" id="r-whatsapp" placeholder="+2348012345678" autocomplete="tel" maxlength="20" onblur="enforceNGPhone(this)"/><span class="text-xs text-2" style="margin-top:3px;display:block">Can be same as phone number</span></div>
       </div>
       <div class="fg"><label class="fl" for="r-loc">Location <span style="color:var(--danger)">*</span></label><input class="fc" type="text" id="r-loc" placeholder="e.g. Lagos, Nigeria" maxlength="100" autocomplete="address-level2" required/><span style="font-size:.73rem;color:var(--text3);display:block;margin-top:3px">Your city/state — shown to buyers</span></div>
-      <div class="fg"><label class="fl" for="r-ref">Referral Code <span style="color:var(--text3);font-weight:400">(optional)</span></label><input class="fc" type="text" id="r-ref" placeholder="Enter code if you have one" autocomplete="off" maxlength="12"/></div>
+      <div class="fg"><label class="fl" for="r-ref">Referral Code <span style="color:var(--text3);font-weight:400">(optional)</span></label><input class="fc" type="text" id="r-ref" placeholder="Enter code if you have one" autocomplete="off" maxlength="12"/><span id="r-ref-hint" style="font-size:.72rem;color:var(--danger);display:none;margin-top:3px"></span></div>
       <button type="button" class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px" onclick="handleRegister(event)">Create Account</button>
       <div style="text-align:center;font-size:.85rem;color:var(--text2);margin-top:16px">Have an account? <a href="#" onclick="toggleAuth('login')" style="color:var(--accent);font-weight:600">Sign In</a></div>
       <!-- Agreement checkboxes — required before account creation -->
@@ -650,7 +758,11 @@ table{font-size:.8rem}
           <input type="checkbox" id="r-agree-terms"/>
           <span>I have read and agree to the <a href="#" onclick="navLegal('terms');return false">Terms &amp; Conditions</a>.</span>
         </label>
-        <div id="r-agree-hint" style="font-size:.72rem;color:var(--danger);display:none;margin-top:2px">⚠️ Please tick both boxes to continue.</div>
+        <label class="reg-agree-item">
+          <input type="checkbox" id="r-agree-about"/>
+          <span>I understand RawFlip is a <strong>peer-to-peer marketplace</strong>. Funds in my wallet are <strong>not insured</strong> by any financial institution. See <a href="#" onclick="nav('about');return false">About Us</a>.</span>
+        </label>
+        <div id="r-agree-hint" style="font-size:.72rem;color:var(--danger);display:none;margin-top:2px">⚠️ Please tick all three boxes to continue.</div>
       </div>
     </div>
   </div>
@@ -734,8 +846,7 @@ table{font-size:.8rem}
   <!-- ── Welcome Carousel (new users, first week, every 3 min) ── -->
   <div id="rf-carousel-bar">
     <div id="rf-carousel-track">
-      <span class="rf-carousel-text">🎉 You're in the right place to buy, sell, and discover amazing new and used items. Flip your stuff, find great deals, and join a community of savvy buyers and sellers. Every tap is an opportunity — let's make your marketplace journey fun and rewarding! 💡🚀..</span>
-      <span class="rf-carousel-text">🎉 You're in the right place to buy, sell, and discover amazing new and used items. Flip your stuff, find great deals, and join a community of savvy buyers and sellers. Every tap is an opportunity — let's make your marketplace journey fun and rewarding! 💡🚀..</span>
+      <span class="rf-carousel-text" id="rf-carousel-msg">🎉 You're in the right place to buy, sell, and discover amazing new and used items. Flip your stuff, find great deals, and join a community of savvy buyers and sellers. Every tap is an opportunity — let's make your marketplace journey fun and rewarding! 💡🚀</span>
     </div>
   </div>
 
@@ -1634,13 +1745,14 @@ table{font-size:.8rem}
       </div>
       <!-- Step 1: Amount entry -->
       <div id="dep-step-1" style="display:none">
-        <div style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:12px;margin-bottom:14px;font-size:.83rem;color:var(--text2)">
+        <div id="dep-fee-info" style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:12px;margin-bottom:14px;font-size:.83rem;color:var(--text2)">
           Minimum deposit: <strong style="color:var(--accent)">₦5,000</strong>. A block fee of ₦100 per ₦5,000 applies automatically.
         </div>
         <div class="fg"><label class="fl">Amount to Deposit (₦) *</label>
           <input class="fc" type="number" id="dep-amt" placeholder="5000" min="5000" step="1" oninput="calcDepFee()"/>
         </div>
         <div id="dep-fee-preview" style="display:none;background:var(--bg3);border-radius:8px;padding:12px;margin-top:8px;font-size:.85rem">
+          <div id="dep-fm-note" style="display:none;background:rgba(240,180,0,.12);border:1px solid rgba(240,180,0,.35);border-radius:6px;padding:7px 10px;margin-bottom:8px;font-size:.78rem;color:var(--warning);font-weight:600">&#9733; Standard fee: &#8358;100 per &#8358;5,000 block &nbsp;&bull;&nbsp; <strong>Your fee: &#8358;0</strong> (Founding Member Perk!)</div>
           <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Block Fee:</span><span id="dep-fee-val" style="color:var(--warning);font-weight:700"></span></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">You will receive:</span><span id="dep-net-val" style="color:var(--success);font-weight:700"></span></div>
           <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)"><span style="font-weight:700">Total to transfer:</span><span id="dep-total-val" style="font-weight:800;color:var(--accent);font-size:1rem"></span></div>
@@ -1690,7 +1802,8 @@ table{font-size:.8rem}
     </div>
     <div class="fg"><label class="fl">Amount (₦ NGN) *</label><input class="fc" type="number" id="wd-amt" placeholder="0" min="1" step="1" oninput="calcWdFee()"/></div>
     <div id="wd-fee-preview" style="background:var(--bg3);border-radius:var(--r-sm);padding:10px 12px;font-size:.82rem;color:var(--text2);margin-bottom:4px;display:none">
-      Fee: <span id="wd-fee-val" style="color:var(--warning);font-weight:700"></span> · You receive: <span id="wd-net-val" style="color:var(--success);font-weight:700"></span>
+      <div id="wd-fm-note" style="display:none;background:rgba(240,180,0,.12);border:1px solid rgba(240,180,0,.35);border-radius:6px;padding:6px 10px;margin-bottom:6px;font-size:.78rem;color:var(--warning);font-weight:600">&#9733; Standard fee: &#8358;100 per &#8358;5,000 block &nbsp;&bull;&nbsp; <strong>Your fee: &#8358;0</strong> (Founding Member Perk!)</div>
+      Fee: <span id="wd-fee-val" style="color:var(--warning);font-weight:700"></span> &nbsp;&bull;&nbsp; You receive: <span id="wd-net-val" style="color:var(--success);font-weight:700"></span>
     </div>
     <div class="fg"><label class="fl">Bank Name *</label><input class="fc" id="wd-bank" placeholder="e.g. First Bank, GTBank"/></div>
     <div class="fg"><label class="fl">Account Number *</label><input class="fc" id="wd-acct" placeholder="10-digit account number" maxlength="20"/></div>
@@ -2025,9 +2138,20 @@ function esc(v){
 }
 
 /* ── API ─────────────────────────────────────────────────── */
+function getCsrfToken(){
+  try{
+    var m=document.cookie.match(/(?:^|;\s*)rf_csrf=([^;]+)/);
+    return m?decodeURIComponent(m[1]):'';
+  }catch(e){return '';}
+}
+
 async function api(method,path,body,isForm){
   var opts={method:method,credentials:'include',headers:{}};
   var tok=loadTok();if(tok)opts.headers['Authorization']='Bearer '+tok;
+  if(method!=='GET'&&method!=='HEAD'&&method!=='OPTIONS'){
+    var csrf=getCsrfToken();
+    if(csrf)opts.headers['X-CSRF-Token']=csrf;
+  }
   if(body){
     if(isForm)opts.body=body;
     else{opts.body=JSON.stringify(body);opts.headers['Content-Type']='application/json';}
@@ -2039,10 +2163,27 @@ async function api(method,path,body,isForm){
     console.error('[api] network error:',path,e);
     throw new Error(netErr);
   }
-  // 401 handling: redirect to login except on auth routes and token refresh
+  // 401 handling: try silent token refresh first; only show login if refresh fails
   if(res.status===401&&path!=='/auth/login'&&path!=='/auth/register'&&path!=='/auth/refresh'){
-    clearTok();showAuth();
-    throw new Error('Session expired — please sign in again');
+    try {
+      var rfRes = await fetch(API_BASE+'/api/auth/refresh',{method:'POST',credentials:'include'});
+      if (rfRes.ok) {
+        var rfData = await rfRes.json();
+        if (rfData && rfData.token) {
+          saveTok(rfData.token);
+          // Retry the original request once with the new token
+          opts.headers['Authorization'] = 'Bearer ' + rfData.token;
+          var retry = await fetch(API_BASE+'/api'+path, opts);
+          if (retry.status === 401) { clearTok(); showAuth(); throw new Error('Session expired — please sign in again'); }
+          res = retry;
+          // Re-check content type and re-parse below
+          ct = res.headers.get('content-type');
+        } else { clearTok(); showAuth(); throw new Error('Session expired — please sign in again'); }
+      } else { clearTok(); showAuth(); throw new Error('Session expired — please sign in again'); }
+    } catch(rfErr) {
+      if (rfErr.message === 'Session expired — please sign in again') throw rfErr;
+      clearTok(); showAuth(); throw new Error('Session expired — please sign in again');
+    }
   }
   // Guard: check Content-Type before parsing JSON
   var ct=res.headers.get('content-type');
@@ -2190,13 +2331,43 @@ function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-th
 function initApp(){
   applyTheme(localStorage.getItem('rf_theme')||'dark');
   // Check for password reset token in URL before anything else
-  checkResetPasswordToken();
+  // Deferred to ensure function is defined (declared later in the file)
+  if (typeof checkResetPasswordToken === 'function') {
+    checkResetPasswordToken();
+  } else {
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof checkResetPasswordToken === 'function') checkResetPasswordToken();
+    });
+  }
   registerSW();
   var tok=loadTok();
   fetch(API_BASE+'/api/auth/me',{credentials:'include',headers:tok?{'Authorization':'Bearer '+tok}:{}})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(u){if(u&&(u._id||u.id)){S.user=u;showApp();}else{clearTok();showAuth();}})
-    .catch(function(){showAuth();});
+    .then(function(r){return r.ok?r.json():r.status===401||r.status===403?'__unauth__':null;})
+    .then(function(u){
+      if(u&&u!=='__unauth__'&&(u._id||u.id)){
+        S.user=u;
+        // Compute eaDaysRemaining client-side if not returned
+        if(u.eaDaysRemaining!=null){S.user.eaDaysRemaining=u.eaDaysRemaining;}
+        else if(u.earlyAdopterGrantedAt){
+          var _e=new Date(u.earlyAdopterGrantedAt);_e.setMonth(_e.getMonth()+6);
+          S.user.eaDaysRemaining=Math.ceil((_e-Date.now())/86400000);
+          S.user.isEarlyAdopterActive=new Date()<_e;
+        }
+        showApp();
+      } else if(u==='__unauth__'){
+        // Server explicitly says not authenticated
+        clearTok();showAuth();
+      } else {
+        // Null response or unexpected — show auth
+        clearTok();showAuth();
+      }
+    })
+    .catch(function(e){
+      // Network error — don't kick user out, just show auth page
+      // (They may be offline; we can't confirm session either way)
+      console.warn('[initApp] /auth/me failed:',e.message);
+      clearTok();showAuth();
+    });
 }
 
 function showApp(){
@@ -2229,8 +2400,17 @@ async function handleLogin(event){
   if(btn){btn.disabled=true;btn.textContent='Signing in…';}
   try{
     var d=await api('POST','/auth/login',{email:email,password:pw});
-    if(d.token)saveTok(d.token);S.user=d.user||d;showApp();
-  }catch(e){toast('Login failed',e.message,'error',5000);}
+    if(d.token)saveTok(d.token);S.user=d.user||d;if(S.user&&S.user.eaDaysRemaining==null&&S.user.earlyAdopterGrantedAt){var _ea=new Date(S.user.earlyAdopterGrantedAt);_ea.setMonth(_ea.getMonth()+6);S.user.eaDaysRemaining=Math.ceil((_ea-Date.now())/86400000);}showApp();
+  }catch(e){
+    if(e.unverified||e.message.toLowerCase().includes('verify your email')){
+      toast('Email not verified','Please check your inbox and verify your email before signing in.','warn',8000);
+      // Show resend option
+      var ea=document.getElementById('login-resend-wrap');
+      if(ea){ea.style.display='block';document.getElementById('login-resend-email').value=email;}
+    } else {
+      toast('Login failed',e.message,'error',5000);
+    }
+  }
   finally{if(btn){btn.disabled=false;btn.textContent='Sign In';}}
 }
 
@@ -2281,16 +2461,28 @@ async function handleRegister(event){
   if(btn){btn.disabled=true;btn.textContent='Creating account…';}
   try{
     var refCode=(document.getElementById('r-ref')&&document.getElementById('r-ref').value.trim())||'';
+    var refHint=document.getElementById('r-ref-hint');
+    if(refHint){refHint.textContent='';refHint.style.display='none';}
     var d=await api('POST','/auth/register',{
       username:username, email:email, password:pw,
       phone:phone, whatsapp:whatsapp, location:location,
       referralCode: refCode||undefined,
-      // Send agreement flags so backend records them immediately (About/disclaimer moved to deposit flow)
       agreePrivacy: !!(document.getElementById('r-agree-privacy')&&document.getElementById('r-agree-privacy').checked),
       agreeTerms:   !!(document.getElementById('r-agree-terms')&&document.getElementById('r-agree-terms').checked),
+      agreeAbout:   !!(document.getElementById('r-agree-about')&&document.getElementById('r-agree-about').checked),
     });
     showRegisterSuccess(email);
-  }catch(e){toast('Registration failed',e.message,'error',5000);}
+  }catch(e){
+    var errMsg=e.message||'Registration failed';
+    var refH=document.getElementById('r-ref-hint');
+    if(errMsg.toLowerCase().includes('referral')&&refH){
+      refH.textContent=errMsg.replace(/^referralCode:\s*/i,'');
+      refH.style.display='block';
+      var refEl=document.getElementById('r-ref');if(refEl){refEl.focus();refEl.select();}
+    } else {
+      toast('Registration failed',errMsg,'error',5000);
+    }
+  }
   finally{if(btn){btn.disabled=false;btn.textContent='Create Account';}}
 }
 
@@ -2308,10 +2500,11 @@ function showRegisterSuccess(email, extraMsg) {
   panel.style.cssText = 'text-align:center;padding:10px 0';
   panel.innerHTML =
     '<div style="font-size:3rem;margin-bottom:12px">🎉</div>' +
-    '<div class="fw7" style="font-size:1.1rem;margin-bottom:8px">Welcome to RawFlip!</div>' +
-    '<div class="text-sm text-2" style="margin-bottom:20px">Your account has been created successfully. You can now sign in and start exploring.</div>' +
+    '<div class="fw7" style="font-size:1.1rem;margin-bottom:8px">Almost there! Check your email ✉️</div>' +
+    '<div class="text-sm text-2" style="margin-bottom:8px">A verification link has been sent to <strong>' + esc(email) + '</strong>.</div>' +
+    '<div class="text-sm text-2" style="margin-bottom:20px">Click the link to activate your account before signing in. Check your spam folder if you don\'t see it.</div>' +
     (extraMsg ? '<div class="text-sm" style="color:var(--success);margin-bottom:16px">' + esc(extraMsg) + '</div>' : '') +
-    '<button type="button" class="btn btn-p" style="width:100%;justify-content:center;margin-bottom:16px" onclick="toggleAuth(\'login\')">Continue to Sign In</button>' +
+    '<button type="button" class="btn btn-s" style="width:100%;justify-content:center;margin-bottom:16px" onclick="toggleAuth(\'login\')">Already verified? Sign In</button>' +
     '<div style="margin-top:8px;padding:16px;background:rgba(67,97,238,.07);border:1px solid rgba(67,97,238,.18);border-radius:12px">' +
       '<div style="font-weight:700;font-size:.9rem;margin-bottom:4px">📣 Join our community</div>' +
       '<div style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Get the latest updates, tips &amp; deals</div>' +
@@ -2337,7 +2530,20 @@ function showRegisterSuccess(email, extraMsg) {
 }
 
 
-// resendVerifEmail removed — email verification not required
+async function resendVerifEmail() {
+  var email = (document.getElementById('login-resend-email')||{}).value || (document.getElementById('li-email')||{}).value;
+  if (!email) { toast('No email','Enter your email in the field above','warn'); return; }
+  var btn = document.querySelector('#login-resend-wrap .btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  try {
+    await api('POST', '/auth/resend-verification', { email });
+    toast('Verification sent', 'Check your inbox (and spam folder)', 'success', 6000);
+    if (btn) { btn.textContent = 'Email sent ✓'; setTimeout(function(){ btn.disabled=false; btn.textContent='Resend Verification Email'; }, 30000); }
+  } catch(e) {
+    toast('Failed to send', e.message, 'error', 5000);
+    if (btn) { btn.disabled = false; btn.textContent = 'Resend Verification Email'; }
+  }
+}
 
 async function handleLogout(){
   try{await api('POST','/auth/logout');}catch(e){}
@@ -2862,7 +3068,6 @@ async function submitOffer(){
 /* ── Purchase Now ────────────────────────────── */
 async function purchaseNow(lid,title,price){
   if(!S.user){toast('Sign in to purchase','','warn');return;}
-  // Fetch fresh wallet balance
   try{
     var w=await api('GET','/wallet');
     if(w.rate){exchangeRate=w.rate;window.RF_RATE=w.rate;}
@@ -2872,7 +3077,10 @@ async function purchaseNow(lid,title,price){
       S.user.escrowBalance=w.escrowBalance||0;
       S.user.withdrawableBalance=w.withdrawableBalance||0;
     }
-  }catch(e){}
+  }catch(e){
+    toast('Balance unavailable','Could not refresh your wallet balance. Check your connection and try again.','warn',5000);
+    return;
+  }
   var available=(S.user&&S.user.availableBalance)||0;
   if(available<price){
     toast('Insufficient Balance','Deposit funds first. Price: '+fmtNGN(price)+', Available: '+fmtNGN(available),'warn',6000);
@@ -3023,91 +3231,83 @@ async function fetchNotifCount(){
   }catch(e){}
 }
 
+function resolveNotifAction(n){
+  var nId=String(n._id);
+  var nTxId=n.transactionId?String(n.transactionId):'';
+  var link=n.link||'';
+  var t=n.type||'';
+  var titleLow=(n.title||'').toLowerCase();
+  var knownPages=['home','transactions','wallet','profile','offers','subscription','referral','notifications','settings','analytics','admin'];
+  if(link==='/admin'&&(titleLow.includes('deposit')||titleLow.includes('withdrawal')||titleLow.includes('proof')))
+    return{nId,page:'admin',adminTab:'wallettx'};
+  if(link==='/admin') return{nId,page:'admin'};
+  if(t==='offer'||t==='offer_counter'||t==='offer_rejected') return{nId,page:'offers'};
+  if(t==='review') return{nId,page:'profile'};
+  if(t==='referral_bonus') return{nId,page:'wallet'};
+  if(t==='subscription') return{nId,page:'subscription'};
+  if(t==='wallet') return{nId,page:'wallet'};
+  if(t==='dispute'||t==='offer_accepted'||t==='system'||t==='message'){
+    if(nTxId) return{nId,page:'transactions',txId:nTxId};
+    var txM=link.match(/\/transactions\/([a-f0-9]{24})/);
+    if(txM) return{nId,page:'transactions',txId:txM[1]};
+    if(link.includes('wallet')) return{nId,page:'wallet'};
+    return{nId,page:'transactions'};
+  }
+  if(link){
+    var lp=link.replace(/^\/api\//,'').replace(/^\//,'').split('/')[0];
+    if(knownPages.indexOf(lp)!==-1) return{nId,page:lp};
+  }
+  return{nId};
+}
+function handleNotifClick(el){
+  var nId=el.dataset.nid,page=el.dataset.page,txId=el.dataset.txid,tab=el.dataset.admintab;
+  if(nId) markRead(nId);
+  if(!page) return;
+  nav(page);
+  if(page==='admin'&&tab){
+    setTimeout(function(){
+      var btn=document.querySelector('#page-admin .tab-btn[onclick*="'+tab+'"]');
+      if(typeof adminTab==='function') adminTab(tab,btn||null);
+    },200);
+  } else if(page==='transactions'&&txId){
+    setTimeout(function(){openTxDetail(txId);},80);
+  } else if(page==='profile'){
+    loadProfile();
+  }
+}
+
 async function loadNotifications(){
   var ct=document.getElementById('notif-ct');if(!ct)return;
   ct.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   try{
     var d=await api('GET','/notifications?limit=50');
-    if(!d.notifications||!d.notifications.length){ct.innerHTML='<div class="empty"><div class="empty-ic">&#128276;</div><div class="empty-t">No notifications</div></div>';return;}
+    if(!d.notifications||!d.notifications.length){
+      ct.innerHTML='<div class="empty"><div class="empty-ic">&#128276;</div><div class="empty-t">No notifications</div></div>';
+      return;
+    }
+    var icons={message:'💬',offer:'🤝',offer_accepted:'✅',offer_rejected:'❌',review:'⭐',system:'🔔',follow:'👥',dispute:'⚠️',offer_counter:'🔄',referral_bonus:'🎁',subscription:'💎',wallet:'💰'};
     ct.innerHTML=d.notifications.map(function(n){
-      var icons={message:'💬',offer:'🤝',offer_accepted:'✅',offer_rejected:'❌',review:'⭐',system:'🔔',follow:'👥',dispute:'⚠️',offer_counter:'🔄',referral_bonus:'🎁',subscription:'💎',wallet:'💰'};
-      // Build action-aware click handler for each notification type
-      var nId = String(n._id);
-      var nTxId = n.transactionId ? String(n.transactionId) : '';
-      var clickHandler;
-      if (n.type === 'system' || n.type === 'message') {
-        // Admin-targeted notifications (link:'/admin') — route to the correct admin tab
-        var titleLow = (n.title||'').toLowerCase();
-        var isAdminWalletTx = n.link === '/admin' && (
-          titleLow.includes('deposit') || titleLow.includes('withdrawal') || titleLow.includes('proof')
-        );
-        var isAdminGeneral = n.link === '/admin';
-        if (isAdminWalletTx) {
-          clickHandler = "markRead('" + nId + "');nav('admin');setTimeout(function(){var btn=document.querySelector('#page-admin .tab-btn[onclick*=wallettx]');if(typeof adminTab==='function')adminTab('wallettx',btn||null);},200)";
-        } else if (isAdminGeneral) {
-          clickHandler = "markRead('" + nId + "');nav('admin')";
-        } else if (nTxId) {
-          clickHandler = "markRead('" + nId + "');nav('transactions');setTimeout(function(){openTxDetail('" + nTxId + "');},80)";
-        } else if (n.link && n.link.match(/\/transactions\/([a-f0-9]{24})/)) {
-          var txFromLink = n.link.match(/\/transactions\/([a-f0-9]{24})/)[1];
-          clickHandler = "markRead('" + nId + "');nav('transactions');setTimeout(function(){openTxDetail('" + txFromLink + "');},80)";
-        } else if (n.link === '/wallet' || (n.link && n.link.includes('wallet'))) {
-          clickHandler = "markRead('" + nId + "');nav('wallet')";
-        } else {
-          clickHandler = "markRead('" + nId + "');nav('transactions')";
-        }
-      } else if (n.type === 'offer' || n.type === 'offer_counter') {
-        // Offer received / counter — go to offers page
-        clickHandler = "markRead('" + nId + "');nav('offers')";
-      } else if (n.type === 'offer_accepted') {
-        // Offer accepted = transaction was created
-        if (nTxId) {
-          clickHandler = "markRead('" + nId + "');nav('transactions');setTimeout(function(){openTxDetail('" + nTxId + "');},80)";
-        } else {
-          clickHandler = "markRead('" + nId + "');nav('transactions')";
-        }
-      } else if (n.type === 'offer_rejected') {
-        clickHandler = "markRead('" + nId + "');nav('offers')";
-      } else if (n.type === 'review') {
-        // Review — show user's own profile
-        clickHandler = "markRead('" + nId + "');loadProfile();nav('profile')";
-      } else if (n.type === 'dispute') {
-        // Dispute — navigate to transactions and open the transaction if we have a ref
-        if (nTxId) {
-          clickHandler = "markRead('" + nId + "');nav('transactions');setTimeout(function(){openTxDetail('" + nTxId + "');},80)";
-        } else {
-          clickHandler = "markRead('" + nId + "');nav('transactions')";
-        }
-      } else if (n.type === 'referral_bonus') {
-        clickHandler = "markRead('" + nId + "');nav('wallet')";
-      } else if (n.type === 'subscription') {
-        clickHandler = "markRead('" + nId + "');nav('subscription')";
-      } else if (n.type === 'wallet') {
-        clickHandler = "markRead('" + nId + "');nav('wallet')";
-      } else if (n.link) {
-        // Generic link — try to extract a known page name, avoid raw paths
-        var linkClean = n.link.replace(/^\/api\//, '').replace(/^\//, '');
-        var knownPages = ['home','transactions','wallet','profile','offers','subscription','referral','notifications','settings','analytics'];
-        var linkPage = linkClean.split('/')[0];
-        if (knownPages.indexOf(linkPage) !== -1) {
-          clickHandler = "markRead('" + nId + "');nav('" + linkPage + "')";
-        } else {
-          // Fallback: just mark as read, don't navigate to unknown page
-          clickHandler = "markRead('" + nId + "')";
-        }
-      } else {
-        clickHandler = "markRead('" + nId + "')";
-      }
-      return '<div class="notif-item'+(n.read?'':' unrd')+'" onclick="'+clickHandler+'" style="cursor:pointer">'+
+      var action=resolveNotifAction(n);
+      var attrs='data-nid="'+esc(action.nId||'')+'"';
+      if(action.page)     attrs+=' data-page="'+esc(action.page)+'"';
+      if(action.txId)     attrs+=' data-txid="'+esc(action.txId)+'"';
+      if(action.adminTab) attrs+=' data-admintab="'+esc(action.adminTab)+'"';
+      return '<div class="notif-item'+(n.read?'':' unrd')+'" '+attrs+' style="cursor:pointer">'+
         '<div class="notif-ic">'+(icons[n.type]||'🔔')+'</div>'+
-        '<div class="notif-body"><div class="notif-t">'+esc(n.title)+'</div>'+
-        '<div class="notif-m">'+esc(n.message)+'</div>'+
-        '<div class="notif-tm">'+timeAgo(n.createdAt)+'</div></div>'+
+        '<div class="notif-body">'+
+          '<div class="notif-t">'+esc(n.title)+'</div>'+
+          '<div class="notif-m">'+esc(n.message)+'</div>'+
+          '<div class="notif-tm">'+timeAgo(n.createdAt)+'</div>'+
+        '</div>'+
         (n.read?'':'<div class="unrd-dot"></div>')+
-        '</div>';
+      '</div>';
     }).join('');
+    ct.addEventListener('click',function(ev){
+      var item=ev.target.closest('.notif-item');
+      if(item) handleNotifClick(item);
+    },{once:true});
     fetchNotifCount();
-  }catch(e){console.error('[loadWishlist]',e);ct.innerHTML='<div class="empty">'+esc(e.message||'Failed to load wishlist')+'</div>';}
+  }catch(e){ct.innerHTML='<div class="empty">'+esc(e.message||'Failed to load notifications')+'</div>';}
 }
 
 async function markRead(nid){
@@ -3344,7 +3544,7 @@ async function loadProfile(userId){
       '<div class="prof-info">'+
       '<div class="prof-name">'+esc(user.username||'?')+
       (user.isVerified?'<span class="verified-badge" style="margin-left:8px">✓ Verified</span>':'')+
-      (user.isEarlyAdopter?'<div class="rf-badge-container rf-badge-lg" title="Founding Member — 1 of 200 original RawFlip users"><div class="rf-metal-plate"><div class="rf-inner-etching"><span class="rf-monogram">RF</span><span class="rf-label">FOUNDING MEMBER</span><div class="rf-divider"></div><span class="rf-serial">NO. '+(user.earlyAdopterNumber||'—')+' OF 200</span></div></div></div>':'')+
+      (user.isEarlyAdopter?'<div style="position:relative;display:inline-block"><div class="rf-badge-container rf-badge-lg" title="Founding Member — 1 of 200 original RawFlip users"><div class="rf-metal-plate"><div class="rf-inner-etching"><span class="rf-monogram">RF</span><span class="rf-label">FOUNDING MEMBER</span><div class="rf-divider"></div><span class="rf-serial">NO. '+(user.earlyAdopterNumber||'—')+' OF 200</span></div></div></div>'+(user.legacyPlan&&user.legacyPlan!=='none'?'<div class="rf-legacy-ribbon">LEGACY</div>':'')+'</div>':'')+
       (user.isEarlyAdopterActive?'<span class="ea-free-badge" title="Zero fees active">FREE FEES</span>':'')+
       '</div>'+
       '<div class="text-sm text-2">'+(user.bio||'No bio yet')+'</div>'+
@@ -3369,7 +3569,9 @@ async function loadProfile(userId){
       (reviews.length?'<div class="sec-title mt-4">Reviews</div>'+reviews.map(function(r){
         return '<div class="rev-card"><div class="rev-hdr"><div class="av av-sm">'+((r.reviewer&&r.reviewer.username||'?')[0].toUpperCase())+'</div><div class="fw7">'+esc(r.reviewer&&r.reviewer.username||'?')+'</div><div class="stars">'+starStr(r.rating)+'</div><div class="text-xs text-2">'+timeAgo(r.createdAt)+'</div></div><div class="rev-body">'+esc(r.comment)+'</div></div>';
       }).join(''):'')+
+      (isMe?'<div class="sec-title mt-4">🔖 Saved Searches</div><div id="saved-searches-ct" style="margin-top:6px"></div>':'')+
       '';
+    if(isMe){ loadSavedSearches().then(function(){renderSavedSearches();}); }
     // Activate lazy-loading for listing images on the profile page
   var profGrid=ct.querySelector('.listings-grid');
   if(profGrid){
@@ -3590,14 +3792,22 @@ async function loadAdminStats(){
   var ct=document.getElementById('admin-stats-pnl');if(!ct)return;
   try{
     var d=await api('GET','/admin/stats');
-    ct.innerHTML='<div class="stats-grid">'+
-      statCard('Users',d.users,'👤')+
-      statCard('Listings',d.listings,'🏷️')+
-      statCard('Offers',d.offers,'🤝')+
-      statCard('Open Reports',d.reports||0,'⚠️')+
-      statCard('Open Disputes',d.disputes||0,'🔥')+
+    ct.innerHTML=
+      '<div class="stats-grid">'+
+        statCard('Users',d.users,'👤')+
+        statCard('Listings',d.listings,'🏷️')+
+        statCard('Offers',d.offers,'🤝')+
+        statCard('Open Reports',d.reports||0,'⚠️')+
+        statCard('Open Disputes',d.disputes||0,'🔥')+
+      '</div>'+
+      '<div class="card" style="margin-top:18px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'+
+        '<div>'+
+          '<div class="fw7" style="font-size:.95rem">💱 NGN/USD Exchange Rate</div>'+
+          '<div class="text-sm text-2" style="margin-top:2px">Current rate: <strong>₦<span id="admin-rate-display">'+(window.RF_RATE||'—')+'</span>/USD</strong></div>'+
+        '</div>'+
+        '<button type="button" class="btn btn-s btn-sm" onclick="adminUpdateRate()">Update Rate</button>'+
       '</div>';
-  }catch(e){console.error('[loadWishlist]',e);ct.innerHTML='<div class="empty">'+esc(e.message||'Failed to load wishlist')+'</div>';}
+  }catch(e){ct.innerHTML='<div class="empty">'+esc(e.message||'Failed to load stats')+'</div>';}
 }
 
 function statCard(label,val,ic){
@@ -3785,13 +3995,13 @@ function togglePwVis(inputId, btn) {
 
 // Validates all three reg checkboxes — shows inline hint if any missing
 function validateRegAgreements() {
-  // About/disclaimer moved to deposit flow — only privacy + terms required at registration
   var privacy = document.getElementById('r-agree-privacy');
   var terms   = document.getElementById('r-agree-terms');
+  var about   = document.getElementById('r-agree-about');
   var hint    = document.getElementById('r-agree-hint');
-  var allChecked = privacy && privacy.checked && terms && terms.checked;
+  var allChecked = !!(privacy && privacy.checked && terms && terms.checked && about && about.checked);
   if (hint) hint.style.display = allChecked ? 'none' : 'block';
-  return !!allChecked;
+  return allChecked;
 }
 
 // After a user logs in / registers, push their pre-checked agreements to the backend
@@ -4466,9 +4676,13 @@ function checkOAuthCallback() {
     history.replaceState({}, '', window.location.pathname);
     showResetPasswordUI(resetToken);
   }
+  if (params.get('verified') === '1') {
+    history.replaceState({}, '', window.location.pathname);
+    toast('Email verified!', 'You can now sign in to your account.', 'success', 6000);
+  }
   if (params.get('verifyExpired') === '1') {
     history.replaceState({}, '', window.location.pathname);
-    toast('Link expired', 'A new verification link has been sent.', 'warn');
+    toast('Link expired', 'Request a new verification link on the sign-in screen.', 'warn', 6000);
   }
   if (params.get('oauthError')) {
     history.replaceState({}, '', window.location.pathname);
@@ -4703,8 +4917,20 @@ var chartInstances = {};
 async function loadAnalytics() {
   var ct = document.getElementById('ana-summary');
   if (!ct) return;
-  // Analytics is Pro-only — show upgrade prompt client-side before hitting API
-  if (S.user && S.user.activePlan !== 'pro') {
+  // Analytics: Pro-only — but Founding Members with active window have Pro-equivalent access
+  var _hasProAccess = (function() {
+    if (!S.user) return false;
+    var p = S.user.activePlan || 'free';
+    if (p === 'pro' || p === 'legacy_pro') return true;
+    // EA active window = Pro-equivalent
+    if (S.user.isEarlyAdopter && S.user.earlyAdopterGrantedAt) {
+      var exp = new Date(S.user.earlyAdopterGrantedAt);
+      exp.setMonth(exp.getMonth() + 6);
+      if (new Date() < exp) return true;
+    }
+    return false;
+  })();
+  if (!_hasProAccess) {
     ct.innerHTML = '<div class="agree-wall" style="max-width:480px;margin:40px auto"><div class="aw-ic">📊</div><h3>Pro Feature</h3><p>The Analytics Dashboard is available on the <strong>Pro plan</strong>. Upgrade to unlock detailed insights into your listings, sales, and wallet activity.</p><div class="agree-wall-btns"><button type="button" class="btn btn-p" onclick="nav(\'subscription\')">View Plans</button></div></div>';
     return;
   }
@@ -5328,7 +5554,8 @@ function renderTxDetail(tx, isBuyer, isSeller){
   } else if (state==='COMPLETED'){
     var sellerPlan=S.user&&S.user.activePlan||'free';
     var upgradeBanner='';
-    if(isSeller&&sellerPlan!=='pro'&&tx.escrowFeePercent){
+    var _isEANow=S.user&&S.user.isEarlyAdopter&&S.user.isEarlyAdopterActive;
+    if(isSeller&&!_isEANow&&sellerPlan!=='pro'&&tx.escrowFeePercent){
       var nextPlan=sellerPlan==='free'?'Basic':'Pro';
       var nextFee=sellerPlan==='free'?15:10;
       var saved=Math.round((tx.amount||0)*(tx.escrowFeePercent-nextFee)/100);
@@ -6375,9 +6602,21 @@ document.addEventListener('DOMContentLoaded',function(){
       // plan badge
       var pb = document.getElementById('wallet-plan-badge');
       if (pb && S.user) {
-        var plan = S.user.activePlan||'free';
-        var planColors = {free:'var(--text3)',basic:'var(--accent3)',pro:'#f0a000'};
-        pb.innerHTML = '<span style="background:'+planColors[plan]+';color:#000;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:800;text-transform:uppercase">'+plan+' plan</span>';
+        var u = S.user;
+        var isEAActive = u.isEarlyAdopter && u.earlyAdopterGrantedAt && (function(){ var e=new Date(u.earlyAdopterGrantedAt); e.setMonth(e.getMonth()+6); return new Date()<e; })();
+        var planLabel, badgeColor, badgeBg;
+        if (isEAActive) {
+          planLabel = 'Founding Member (Premium Access)';
+          badgeBg = 'linear-gradient(135deg,#b8860b,#f0ad4e)';
+          badgeColor = '#1a1a1a';
+        } else {
+          var plan = u.activePlan || 'free';
+          var planColors = {free:'var(--text3)',basic:'var(--accent3)',pro:'#f0a000',legacy_basic:'#f0ad4e',legacy_pro:'#f0ad4e'};
+          planLabel = plan.replace('_',' ').replace(/\b\w/g,function(c){return c.toUpperCase();}) + ' Plan';
+          badgeBg = planColors[plan] || 'var(--text3)';
+          badgeColor = '#000';
+        }
+        pb.innerHTML = '<span style="background:'+badgeBg+';color:'+badgeColor+';padding:3px 12px;border-radius:12px;font-size:.72rem;font-weight:800">'+esc(planLabel)+'</span>';
       }
       // wallet tx history (v7 format with status)
       var ct = document.getElementById('wallet-tx-ct');
@@ -6407,25 +6646,41 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 
 /* ── Block fee calculator ── */
-function calcBlockFee(amount) {
-  if (!amount||amount<0) return 0;
-  return Math.ceil(amount/5000)*100;
+function calcBlockFee(amount, user) {
+  if (!amount || amount < 0) return 0;
+  // Founding Member perk: zero deposit/withdrawal fees during 6-month window
+  var u = user || (window.S && window.S.user) || null;
+  if (u && u.isEarlyAdopter && u.earlyAdopterGrantedAt) {
+    var exp = new Date(u.earlyAdopterGrantedAt);
+    exp.setMonth(exp.getMonth() + 6);
+    if (new Date() < exp) return 0;
+  }
+  return Math.ceil(amount / 5000) * 100;
 }
 
 /* ── Deposit modal v7 ── */
 var _depTxId = null, _depProofFile = null;
 
 function calcDepFee() {
-  var amt = parseFloat(document.getElementById('dep-amt').value)||0;
+  var amt = parseFloat(document.getElementById('dep-amt').value) || 0;
   var preview = document.getElementById('dep-fee-preview');
   if (!preview) return;
   if (amt >= 5000) {
-    var fee = Math.ceil(amt / 5000) * 100;
+    var fee = calcBlockFee(amt); // uses S.user automatically — 0 for Founding Members
     var net = amt - fee;
     document.getElementById('dep-fee-val').textContent = fmtNGN(fee);
     document.getElementById('dep-net-val').textContent = fmtNGN(net);
     var totalEl = document.getElementById('dep-total-val');
-    if(totalEl) totalEl.textContent = fmtNGN(amt);
+    if (totalEl) totalEl.textContent = fmtNGN(amt);
+    // Founding Member perk note
+    var noteEl = document.getElementById('dep-fm-note');
+    if (noteEl) {
+      if (fee === 0 && S.user && S.user.isEarlyAdopter) {
+        noteEl.style.display = 'block';
+      } else {
+        noteEl.style.display = 'none';
+      }
+    }
     preview.style.display = 'block';
   } else {
     preview.style.display = 'none';
@@ -6434,6 +6689,23 @@ function calcDepFee() {
 
 function openDepositModal() {
   if (!S.user){toast('Sign in first','','warn');return;}
+  // Update fee info note based on founding member status
+  var feeInfoEl = document.getElementById('dep-fee-info');
+  if (feeInfoEl) {
+    var u = S.user;
+    var isEANow = u.isEarlyAdopter && u.earlyAdopterGrantedAt && (function(){
+      var e = new Date(u.earlyAdopterGrantedAt); e.setMonth(e.getMonth()+6); return new Date() < e;
+    })();
+    if (isEANow) {
+      feeInfoEl.style.background = 'rgba(240,173,78,.08)';
+      feeInfoEl.style.borderColor = 'rgba(240,173,78,.35)';
+      feeInfoEl.innerHTML = 'Minimum deposit: <strong style="color:var(--accent)">&#8358;5,000</strong>. <strong style="color:var(--warning)">&#9733; Your block fee: &#8358;0</strong> (Founding Member perk &mdash; zero fees for 6 months).';
+    } else {
+      feeInfoEl.style.background = '';
+      feeInfoEl.style.borderColor = '';
+      feeInfoEl.innerHTML = 'Minimum deposit: <strong style="color:var(--accent)">&#8358;5,000</strong>. A block fee of &#8358;100 per &#8358;5,000 applies automatically.';
+    }
+  }
   // reset state
   _depTxId = null; _depProofFile = null;
   var amtEl=document.getElementById('dep-amt'); if(amtEl)amtEl.value='';
@@ -6536,10 +6808,12 @@ function calcWdFee() {
   var preview = document.getElementById('wd-fee-preview');
   if (!preview) return;
   if (amt >= 1) {
-    var fee = calcBlockFee(amt);
+    var fee = calcBlockFee(amt); // 0 for active Founding Members
     var net = Math.max(0, amt - fee);
     document.getElementById('wd-fee-val').textContent = fmtNGN(fee);
     document.getElementById('wd-net-val').textContent = fmtNGN(net);
+    var wdNote = document.getElementById('wd-fm-note');
+    if (wdNote) wdNote.style.display = (fee === 0 && S.user && S.user.isEarlyAdopter) ? 'block' : 'none';
     preview.style.display = 'block';
   } else {
     preview.style.display = 'none';
@@ -6590,9 +6864,11 @@ async function submitWithdrawalV7() {
 
 /* ── Subscription page ── */
 var PLAN_DEFS = {
-  free:  {label:'Free',    cost:0,       escrow:'20%', listings:'3',    minWd:'₦5,000', features:['Basic marketplace access','20% escrow fee','Up to 3 active listings','₦5,000 min withdrawal']},
-  basic: {label:'Basic',   cost:1500,    escrow:'15%', listings:'10',   minWd:'₦2,000', features:['All Free features','15% escrow fee','Up to 10 active listings','₦2,000 min withdrawal','✓ Verified badge','✓ Priority search']},
-  pro:   {label:'Pro',     cost:4500,    escrow:'10%', listings:'∞',   minWd:'₦0',     features:['All Basic features','10% escrow fee','Unlimited listings','No minimum withdrawal','✓ Pro analytics','✓ Highest search priority','✓ Referral commission boost']},
+  free:         {label:'Free',         cost:0,    escrow:'20%',  listings:'3',  minWd:'₦5,000', features:['Basic marketplace access','20% escrow fee','Up to 3 active listings','₦5,000 min withdrawal']},
+  basic:        {label:'Basic',        cost:1500, escrow:'15%',  listings:'10', minWd:'₦2,000', features:['All Free features','15% escrow fee','Up to 10 active listings','₦2,000 min withdrawal','✓ Verified badge','✓ Priority search']},
+  pro:          {label:'Pro',          cost:4500, escrow:'10%',  listings:'∞',  minWd:'₦0',     features:['All Basic features','10% escrow fee','Unlimited listings','No minimum withdrawal','✓ Pro analytics','✓ Highest search priority','✓ Referral commission boost']},
+  'legacy_basic': {label:'Legacy Basic', cost:750,  escrow:'12%',  listings:'20', minWd:'₦1,000', 'legacy':true, features:['🏆 Raw Industrial badge (forever)','12% escrow fee (50% off)','Up to 20 listings','₦1,000 min withdrawal','✓ Verified badge','✓ Priority search','Legacy ribbon on profile']},
+  'legacy_pro':   {label:'Legacy Pro',   cost:2250, escrow:'7.5%', listings:'∞',  minWd:'₦0',     'legacy':true, features:['🏆 Raw Industrial badge (forever)','7.5% escrow fee (50% off)','Unlimited listings','No minimum withdrawal','✓ Pro analytics','✓ Highest priority','✓ Referral boost','Legacy ribbon on profile']},
 };
 
 async function loadSubscriptionPage() {
@@ -6600,56 +6876,194 @@ async function loadSubscriptionPage() {
   var plansEl  = document.getElementById('sub-plans-grid');
   var histEl   = document.getElementById('sub-history-ct');
   if (bannerEl) bannerEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-  if (plansEl)  plansEl.innerHTML  = '';
+  if (plansEl)  plansEl.innerHTML  = '<div class="loading"><div class="spinner"></div></div>';
   try {
-    var d = await api('GET','/subscription');
-    // activePlan from server is an object (getActivePlan returns plan object), extract id string safely
+    var d = await api('GET', '/subscription');
+
+    // ── Resolve active plan — use backend as truth source ─────────
+    // Backend returns getActivePlan(user): for active EA this is {id:'pro',...}
     var activePlanRaw = d.activePlan || {};
-    var activePlan = (typeof activePlanRaw === 'string') ? activePlanRaw : (activePlanRaw.id || activePlanRaw.name || 'free');
-    activePlan = activePlan.toLowerCase(); // normalize
-    var expiresAt  = d.planExpiresAt;
-    // Banner
+    var activePlan = (typeof activePlanRaw === 'string')
+      ? activePlanRaw
+      : (activePlanRaw.id || activePlanRaw.name || 'free');
+    activePlan = activePlan.toLowerCase();
+
+    var expiresAt = d.planExpiresAt || null;
+    // Use backend as authoritative source for EA status
+    var isEA     = !!(d.isEarlyAdopter || (S.user && S.user.isEarlyAdopter));
+    var eaActive = !!(d.isEarlyAdopterActive);
+    // Fallback: re-derive if backend didn't send field (old backend)
+    if (isEA && d.isEarlyAdopterActive === undefined) {
+      var _g = (S.user && S.user.earlyAdopterGrantedAt) || null;
+      if (_g) { var _x = new Date(_g); _x.setMonth(_x.getMonth()+6); eaActive = new Date() < _x; }
+      else if (S.user && S.user.eaDaysRemaining != null) { eaActive = S.user.eaDaysRemaining > 0; }
+    }
+    // Backend already returns activePlan.id='pro' for active EA,
+    // but set it explicitly to be safe
+    if (eaActive) activePlan = 'pro';
+    var isLegacy  = activePlan === 'legacy_basic' || activePlan === 'legacy_pro';
+
+    // ── Current-plan banner ──────────────────────────────────────
+    // During active EA window: show plan as Pro, NO mention of free window
+    // After EA window expires: show Free plan, show expired notice
     if (bannerEl) {
-      var daysLeft = expiresAt ? Math.ceil((new Date(expiresAt)-Date.now())/(86400000)) : null;
-      bannerEl.innerHTML = '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
-        '<div style="font-size:1.5rem">'+(activePlan==='pro'?'🏆':activePlan==='basic'?'⭐':'🔓')+'</div>'+
-        '<div><div style="font-weight:700;color:var(--text)">Current Plan: <span style="color:'+(activePlan==='free'?'var(--text3)':activePlan==='basic'?'var(--accent3)':'#f0a000')+'">'+activePlan.toUpperCase()+'</span></div>'+
-        (daysLeft!==null?'<div style="font-size:.78rem;color:var(--text2)">Expires in '+daysLeft+' day'+(daysLeft!==1?'s':'')+'</div>':'')+
-        '</div></div>';
+      var daysLeft = expiresAt ? Math.ceil((new Date(expiresAt) - Date.now()) / 86400000) : null;
+      var planLbl, planColor, planIcon;
+
+      if (eaActive) {
+        // Active founding member — show Pro, no window countdown
+        planLbl   = 'Pro';
+        planColor = '#f0a000';
+        planIcon  = '&#127942;';
+      } else if (isLegacy) {
+        planLbl   = PLAN_DEFS[activePlan] ? PLAN_DEFS[activePlan].label : activePlan;
+        planColor = '#f0ad4e';
+        planIcon  = '&#127942;';
+      } else {
+        planLbl   = PLAN_DEFS[activePlan] ? PLAN_DEFS[activePlan].label : activePlan.toUpperCase();
+        planColor = activePlan === 'free' ? 'var(--text3)' : activePlan === 'basic' ? 'var(--accent3)' : '#f0a000';
+        planIcon  = activePlan === 'pro' ? '&#127942;' : activePlan === 'basic' ? '&#11088;' : '&#128275;';
+      }
+
+      bannerEl.innerHTML =
+        '<div style="background:var(--bg3);border:1px solid ' + (isLegacy || eaActive ? 'rgba(240,173,78,.4)' : 'var(--border)') + ';border-radius:var(--r-sm);padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+          + '<div style="font-size:1.5rem">' + planIcon + '</div>'
+          + '<div style="flex:1">'
+            + '<div style="font-weight:700;color:var(--text)">Plan: <span style="color:' + planColor + '">' + esc(planLbl) + '</span>'
+              + (eaActive ? '<span style="font-size:.65rem;background:rgba(240,173,78,.2);color:#f0ad4e;padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:800">&#9874; FOUNDING MEMBER</span>' : '')
+              + (isLegacy ? '<span style="font-size:.65rem;background:rgba(240,173,78,.2);color:#f0ad4e;padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:800">LEGACY</span>' : '')
+            + '</div>'
+            // Only show expiry info for paid non-EA plans
+            + (!eaActive && !isEA && daysLeft !== null ? '<div style="font-size:.78rem;color:var(--text2)">Expires in ' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + '</div>' : '')
+            // After EA window ends: prompt to subscribe
+            + (!eaActive && isEA ? '<div style="font-size:.78rem;color:var(--warning)">&#9888; Your free access has ended. Subscribe to a Legacy plan to keep discounted rates.</div>' : '')
+          + '</div>'
+        + '</div>';
     }
-    // Plans
+
+    // ── Plans grid ───────────────────────────────────────────────
     if (plansEl) {
-      plansEl.innerHTML = ['free','basic','pro'].map(function(pid){
-        var p = PLAN_DEFS[pid];
-        var isCurrent = pid === activePlan;
-        var cardCls = 'plan-card'+(isCurrent?' current':'')+(pid==='pro'?' pro-card':pid==='basic'?' basic-card':'');
-        return '<div class="'+cardCls+'">'+
-          (isCurrent?'<div style="position:absolute;top:12px;right:12px;background:var(--accent);color:#fff;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:12px">CURRENT</div>':'')+
-          '<div class="plan-name">'+p.label+'</div>'+
-          '<div class="plan-price">'+(p.cost===0?'Free':'₦'+p.cost.toLocaleString()+'<span>/month</span>')+'</div>'+
-          p.features.map(function(f){return '<div class="plan-feature"><span class="pf-ic">✓</span>'+esc(f)+'</div>';}).join('')+
-          (!isCurrent&&pid!=='free'?'<button type="button" class="btn btn-p w-full mt-3" id="sub-purchase-btn-'+pid+'" style="width:100%;justify-content:center;margin-top:14px" onclick="purchaseSubscription(\''+pid+'\')">Upgrade to '+p.label+'</button>':'')+
-          (isCurrent&&pid!=='free'?'<button type="button" class="btn btn-s w-full mt-3" style="width:100%;justify-content:center;margin-top:14px;color:var(--danger)" id="sub-cancel-btn" onclick="cancelSubscription()">Cancel at Expiry</button>':'')+
-        '</div>';
-      }).join('');
+      var html = '';
+
+      if (isEA) {
+        if (eaActive) {
+          // ── Active EA window: show Pro benefits summary, nothing to upgrade yet ──
+          html += '<div style="background:linear-gradient(135deg,rgba(240,173,78,.12),rgba(184,134,11,.08));'
+            +      'border:1px solid rgba(240,173,78,.35);border-radius:var(--r);padding:20px 22px;margin-bottom:20px">'
+            +   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'
+            +     '<span style="font-size:1.8rem">&#127942;</span>'
+            +     '<div>'
+            +       '<div style="font-weight:900;font-size:1rem;color:#f0ad4e">Pro Access — Active</div>'
+            +       '<div style="font-size:.8rem;color:var(--text2)">All Pro features are unlocked on your account.</div>'
+            +     '</div>'
+            +   '</div>'
+            +   ['&#128275; Unlimited listings',
+                 '&#9989; 0% block fee on deposits & withdrawals',
+                 '&#9989; 0% escrow fee on all sales',
+                 '&#128202; Full Analytics dashboard',
+                 '&#128269; Highest search priority',
+                 '&#127775; Referral commission boost',
+                 '&#9874; Raw Industrial badge — yours forever'].map(function(f){
+                   return '<div style="font-size:.84rem;color:var(--text);padding:4px 0;display:flex;gap:8px;align-items:center">' + f + '</div>';
+                 }).join('')
+            + '</div>';
+        } else {
+          // ── EA window expired: show legacy rates header + expired notice ────────
+          html += '<div style="background:linear-gradient(135deg,rgba(184,134,11,.18),rgba(240,173,78,.10));'
+            +      'border:1px solid rgba(240,173,78,.4);border-radius:var(--r);padding:18px 20px;margin-bottom:20px">'
+            +   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">'
+            +     '<span style="font-size:1.5rem">&#9874;</span>'
+            +     '<div style="font-weight:900;font-size:1rem;background:linear-gradient(90deg,#f0ad4e,#fffbe6,#b8860b);'
+            +          '-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">&#9881; Founding Member Legacy Rates</div>'
+            +   '</div>'
+            +   '<div style="font-size:.82rem;color:var(--text2)">Lifetime 50% discount — exclusive to the first 200 members forever.</div>'
+            + '</div>';
+
+          html += '<div style="background:rgba(240,173,78,.07);border:1px solid rgba(240,173,78,.3);'
+            +      'border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start">'
+            +   '<span style="font-size:1.2rem">&#9888;</span>'
+            +   '<div><div style="font-weight:700;color:#f0ad4e;margin-bottom:4px">Your free access has ended</div>'
+            +     '<div style="font-size:.82rem;color:var(--text2)">Subscribe to a Legacy plan below to keep discounted rates — or remain on Free. Your Raw Industrial badge stays on your profile <strong style="color:#f0ad4e">forever</strong>.</div>'
+            +   '</div>'
+            + '</div>';
+        }
+
+        // Legacy plan cards — only shown after EA window ends
+        if (!eaActive) {
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">';
+        ['legacy_basic', 'legacy_pro'].forEach(function(pid) {
+          var p = PLAN_DEFS[pid];
+          var isCurrent = pid === activePlan;
+          var origPrice = pid === 'legacy_basic' ? '1,500' : '4,500';
+          html += '<div class="plan-card' + (isCurrent ? ' current' : '') + (pid === 'legacy_pro' ? ' pro-card' : '') + '" style="border-color:rgba(240,173,78,.35);position:relative">'
+            + (isCurrent ? '<div style="position:absolute;top:12px;right:12px;background:#f0ad4e;color:#1a1a1a;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:12px">CURRENT</div>' : '')
+            + '<div style="position:absolute;top:12px;left:12px;font-size:.6rem;background:rgba(240,173,78,.2);color:#f0ad4e;padding:2px 8px;border-radius:10px;font-weight:800">LEGACY</div>'
+            + '<div class="plan-name" style="margin-top:14px;color:#f0ad4e">' + p.label + '</div>'
+            + '<div class="plan-price" style="color:#f0ad4e">&#8358;' + p.cost.toLocaleString() + '<span>/month</span></div>'
+            + '<div style="font-size:.7rem;color:var(--text3);text-decoration:line-through;margin-bottom:8px">was &#8358;' + origPrice + '/month</div>'
+            + p.features.map(function(f) { return '<div class="plan-feature"><span class="pf-ic" style="color:#f0ad4e">&#10003;</span>' + esc(f) + '</div>'; }).join('')
+            + (!isCurrent
+                ? '<button type="button" class="btn btn-p w-full mt-3" style="width:100%;justify-content:center;margin-top:14px;background:linear-gradient(135deg,#b8860b,#f0ad4e);border:none;color:#1a1a1a;font-weight:800" data-action="buy-legacy" data-plan="' + pid + '">Choose ' + p.label + '</button>'
+                : '<button type="button" class="btn btn-s w-full mt-3" style="width:100%;justify-content:center;margin-top:14px;color:var(--danger)" data-action="cancel-sub">Cancel at Expiry</button>')
+            + '</div>';
+        });
+        html += '</div>';
+        } // end !eaActive legacy cards
+
+      } else {
+        // ── Standard user view: Free / Basic / Pro ─────────────
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">';
+        ['free', 'basic', 'pro'].forEach(function(pid) {
+          var p = PLAN_DEFS[pid];
+          var isCurrent = pid === activePlan;
+          var cardCls = 'plan-card' + (isCurrent ? ' current' : '') + (pid === 'pro' ? ' pro-card' : pid === 'basic' ? ' basic-card' : '');
+          html += '<div class="' + cardCls + '">'
+            + (isCurrent ? '<div style="position:absolute;top:12px;right:12px;background:var(--accent);color:#fff;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:12px">CURRENT</div>' : '')
+            + '<div class="plan-name">' + p.label + '</div>'
+            + '<div class="plan-price">' + (p.cost === 0 ? 'Free' : '&#8358;' + p.cost.toLocaleString() + '<span>/month</span>') + '</div>'
+            + p.features.map(function(f) { return '<div class="plan-feature"><span class="pf-ic">&#10003;</span>' + esc(f) + '</div>'; }).join('')
+            + (!isCurrent && pid !== 'free' ? '<button type="button" class="btn btn-p w-full mt-3" id="sub-purchase-btn-' + pid + '" style="width:100%;justify-content:center;margin-top:14px" data-action="buy-plan" data-plan="' + pid + '">Upgrade to ' + p.label + '</button>' : '')
+            + (isCurrent && pid !== 'free' ? '<button type="button" class="btn btn-s w-full mt-3" style="width:100%;justify-content:center;margin-top:14px;color:var(--danger)" data-action="cancel-sub">Cancel at Expiry</button>' : '')
+            + '</div>';
+        });
+        html += '</div>';
+      }
+
+      plansEl.innerHTML = html;
+
+      // Single event delegate for all plan buttons
+      plansEl.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var action = btn.dataset.action;
+        var plan   = btn.dataset.plan;
+        if      (action === 'buy-plan')    purchaseSubscription(plan);
+        else if (action === 'buy-legacy')  purchaseLegacyPlan(plan);
+        else if (action === 'cancel-sub')  cancelSubscription();
+      });
     }
-    // History
+
+    // ── Subscription history ─────────────────────────────────────
     if (histEl) {
-      var hist = d.history||[];
-      if (!hist.length) { histEl.innerHTML='<div class="empty" style="padding:20px"><div class="empty-t">No subscription history</div></div>'; }
-      else {
-        histEl.innerHTML = hist.map(function(s){
-          var planLabel = typeof s.plan === 'string' ? s.plan : (s.plan&&s.plan.id||s.plan&&s.plan.name||'free');
-          return '<div class="card mb-2"><div class="card-body" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">'+
-            '<div><div class="fw7">'+esc(planLabel.toUpperCase())+'</div>'+
-            '<div class="text-xs text-2">'+new Date(s.startDate).toLocaleDateString()+' → '+new Date(s.endDate).toLocaleDateString()+'</div></div>'+
-            '<div style="text-align:right"><div>'+fmtNGN(s.costNGN)+'</div><div class="text-xs" style="color:'+(s.status==='active'?'var(--success)':'var(--text3)')+'">'+esc(s.status)+'</div></div>'+
-          '</div></div>';
+      var hist = d.history || [];
+      if (!hist.length) {
+        histEl.innerHTML = '<div class="empty" style="padding:20px"><div class="empty-t">No subscription history yet</div></div>';
+      } else {
+        histEl.innerHTML = hist.map(function(s) {
+          var planLabel = typeof s.plan === 'string' ? s.plan : (s.plan && (s.plan.id || s.plan.name) || 'free');
+          return '<div class="card mb-2"><div class="card-body" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">'
+            + '<div><div class="fw7">' + esc(planLabel.toUpperCase()) + '</div>'
+            + '<div class="text-xs text-2">' + new Date(s.startDate).toLocaleDateString() + ' to ' + new Date(s.endDate).toLocaleDateString() + '</div></div>'
+            + '<div style="text-align:right"><div>' + fmtNGN(s.costNGN) + '</div>'
+            + '<div class="text-xs" style="color:' + (s.status === 'active' ? 'var(--success)' : 'var(--text3)') + '">' + esc(s.status) + '</div></div>'
+            + '</div></div>';
         }).join('');
       }
     }
+
   } catch(e) {
-    if (bannerEl) bannerEl.innerHTML = '<div class="empty">'+esc(e.message)+'</div>';
+    if (bannerEl) bannerEl.innerHTML = '<div class="empty">' + esc(e.message) + '</div>';
+    if (plansEl)  plansEl.innerHTML  = '';
   }
 }
 
@@ -6667,6 +7081,22 @@ async function purchaseSubscription(planId) {
     loadSubscriptionPage();
   } catch(e){toast('Failed',e.message,'error',5000);}
   finally { if(btn){btn.disabled=false;btn.textContent=origText;} }
+}
+
+async function purchaseLegacyPlan(planId) {
+  var p = PLAN_DEFS[planId];
+  if (!p) return;
+  if (!confirm('Activate ' + p.label + ' for ' + p.cost.toLocaleString() + '/month? This is your exclusive 50%-off Legacy rate. Funds will be deducted from your wallet.')) return;
+  var btns = document.querySelectorAll('[data-action="buy-legacy"]');
+  btns.forEach(function(b) { b.disabled = true; });
+  try {
+    await api('POST', '/subscription/purchase', { plan: planId });
+    toast('Legacy plan activated!', 'Welcome to your permanent Legacy status', 'success', 6000);
+    closeModal('legacy-offer-modal');
+    if (S.user) { S.user.activePlan = planId; S.user.legacyPlan = planId; }
+    loadSubscriptionPage();
+  } catch(e) { toast('Failed', e.message, 'error', 5000); }
+  finally { btns.forEach(function(b) { b.disabled = false; }); }
 }
 
 async function cancelSubscription() {
@@ -6692,7 +7122,7 @@ async function loadReferralDashboard() {
     var d = await api('GET','/referral/dashboard');
     // Set referral link
     var linkInp = document.getElementById('ref-link-inp');
-    if (linkInp) linkInp.value = d.referralLink || (window.location.origin+'?ref='+d.referralCode);
+    if (linkInp) linkInp.value = d.referralLink || ('https://rawflip.shop?ref='+d.referralCode);
     // Stats cards
     if (statsEl) {
       statsEl.innerHTML = [
@@ -7093,43 +7523,79 @@ function syncBottomNav(page){
   };
 })();
 
-/* Pull-to-refresh */
+/* Pull-to-refresh — stays on current page, only refreshes data */
 (function(){
   var startY=0,pulling=false,triggered=false;
   var ind=document.getElementById('ptr-indicator');
+
+  // Only activate when the main app is shown and user is logged in
+  function isAppVisible(){
+    var root=document.getElementById('root');
+    return root && root.style.display!=='none' && window.S && window.S.user;
+  }
+
+  // Only activate when the active scrollable page is at the very top
+  function getActivePage(){
+    var p=window.S&&window.S.currentPage;
+    if(!p)return null;
+    // .page elements use fixed positioning and scroll independently
+    var el=document.getElementById('page-'+p);
+    // fallback for pages not using page-* id pattern
+    if(!el)el=document.getElementById('content-area');
+    return el;
+  }
+
   document.addEventListener('touchstart',function(e){
-    var ca=document.getElementById('content-area');
-    if(ca&&ca.scrollTop===0){startY=e.touches[0].clientY;pulling=true;triggered=false;}
+    if(!isAppVisible())return;
+    var el=getActivePage();
+    if(el&&el.scrollTop===0){
+      startY=e.touches[0].clientY;
+      pulling=true;
+      triggered=false;
+    }
   },{passive:true});
+
   document.addEventListener('touchmove',function(e){
     if(!pulling)return;
-    if(e.touches[0].clientY-startY>70&&!triggered){
+    var delta=e.touches[0].clientY-startY;
+    if(delta>65&&!triggered){
       triggered=true;
       if(ind)ind.classList.add('ptr-show');
     }
   },{passive:true});
+
   document.addEventListener('touchend',function(){
     if(pulling&&triggered){
       setTimeout(function(){
         if(ind)ind.classList.remove('ptr-show');
+        if(!isAppVisible())return; // guard: don't act if user logged out mid-pull
+        // Re-check session silently before refreshing data — never redirect to login from PTR
+        var tok=typeof loadTok==='function'?loadTok():null;
+        if(!tok&&!S.user){return;} // truly logged out — do nothing
         var p=window.S&&window.S.currentPage;
         var refreshMap={
-          home:       function(){loadListings();},
-          notifications:function(){loadNotifications();},
-          transactions:function(){loadTransactions();},
-          wallet:     function(){loadWallet();},
-          posts:      function(){loadPosts();},
-          offers:     function(){if(typeof loadOffers==='function')loadOffers();},
-          wishlist:   function(){if(typeof loadWishlist==='function')loadWishlist();},
-          profile:    function(){if(typeof loadProfile==='function'&&S.profileUserId)loadProfile(S.profileUserId);},
-          search:     function(){if(typeof loadSearchResults==='function')loadSearchResults();},
-          tasks:      function(){if(typeof loadTasks==='function')loadTasks();},
-          referral:   function(){if(typeof loadReferralDashboard==='function')loadReferralDashboard();},
-          analytics:  function(){if(typeof loadAnalytics==='function')loadAnalytics();},
-          subscription:function(){if(typeof loadSubscriptionPage==='function')loadSubscriptionPage();},
-          'listing-detail':function(){if(typeof openListingDetail==='function'&&S.currentListingId)openListingDetail(S.currentListingId);},
+          home:         function(){if(typeof loadListings==='function')loadListings();},
+          notifications:function(){if(typeof loadNotifications==='function')loadNotifications();},
+          transactions: function(){if(typeof loadTransactions==='function')loadTransactions();},
+          wallet:       function(){if(typeof loadWallet==='function')loadWallet();},
+          posts:        function(){if(typeof loadPosts==='function')loadPosts();},
+          offers:       function(){if(typeof loadOffers==='function')loadOffers();},
+          wishlist:     function(){if(typeof loadWishlist==='function')loadWishlist();},
+          profile:      function(){if(typeof loadProfile==='function'&&S.profileUserId)loadProfile(S.profileUserId);},
+          search:       function(){if(typeof loadSearchResults==='function')loadSearchResults();},
+          tasks:        function(){if(typeof loadTasks==='function')loadTasks();},
+          referral:     function(){if(typeof loadReferralDashboard==='function')loadReferralDashboard();},
+          analytics:    function(){if(typeof loadAnalytics==='function')loadAnalytics();},
+          subscription: function(){if(typeof loadSubscriptionPage==='function')loadSubscriptionPage();},
+          support:      function(){/* support page is static, no refresh needed */},
+          'listing-detail':function(){if(S.currentListingId&&typeof openListing==='function')openListing(S.currentListingId);},
+          'post-detail':   function(){if(S.currentPostId&&typeof openPost==='function')openPost(S.currentPostId);},
         };
-        var fn=refreshMap[p];if(fn)fn();
+        var fn = refreshMap[p];
+        if (fn) { try { fn(); } catch(e) { console.warn('[PTR] refresh error:', e.message); } }
+        // else: unknown page — do nothing, don't navigate
+        // Carousel: play 3x on every pull-to-refresh (same as login)
+        if (typeof window.rfCarouselPlay === 'function') { setTimeout(function(){ window.rfCarouselPlay(3); }, 500); }
       },700);
     }
     pulling=false;triggered=false;
@@ -7263,39 +7729,38 @@ function renderFacets(facets){
   if(!ct)return;
   var condLabel={'new':'New','like_new':'Like New','good':'Good','fair':'Fair','poor':'Poor'};
   var chips=[];
-  // Condition chips — read active value from the actual select, not hidden input
   var curCond=(document.getElementById('f-cond')&&document.getElementById('f-cond').value)||'';
+  var curCat=(document.getElementById('cat-filter')&&document.getElementById('cat-filter').value)||S.currentCategory||'';
   if(facets.byCondition&&facets.byCondition.length){
     facets.byCondition.forEach(function(f){
-      // XSS-safe: encode value with JSON.stringify so single quotes can't break onclick
-      var safeVal=JSON.stringify(String(f.value));
       var active=curCond===f.value;
-      chips.push('<button type="button" class="facet-chip'+(active?' active':'')+'" '+
-        'onclick="setCondFilter('+safeVal+')" title="'+esc(String(f.count))+' listings">'+
-        esc(condLabel[f.value]||f.value)+' <span class="facet-count">'+Number(f.count)+'</span></button>');
+      chips.push('<button type="button" class="facet-chip'+(active?' active':'')+'"'
+        +' data-action="cond" data-val="'+esc(String(f.value))+'" title="'+esc(String(f.count))+' listings">'
+        +esc(condLabel[f.value]||f.value)+' <span class="facet-count">'+Number(f.count)+'</span></button>');
     });
   }
-  // Category chips
-  var curCat=(document.getElementById('f-cat')||(document.getElementById('cat-filter'))&&{value:document.getElementById('cat-filter').value}||{}).value||S.currentCategory||'';
   if(facets.byCategory&&facets.byCategory.length){
     facets.byCategory.forEach(function(f){
-      var safeVal=JSON.stringify(String(f.value));
       var active=curCat===f.value;
-      chips.push('<button type="button" class="facet-chip'+(active?' active':'')+'" '+
-        'onclick="setCatFilter('+safeVal+')">'+
-        esc(f.value.replace(/_/g,' '))+' <span class="facet-count">'+Number(f.count)+'</span></button>');
+      chips.push('<button type="button" class="facet-chip'+(active?' active':'')+'"'
+        +' data-action="cat" data-val="'+esc(String(f.value))+'">'
+        +esc(f.value.replace(/_/g,' '))+' <span class="facet-count">'+Number(f.count)+'</span></button>');
     });
   }
-  // Price range summary (non-interactive)
   if(facets.priceRange&&(facets.priceRange.min||facets.priceRange.max)){
     chips.push('<span class="facet-chip info">'+fmtNGN(facets.priceRange.min||0)+' – '+fmtNGN(facets.priceRange.max||0)+'</span>');
   }
-  // Clear-all chip (only if a condition or category is active)
   if(curCond||curCat||S.currentSearch){
-    chips.push('<button type="button" class="facet-chip clear" onclick="clearAllFilters()">✕ Clear</button>');
+    chips.push('<button type="button" class="facet-chip clear" data-action="clear">✕ Clear</button>');
   }
   ct.innerHTML=chips.length?chips.join(''):'';
-  // Keep hidden inputs in sync
+  ct.addEventListener('click',function(ev){
+    var btn=ev.target.closest('[data-action]');if(!btn)return;
+    var act=btn.dataset.action,val=btn.dataset.val||'';
+    if(act==='cond') setCondFilter(val);
+    else if(act==='cat') setCatFilter(val);
+    else if(act==='clear') clearAllFilters();
+  },{once:true});
   var hCond=document.getElementById('cond-filter');if(hCond)hCond.value=curCond;
   var hCat=document.getElementById('cat-filter');if(hCat)hCat.value=curCat;
 }
@@ -7382,15 +7847,24 @@ function renderSavedSearches(){
     ct.innerHTML='<div class="text-sm text-2">No saved searches yet. Use the 🔖 button when browsing.</div>';
     return;
   }
-  ct.innerHTML=_savedSearches.map(function(ss){
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">' +
-      '<div style="flex:1;cursor:pointer" onclick="runSavedSearch('+JSON.stringify(ss)+')">' +
-        '<div class="fw7 text-sm">'+esc(ss.name)+'</div>' +
-        (ss.query?'<div class="text-xs text-2">"'+esc(ss.query)+'"</div>':'')+
-      '</div>' +
-      '<button type="button" class="btn btn-d btn-sm" style="padding:3px 8px" onclick="deleteSavedSearch(\''+ss._id+'\')" title="Delete">✕</button>' +
-    '</div>';
+  ct.innerHTML=_savedSearches.map(function(ss,idx){
+    return '<div class="ss-row" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)"'
+      +' data-ssidx="'+idx+'" data-ssid="'+esc(String(ss._id||''))+'">'
+      +'<div style="flex:1;cursor:pointer" data-action="run">'
+        +'<div class="fw7 text-sm">'+esc(ss.name)+'</div>'
+        +(ss.query?'<div class="text-xs text-2">"'+esc(ss.query)+'"</div>':'')
+      +'</div>'
+      +'<button type="button" class="btn btn-s btn-sm" data-action="run" style="padding:3px 10px;font-size:.75rem">▶ Run</button>'
+      +'<button type="button" class="btn btn-d btn-sm" data-action="del" style="padding:3px 8px" title="Delete">✕</button>'
+    +'</div>';
   }).join('');
+  ct.addEventListener('click',function(ev){
+    var btn=ev.target.closest('[data-action]');if(!btn)return;
+    var row=btn.closest('[data-ssid]');if(!row)return;
+    var idx=parseInt(row.dataset.ssidx,10),sid=row.dataset.ssid;
+    if(btn.dataset.action==='run'){var ss=_savedSearches[idx];if(ss)runSavedSearch(ss);}
+    else if(btn.dataset.action==='del'){deleteSavedSearch(sid);}
+  });
 }
 
 /* ── Gift Subscription ─────────────────────────────────────── */
@@ -8098,53 +8572,66 @@ async function submitKYC(){
 </div>
 
 <script>
-/* ── Welcome Carousel — new users only, first 7 days, every 3 min ─────────── */
+/* ── Welcome Carousel ──────────────────────────────────────────────────────── */
+/* Shows 3 times every session: immediately on login, then after each playback */
 (function rfCarousel() {
-  var MSG_KEY   = 'rf_join_ts';   // localStorage: timestamp when user first logged in
-  var SHOWN_KEY = 'rf_car_sess';  // sessionStorage: shown this session already
+  var _playsLeft = 0;  // how many plays remain this session
+  var _playing   = false;
 
-  function shouldShow() {
-    if (!S.user) return false;
-    var joinTs = localStorage.getItem(MSG_KEY);
-    if (!joinTs) return false;
-    var age = Date.now() - parseInt(joinTs, 10);
-    return age < 7 * 24 * 60 * 60 * 1000; // within first 7 days
-  }
+  function playOnce(onDone) {
+    var bar   = document.getElementById('rf-carousel-bar');
+    var track = document.getElementById('rf-carousel-track');
+    var msg   = document.getElementById('rf-carousel-msg');
+    if (!bar || !track || !msg || _playing) return;
+    _playing = true;
+    bar.classList.add('visible');
 
-  function showCarousel() {
-    var bar = document.getElementById('rf-carousel-bar');
-    if (bar && shouldShow()) {
-      // Reset animation so it replays each time
-      var track = document.getElementById('rf-carousel-track');
-      if (track) {
-        track.style.animation = 'none';
-        // Force reflow
-        void track.offsetWidth;
-        track.style.animation = '';
-      }
-      bar.classList.add('visible');
-      // Hide only after the animation fully completes (animationend)
-      if (track) {
-        track.addEventListener('animationend', function onEnd() {
-          track.removeEventListener('animationend', onEnd);
+    // Use double-rAF so the DOM has fully painted and scrollWidth is accurate
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        var textW = msg.scrollWidth;
+        var viewW = window.innerWidth;
+        var speed = 110;  // px/s — comfortable reading pace
+        var dur   = Math.round((viewW + textW) / speed * 10) / 10;
+
+        track.style.transition = 'none';
+        track.style.transform  = 'translateX(' + viewW + 'px)';
+        void track.offsetWidth; // force reflow
+
+        track.style.transition = 'transform ' + dur + 's linear';
+        track.style.transform  = 'translateX(-' + (textW + 60) + 'px)';
+
+        setTimeout(function() {
           bar.classList.remove('visible');
-        });
-      }
-    }
+          track.style.transition = 'none';
+          track.style.transform  = '';
+          _playing = false;
+          if (typeof onDone === 'function') onDone();
+        }, dur * 1000 + 100); // +100ms grace after text exits
+      });
+    });
   }
 
-  // Hook into showApp to record join timestamp on first login
-  var _origShowApp = window.showApp;
-  window.showApp = function () {
-    if (_origShowApp) _origShowApp();
-    setTimeout(function () {
-      if (S.user && !localStorage.getItem(MSG_KEY)) {
-        localStorage.setItem(MSG_KEY, String(Date.now()));
+  function runSequence(count) {
+    if (!S.user || count <= 0) return;
+    playOnce(function() {
+      if (count > 1) {
+        // 2-second pause between plays
+        setTimeout(function() { runSequence(count - 1); }, 2000);
       }
-      showCarousel();
-      // Repeat every 3 minutes
-      setInterval(showCarousel, 3 * 60 * 1000);
-    }, 1200);
+    });
+  }
+
+  // Expose globally so PTR and other callers can trigger the carousel
+  window.rfCarouselPlay = function(n) { runSequence(n || 3); };
+
+  // Hook into showApp — trigger 3 plays immediately after login/register
+  var _origShowApp = window.showApp;
+  window.showApp = function() {
+    if (_origShowApp) _origShowApp();
+    setTimeout(function() {
+      runSequence(3);
+    }, 800); // slight delay so app UI renders first
   };
 })();
 
@@ -8170,5 +8657,55 @@ async function submitKYC(){
   };
 })();
 </script>
+
+<!-- ── Legacy Offer Comparison Modal (Founding Members) ─────────────── -->
+<div class="modal-ov" id="legacy-offer-modal">
+  <div class="modal" style="max-width:520px;width:96%">
+    <div class="md-hdr">
+      <div class="md-title">🏆 Your Exclusive Legacy Offer</div>
+      <button type="button" class="md-close" onclick="closeModal('legacy-offer-modal')">&#10005;</button>
+    </div>
+    <div class="md-body" style="padding:20px 22px">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:.85rem;color:var(--text2)">As one of the original 200 RawFlip members, you qualify for a <strong style="color:var(--raw-gold)">lifetime 50% discount</strong> on any paid plan. Your Raw Industrial badge stays forever.</div>
+      </div>
+      <div class="legacy-compare">
+        <!-- Legacy Basic -->
+        <div class="lc-plan">
+          <div class="lc-plan-name">Legacy Basic</div>
+          <div class="lc-plan-price">₦750<span>/month</span></div>
+          <div class="lc-plan-orig">was ₦1,500/month</div>
+          <div class="lc-plan-feat">
+            🏆 Raw Industrial badge<br/>
+            12% escrow fee<br/>
+            20 listings<br/>
+            ₦1,000 min withdrawal<br/>
+            ✓ Verified badge<br/>
+            Legacy ribbon
+          </div>
+          <button type="button" class="btn btn-s" style="width:100%;margin-top:12px;justify-content:center" onclick="purchaseLegacyPlan('legacy_basic')">Choose Basic</button>
+        </div>
+        <!-- Legacy Pro -->
+        <div class="lc-plan featured">
+          <div class="lc-plan-badge">⭐ Best Value</div>
+          <div class="lc-plan-name" style="color:var(--raw-gold)">Legacy Pro</div>
+          <div class="lc-plan-price">₦2,250<span>/month</span></div>
+          <div class="lc-plan-orig">was ₦4,500/month</div>
+          <div class="lc-plan-feat">
+            🏆 Raw Industrial badge<br/>
+            7.5% escrow fee<br/>
+            ∞ Unlimited listings<br/>
+            ₦0 min withdrawal<br/>
+            ✓ Pro analytics<br/>
+            ✓ Referral boost<br/>
+            Legacy ribbon
+          </div>
+          <button type="button" class="btn btn-p" style="width:100%;margin-top:12px;justify-content:center" onclick="purchaseLegacyPlan('legacy_pro')">Choose Pro</button>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:.75rem;color:var(--text3);margin-top:8px">Both plans include your permanent Raw Industrial Founding Member badge.</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
