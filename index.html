@@ -2403,10 +2403,9 @@ async function handleLogin(event){
     if(d.token)saveTok(d.token);S.user=d.user||d;if(S.user&&S.user.eaDaysRemaining==null&&S.user.earlyAdopterGrantedAt){var _ea=new Date(S.user.earlyAdopterGrantedAt);_ea.setMonth(_ea.getMonth()+6);S.user.eaDaysRemaining=Math.ceil((_ea-Date.now())/86400000);}showApp();
   }catch(e){
     if(e.unverified||e.message.toLowerCase().includes('verify your email')){
-      toast('Email not verified','Please check your inbox and verify your email before signing in.','warn',8000);
-      // Show resend option
-      var ea=document.getElementById('login-resend-wrap');
-      if(ea){ea.style.display='block';document.getElementById('login-resend-email').value=email;}
+      // Open the code-entry screen directly — user can enter code or request resend
+      showVerifyCodeUI(email, null);
+      toast('Email not verified','Enter the code from your email — or request a new one.','warn',6000);
     } else {
       toast('Login failed',e.message,'error',5000);
     }
@@ -2486,62 +2485,288 @@ async function handleRegister(event){
   finally{if(btn){btn.disabled=false;btn.textContent='Create Account';}}
 }
 
-// Show registration success state — replaces the register form
-function showRegisterSuccess(email, extraMsg) {
+// Show the code-entry screen after registration (or resend)
+// mode = 'verify'
+// email = user's email address
+// expiresAt = ISO timestamp (optional — used to seed countdown)
+function showVerifyCodeUI(email, expiresAt) {
   var authPage = document.getElementById('auth-page');
   var regFrm   = document.getElementById('reg-frm');
+  var loginFrm = document.getElementById('login-frm');
   var hd  = document.getElementById('auth-hd');
   var sub = document.getElementById('auth-sub');
-  if (hd)  hd.textContent  = '🎉 Account Created!';
-  if (sub) sub.textContent = '';
-  if (regFrm) regFrm.style.display = 'none';
-  var panel = document.createElement('div');
-  panel.id = 'reg-success-panel';
-  panel.style.cssText = 'text-align:center;padding:10px 0';
+  if (hd)  hd.textContent  = 'Verify Your Email';
+  if (sub) sub.textContent = 'Enter the 6-character code we sent you';
+  if (regFrm)   regFrm.style.display   = 'none';
+  if (loginFrm) loginFrm.style.display = 'none';
+  var existing = document.getElementById('code-entry-panel'); if (existing) existing.remove();
+  var panel = document.createElement('div'); panel.id = 'code-entry-panel';
   panel.innerHTML =
-    '<div style="font-size:3rem;margin-bottom:12px">🎉</div>' +
-    '<div class="fw7" style="font-size:1.1rem;margin-bottom:8px">Almost there! Check your email ✉️</div>' +
-    '<div class="text-sm text-2" style="margin-bottom:8px">A verification link has been sent to <strong>' + esc(email) + '</strong>.</div>' +
-    '<div class="text-sm text-2" style="margin-bottom:20px">Click the link to activate your account before signing in. Check your spam folder if you don\'t see it.</div>' +
-    (extraMsg ? '<div class="text-sm" style="color:var(--success);margin-bottom:16px">' + esc(extraMsg) + '</div>' : '') +
-    '<button type="button" class="btn btn-s" style="width:100%;justify-content:center;margin-bottom:16px" onclick="toggleAuth(\'login\')">Already verified? Sign In</button>' +
-    '<div style="margin-top:8px;padding:16px;background:rgba(67,97,238,.07);border:1px solid rgba(67,97,238,.18);border-radius:12px">' +
-      '<div style="font-weight:700;font-size:.9rem;margin-bottom:4px">📣 Join our community</div>' +
-      '<div style="font-size:.8rem;color:var(--text2);margin-bottom:14px">Get the latest updates, tips &amp; deals</div>' +
-      '<div style="display:flex;flex-direction:column;gap:10px">' +
-        '<a href="https://t.me/Rawflip" target="_blank" rel="noopener noreferrer" ' +
-           'style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:#229ED9;border-radius:10px;text-decoration:none;color:#fff;font-weight:600;font-size:.87rem">' +
-          '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.15.66-.54.82-1.08.51l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.02 5.47-4.94c.24-.21-.05-.33-.37-.12L7.47 14.4l-2.93-.92c-.64-.2-.65-.64.13-.95l11.45-4.41c.53-.19 1 .13.82.07z"/></svg>' +
-          'Join Telegram Channel' +
+    '<p class="text-sm text-2" style="text-align:center;margin-bottom:18px">We sent a 6-character code to <strong>' + esc(email) + '</strong>. Enter it below.</p>' +
+    '<div style="display:flex;justify-content:center;margin-bottom:6px">' +
+      '<input class="fc" id="vc-code" type="text" maxlength="6" autocomplete="one-time-code" spellcheck="false" ' +
+        'placeholder="A B C 1 2 3" ' +
+        'style="text-align:center;font-size:1.6rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;max-width:220px;padding:12px 16px"/>' +
+    '</div>' +
+    '<div id="vc-error" style="color:var(--danger);font-size:.8rem;text-align:center;min-height:1.2em;margin-bottom:8px"></div>' +
+    '<button type="button" class="btn btn-p" id="vc-btn" style="width:100%;justify-content:center" onclick="submitVerifyCode(' + JSON.stringify(email) + ')">Verify Account</button>' +
+    '<div style="margin-top:16px;text-align:center">' +
+      '<div id="vc-timer" class="text-sm text-2" style="margin-bottom:8px"></div>' +
+      '<button type="button" class="btn btn-s btn-sm" id="vc-resend" disabled onclick="resendVerifyCode(' + JSON.stringify(email) + ')">Resend Code</button>' +
+      '<div id="vc-resend-timer" style="font-size:.75rem;color:var(--text3);margin-top:4px"></div>' +
+    '</div>' +
+    '<div style="text-align:center;margin-top:18px;padding:14px;background:rgba(67,97,238,.07);border:1px solid rgba(67,97,238,.18);border-radius:12px">' +
+      '<div style="font-weight:700;font-size:.88rem;margin-bottom:4px">📣 While you wait — join our community</div>' +
+      '<div style="font-size:.78rem;color:var(--text2);margin-bottom:12px">Get updates, tips &amp; deals</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px">' +
+        '<a href="https://t.me/Rawflip" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#229ED9;border-radius:10px;text-decoration:none;color:#fff;font-weight:600;font-size:.84rem">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.02 9.52c-.15.66-.54.82-1.08.51l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.02 5.47-4.94c.24-.21-.05-.33-.37-.12L7.47 14.4l-2.93-.92c-.64-.2-.65-.64.13-.95l11.45-4.41c.53-.19 1 .13.82.07z"/></svg>' +
+          'Join Telegram' +
         '</a>' +
-        '<a href="https://whatsapp.com/channel/0029Vb7h0J33mFY4WE0L8l2H" target="_blank" rel="noopener noreferrer" ' +
-           'style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:#25D366;border-radius:10px;text-decoration:none;color:#fff;font-weight:600;font-size:.87rem">' +
-          '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.74-.86-2.01-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.18.2-.35.22-.65.07-.3-.14-1.27-.47-2.41-1.49-.89-.8-1.49-1.78-1.67-2.08-.17-.3-.02-.46.13-.61.14-.13.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.48-.5-.67-.51-.18-.01-.38-.01-.58-.01-.2 0-.52.07-.79.38-.27.3-1.04 1.01-1.04 2.47 0 1.46 1.06 2.87 1.21 3.07.14.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.74-.71 1.99-1.4.24-.68.24-1.27.17-1.39-.07-.12-.27-.19-.57-.34zm-5.4 7.39h-.01C9.45 21.77 7.3 21.1 5.37 19.7l-.37-.22-3.82 1 1.02-3.73-.24-.38C.73 14.8 0 12.66 0 10.47 0 4.7 4.7 0 10.49 0c2.8 0 5.43 1.09 7.41 3.07 1.98 1.98 3.07 4.61 3.07 7.41-.01 5.78-4.71 10.48-10.49 10.47z"/></svg>' +
-          'Join WhatsApp Channel' +
+        '<a href="https://whatsapp.com/channel/0029Vb7h0J33mFY4WE0L8l2H" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#25D366;border-radius:10px;text-decoration:none;color:#fff;font-weight:600;font-size:.84rem">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.74-.86-2.01-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.18.2-.35.22-.65.07-.3-.14-1.27-.47-2.41-1.49-.89-.8-1.49-1.78-1.67-2.08-.17-.3-.02-.46.13-.61.14-.13.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.48-.5-.67-.51-.18-.01-.38-.01-.58-.01-.2 0-.52.07-.79.38-.27.3-1.04 1.01-1.04 2.47 0 1.46 1.06 2.87 1.21 3.07.14.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.74-.71 1.99-1.4.24-.68.24-1.27.17-1.39-.07-.12-.27-.19-.57-.34zm-5.4 7.39h-.01C9.45 21.77 7.3 21.1 5.37 19.7l-.37-.22-3.82 1 1.02-3.73-.24-.38C.73 14.8 0 12.66 0 10.47 0 4.7 4.7 0 10.49 0c2.8 0 5.43 1.09 7.41 3.07 1.98 1.98 3.07 4.61 3.07 7.41-.01 5.78-4.71 10.48-10.49 10.47z"/></svg>' +
+          'Join WhatsApp' +
         '</a>' +
       '</div>' +
     '</div>';
-  if (authPage) {
-    var old = document.getElementById('reg-success-panel');
-    if (old) old.remove();
-    var container = regFrm ? regFrm.parentNode : authPage;
-    container.insertBefore(panel, regFrm ? regFrm.nextSibling : null);
+  var container = (authPage && authPage.querySelector('.auth-card')) || authPage;
+  if (container) {
+    var o2 = document.getElementById('reg-success-panel'); if (o2) o2.remove();
+    container.appendChild(panel);
+  }
+  // Auto-focus and auto-uppercase input
+  var inp = document.getElementById('vc-code');
+  if (inp) {
+    inp.focus();
+    inp.addEventListener('input', function() { this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g,''); });
+    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') submitVerifyCode(email); });
+  }
+  // Start countdown timers
+  startCodeTimers('verify', email, expiresAt || null);
+}
+// Back-compat alias used by handleRegister
+function showRegisterSuccess(email, expiresAt) { showVerifyCodeUI(email, expiresAt); }
+// Resend verify code from login-resend-wrap (when login blocked for unverified)
+async function resendVerifEmail() {
+  var email = (document.getElementById('login-resend-email')||{}).value || (document.getElementById('li-email')||{}).value;
+  if (!email) { toast('No email','Enter your email above','warn'); return; }
+  showVerifyCodeUI(email, null);
+  // Also trigger a resend immediately
+  try {
+    var d = await api('POST', '/auth/resend-verification', { email });
+    toast('Code sent', 'Enter the 6-character code from your email', 'success', 6000);
+  } catch(e) {
+    var msg = e.message || '';
+    if (msg.toLowerCase().includes('wait')) { toast('Too soon', msg, 'warn', 5000); }
+    else { toast('Failed', msg, 'error', 5000); }
   }
 }
 
 
-async function resendVerifEmail() {
-  var email = (document.getElementById('login-resend-email')||{}).value || (document.getElementById('li-email')||{}).value;
-  if (!email) { toast('No email','Enter your email in the field above','warn'); return; }
-  var btn = document.querySelector('#login-resend-wrap .btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+/* ── Code entry: submit, resend, timers ─────────────────────────────────── */
+
+// Ticker state — one object per active code-entry session
+var _codeTimer = null;
+
+function startCodeTimers(type, email, expiresAt) {
+  // Clear any prior ticker
+  if (_codeTimer) { clearInterval(_codeTimer); _codeTimer = null; }
+  var expiry   = expiresAt ? new Date(expiresAt).getTime() : (Date.now() + 30*60*1000);
+  var resendOk = Date.now() + 60*1000; // resend button enabled after 60s
+
+  function tick() {
+    var now      = Date.now();
+    var timerEl  = document.getElementById(type==='reset'?'rp-timer':'vc-timer');
+    var resendEl = document.getElementById(type==='reset'?'rp-resend':'vc-resend');
+    var rtEl     = document.getElementById(type==='reset'?'rp-resend-timer':'vc-resend-timer');
+
+    // Code expiry countdown
+    var secsLeft = Math.max(0, Math.floor((expiry - now) / 1000));
+    if (timerEl) {
+      if (secsLeft > 0) {
+        var m = Math.floor(secsLeft/60), s = secsLeft%60;
+        timerEl.textContent = 'Code expires in ' + m + ':' + (s<10?'0':'') + s;
+        timerEl.style.color = secsLeft < 120 ? 'var(--danger)' : '';
+      } else {
+        timerEl.textContent = 'Code expired. Request a new one.';
+        timerEl.style.color = 'var(--danger)';
+      }
+    }
+    // Resend cooldown countdown
+    var resendLeft = Math.max(0, Math.ceil((resendOk - now) / 1000));
+    if (resendEl) resendEl.disabled = resendLeft > 0;
+    if (rtEl) {
+      rtEl.textContent = resendLeft > 0 ? 'Resend available in ' + resendLeft + 's' : '';
+    }
+    // Stop ticking when both are at zero
+    if (secsLeft <= 0 && resendLeft <= 0 && _codeTimer) {
+      clearInterval(_codeTimer); _codeTimer = null;
+    }
+  }
+  tick(); // run immediately
+  _codeTimer = setInterval(tick, 1000);
+}
+
+async function submitVerifyCode(email) {
+  var inp  = document.getElementById('vc-code');
+  var err  = document.getElementById('vc-error');
+  var btn  = document.getElementById('vc-btn');
+  var code = (inp ? inp.value.trim().toUpperCase() : '');
+  if (err) err.textContent = '';
+  if (!code || code.length < 4) { if (err) err.textContent = 'Enter the full 6-character code.'; return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Verifying…'; }
   try {
-    await api('POST', '/auth/resend-verification', { email });
-    toast('Verification sent', 'Check your inbox (and spam folder)', 'success', 6000);
-    if (btn) { btn.textContent = 'Email sent ✓'; setTimeout(function(){ btn.disabled=false; btn.textContent='Resend Verification Email'; }, 30000); }
+    await api('POST', '/auth/verify-code', { email: email, code: code });
+    // Success
+    if (_codeTimer) { clearInterval(_codeTimer); _codeTimer = null; }
+    var panel = document.getElementById('code-entry-panel'); if (panel) panel.remove();
+    toast('Email verified! 🎉', 'You can now sign in.', 'success', 6000);
+    toggleAuth('login');
   } catch(e) {
-    toast('Failed to send', e.message, 'error', 5000);
-    if (btn) { btn.disabled = false; btn.textContent = 'Resend Verification Email'; }
+    var msg = e.message || 'Verification failed.';
+    if (err) err.textContent = msg;
+    if (msg.toLowerCase().includes('expired')) {
+      // Disable input; show resend prominently
+      if (inp) inp.disabled = true;
+      if (btn) { btn.disabled = true; btn.textContent = 'Code Expired'; }
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = 'Verify Account'; }
+      if (inp) { inp.select(); }
+    }
+  }
+}
+
+async function resendVerifyCode(email) {
+  var btn  = document.getElementById('vc-resend');
+  var err  = document.getElementById('vc-error');
+  var inp  = document.getElementById('vc-code');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  if (err) err.textContent = '';
+  try {
+    var d = await api('POST', '/auth/resend-verification', { email: email });
+    var expiresAt = d && d.expiresAt;
+    toast('New code sent', 'Check your inbox.', 'success', 5000);
+    if (inp) { inp.value = ''; inp.disabled = false; inp.focus(); }
+    var submitBtn = document.getElementById('vc-btn');
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Verify Account'; }
+    startCodeTimers('verify', email, expiresAt);
+  } catch(e) {
+    var msg = e.message || '';
+    if (err) err.textContent = msg || 'Could not resend. Try again.';
+    if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
+  }
+}
+
+// Reset-password code panel — shown from the forgot-password modal
+function showResetCodeUI(email, expiresAt) {
+  // Close forgot-password modal if open
+  var fpModal = document.getElementById('forgot-pw-modal'); if (fpModal) fpModal.remove();
+  // Show auth page with reset form
+  var authPage = document.getElementById('auth-page');
+  if (authPage) authPage.style.display = 'flex';
+  var root = document.getElementById('root'); if (root) root.style.display = 'none';
+  var hd  = document.getElementById('auth-hd'); if (hd) hd.textContent = 'Reset Password';
+  var sub = document.getElementById('auth-sub'); if (sub) sub.textContent = 'Enter your code and choose a new password';
+  var loginFrm = document.getElementById('login-frm'); if (loginFrm) loginFrm.style.display = 'none';
+  var regFrm   = document.getElementById('reg-frm');   if (regFrm)   regFrm.style.display   = 'none';
+  var existing = document.getElementById('reset-pw-panel'); if (existing) existing.remove();
+  var panel = document.createElement('div'); panel.id = 'reset-pw-panel';
+  panel.innerHTML =
+    '<p class="text-sm text-2" style="text-align:center;margin-bottom:14px">We sent a reset code to <strong>' + esc(email) + '</strong>.</p>' +
+    '<div style="display:flex;justify-content:center;margin-bottom:6px">' +
+      '<input class="fc" id="rp-code" type="text" maxlength="6" autocomplete="one-time-code" spellcheck="false" ' +
+        'placeholder="A B C 1 2 3" ' +
+        'style="text-align:center;font-size:1.6rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;max-width:220px;padding:12px 16px"/>' +
+    '</div>' +
+    '<div id="rp-code-error" style="color:var(--danger);font-size:.8rem;text-align:center;min-height:1.2em;margin-bottom:10px"></div>' +
+    '<div class="fg">' +
+      '<label class="fl" for="rp-pw">New Password</label>' +
+      '<input class="fc" type="password" id="rp-pw" placeholder="Min 8 chars, 1 uppercase, 1 digit" autocomplete="new-password" oninput="checkPwStrength(this.value)"/>' +
+      '<div class="pw-strength"><div class="pw-bar" id="rp-pw-bar"></div></div>' +
+      '<div class="pw-rules">' +
+        '<div class="pw-rule" id="rp-r-len">Minimum 8 characters</div>' +
+        '<div class="pw-rule" id="rp-r-up">At least 1 uppercase letter</div>' +
+        '<div class="pw-rule" id="rp-r-num">At least 1 number</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fg" style="margin-top:4px">' +
+      '<label class="fl" for="rp-pw2">Confirm New Password</label>' +
+      '<input class="fc" type="password" id="rp-pw2" placeholder="Repeat your new password" autocomplete="new-password"/>' +
+      '<span id="rp-pw2-hint" style="font-size:.75rem;margin-top:3px;display:block;color:var(--danger)"></span>' +
+    '</div>' +
+    '<button type="button" class="btn btn-p" id="rp-btn" style="width:100%;justify-content:center;margin-top:14px" onclick="submitResetPasswordCode(' + JSON.stringify(email) + ')">Set New Password</button>' +
+    '<div style="margin-top:14px;text-align:center">' +
+      '<div id="rp-timer" class="text-sm text-2" style="margin-bottom:6px"></div>' +
+      '<button type="button" class="btn btn-s btn-sm" id="rp-resend" disabled onclick="resendResetCode(' + JSON.stringify(email) + ')">Resend Code</button>' +
+      '<div id="rp-resend-timer" style="font-size:.75rem;color:var(--text3);margin-top:4px"></div>' +
+    '</div>' +
+    '<div style="text-align:center;font-size:.82rem;color:var(--text2);margin-top:14px">' +
+      '<a href="#" onclick="toggleAuth('login')" style="color:var(--accent)">← Back to Sign In</a>' +
+    '</div>';
+  var authCard = authPage && authPage.querySelector('.auth-card');
+  var container = authCard || authPage;
+  if (container) container.appendChild(panel);
+  // Auto-focus and uppercase
+  var codeInp = document.getElementById('rp-code');
+  if (codeInp) {
+    codeInp.focus();
+    codeInp.addEventListener('input', function() { this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g,''); });
+    codeInp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        var pwInp = document.getElementById('rp-pw');
+        if (pwInp) pwInp.focus(); // tab to password field
+      }
+    });
+  }
+  startCodeTimers('reset', email, expiresAt);
+}
+
+async function submitResetPasswordCode(email) {
+  var codeEl = document.getElementById('rp-code');
+  var codeErr= document.getElementById('rp-code-error');
+  var pw     = (document.getElementById('rp-pw') ||{}).value||'';
+  var pw2    = (document.getElementById('rp-pw2')||{}).value||'';
+  var hint   = document.getElementById('rp-pw2-hint');
+  var btn    = document.getElementById('rp-btn');
+  var code   = codeEl ? codeEl.value.trim().toUpperCase() : '';
+  if (codeErr) codeErr.textContent = '';
+  if (!code || code.length < 4) { if (codeErr) codeErr.textContent = 'Enter the full 6-character code.'; return; }
+  if (pw.length<8||!/[A-Z]/.test(pw)||!/[0-9]/.test(pw)) { toast('Password too weak','Min 8 chars, 1 uppercase, 1 digit','warn'); return; }
+  if (pw !== pw2) { if (hint) hint.textContent='Passwords do not match'; toast('Passwords do not match','','warn'); return; }
+  if (hint) hint.textContent = '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Setting password…'; }
+  try {
+    await api('POST', '/auth/reset-password', { email: email, code: code, password: pw });
+    if (_codeTimer) { clearInterval(_codeTimer); _codeTimer = null; }
+    toast('Password reset!', 'You can now sign in with your new password.', 'success', 5000);
+    var rp = document.getElementById('reset-pw-panel'); if (rp) rp.remove();
+    toggleAuth('login');
+  } catch(e) {
+    var msg = e.message || 'Reset failed.';
+    if (codeErr) codeErr.textContent = msg;
+    if (btn) { btn.disabled = false; btn.textContent = 'Set New Password'; }
+    if (msg.toLowerCase().includes('expired') && codeEl) codeEl.disabled = true;
+    else if (codeEl) { codeEl.select(); }
+  }
+}
+
+async function resendResetCode(email) {
+  var btn  = document.getElementById('rp-resend');
+  var err  = document.getElementById('rp-code-error');
+  var inp  = document.getElementById('rp-code');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  if (err) err.textContent = '';
+  try {
+    var d = await api('POST', '/auth/forgot-password', { email: email });
+    toast('New code sent', 'Check your inbox.', 'success', 5000);
+    if (inp) { inp.value = ''; inp.disabled = false; inp.focus(); }
+    var submitBtn = document.getElementById('rp-btn');
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Set New Password'; }
+    startCodeTimers('reset', email, null); // restart 30m countdown
+  } catch(e) {
+    var msg = e.message || '';
+    if (err) err.textContent = msg || 'Could not resend. Try again.';
+    if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
   }
 }
 
@@ -4670,11 +4895,13 @@ function checkOAuthCallback() {
     history.replaceState({}, '', window.location.pathname);
     toast('Email verified!', 'You can now sign in.', 'success');
   }
-  // Handle reset-password token from email link (?token=...)
+  // Legacy: email-link reset token — no longer issued, but handle gracefully if old link clicked
   var resetToken = params.get('token');
   if (resetToken) {
     history.replaceState({}, '', window.location.pathname);
-    showResetPasswordUI(resetToken);
+    // Can't verify without email — show forgot-password prompt
+    toast('Code required', 'Enter your email to receive a new reset code.', 'warn', 6000);
+    setTimeout(openForgotPassword, 500);
   }
   if (params.get('verified') === '1') {
     history.replaceState({}, '', window.location.pathname);
@@ -7976,14 +8203,14 @@ function openForgotPassword(){
       '<div class="md-hdr"><div class="md-title">🔑 Forgot Password</div>'+
         '<button type="button" class="md-close" onclick="closeModal(\'forgot-pw-modal\')">✕</button></div>'+
       '<div class="md-body" style="padding:20px 24px">'+
-        '<p style="color:var(--text2);font-size:.875rem;margin-bottom:16px">Enter your email address and we\'ll send you a link to reset your password.</p>'+
+        '<p style="color:var(--text2);font-size:.875rem;margin-bottom:16px">Enter your email and we\'ll send you a 6-character reset code.</p>'+
         '<div class="fg"><label class="fl">Email address</label>'+
           '<input class="fc" type="email" id="fp-email" placeholder="you@email.com" autocomplete="email"/></div>'+
         '<div id="fp-result" style="margin-top:12px;font-size:.82rem"></div>'+
       '</div>'+
       '<div class="md-foot">'+
         '<button type="button" class="btn btn-s" onclick="closeModal(\'forgot-pw-modal\')">Cancel</button>'+
-        '<button type="button" class="btn btn-p" id="fp-btn" onclick="submitForgotPassword()">Send Reset Link</button>'+
+        '<button type="button" class="btn btn-p" id="fp-btn" onclick="submitForgotPassword()">Send Reset Code</button>'+
       '</div>'+
     '</div></div>');
   // Pre-fill if user already typed their email on login form
@@ -7998,7 +8225,6 @@ function openForgotPassword(){
 
 async function submitForgotPassword(){
   var email=(document.getElementById('fp-email')||{}).value||'';
-  // Basic email validation
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
     var r=document.getElementById('fp-result');
     if(r)r.innerHTML='<span style="color:var(--danger)">Please enter a valid email address.</span>';
@@ -8008,91 +8234,29 @@ async function submitForgotPassword(){
   if(btn){btn.disabled=true;btn.textContent='Sending…';}
   try{
     await api('POST','/auth/forgot-password',{email:email});
-    var r2=document.getElementById('fp-result');
-    if(r2)r2.innerHTML='<div style="color:var(--success);display:flex;gap:8px;align-items:flex-start">'+
-      '<span>✅</span><span>If that email exists, a reset link has been sent. Check your inbox (and spam folder).</span></div>';
-    if(btn){btn.disabled=true;btn.textContent='Email sent';}
+    // Close modal and show code-entry UI
+    var fpModal=document.getElementById('forgot-pw-modal');if(fpModal)fpModal.remove();
+    showResetCodeUI(email, null);
+    toast('Code sent','Enter the 6-character code from your email.','success',6000);
   }catch(e){
+    var msg=e.message||'';
     var r3=document.getElementById('fp-result');
-    if(r3)r3.innerHTML='<span style="color:var(--danger)">'+esc(e.message)+'</span>';
-    if(btn){btn.disabled=false;btn.textContent='Send Reset Link';}
+    if(msg.toLowerCase().includes('wait')){
+      // Already have an active code — just show the code-entry UI
+      if(r3)r3.innerHTML='<span style="color:var(--warning)">'+esc(msg)+'</span>';
+      setTimeout(function(){
+        var fpModal=document.getElementById('forgot-pw-modal');if(fpModal)fpModal.remove();
+        showResetCodeUI(email,null);
+      },1200);
+    } else {
+      if(r3)r3.innerHTML='<span style="color:var(--danger)">'+esc(msg)+'</span>';
+      if(btn){btn.disabled=false;btn.textContent='Send Reset Code';}
+    }
   }
 }
 
-// Reset password — called when user arrives from reset email link
-function checkResetPasswordToken(){
-  var params=new URLSearchParams(window.location.search);
-  var token=params.get('token');
-  var isReset=params.get('reset')==='1'||window.location.pathname.includes('reset-password');
-  if(!token)return;
-  // Show the reset password UI over the auth page
-  history.replaceState({},'',window.location.pathname);
-  showResetPasswordUI(token);
-}
-
-function showResetPasswordUI(token){
-  // Show auth page, hide login/reg forms, show reset form
-  var authPage=document.getElementById('auth-page');
-  if(authPage)authPage.style.display='flex';
-  var root=document.getElementById('root');if(root)root.style.display='none';
-  var hd=document.getElementById('auth-hd');if(hd)hd.textContent='Reset Password';
-  var sub=document.getElementById('auth-sub');if(sub)sub.textContent='Choose a new password for your account';
-  var loginFrm=document.getElementById('login-frm');if(loginFrm)loginFrm.style.display='none';
-  var regFrm=document.getElementById('reg-frm');if(regFrm)regFrm.style.display='none';
-  // Inject reset form
-  var existing=document.getElementById('reset-pw-panel');if(existing)existing.remove();
-  var panel=document.createElement('div');panel.id='reset-pw-panel';
-  panel.innerHTML=
-    '<div class="fg">'+
-      '<label class="fl" for="rp-pw">New Password</label>'+
-      '<input class="fc" type="password" id="rp-pw" placeholder="Min 8 chars, 1 uppercase, 1 digit" autocomplete="new-password" oninput="checkPwStrength(this.value)"/>'+
-      '<div class="pw-strength"><div class="pw-bar" id="rp-pw-bar"></div></div>'+
-      '<div class="pw-rules">'+
-        '<div class="pw-rule" id="rp-r-len">Minimum 8 characters</div>'+
-        '<div class="pw-rule" id="rp-r-up">At least 1 uppercase letter</div>'+
-        '<div class="pw-rule" id="rp-r-num">At least 1 number</div>'+
-      '</div>'+
-    '</div>'+
-    '<div class="fg" style="margin-top:4px">'+
-      '<label class="fl" for="rp-pw2">Confirm New Password</label>'+
-      '<input class="fc" type="password" id="rp-pw2" placeholder="Repeat your new password" autocomplete="new-password"/>'+
-      '<span id="rp-pw2-hint" style="font-size:.75rem;margin-top:3px;display:block;color:var(--danger)"></span>'+
-    '</div>'+
-    '<button type="button" class="btn btn-p" id="rp-btn" style="width:100%;justify-content:center;margin-top:14px" onclick="submitResetPassword(\''+token+'\')">Set New Password</button>'+
-    '<div style="text-align:center;font-size:.82rem;color:var(--text2);margin-top:12px">'+
-      '<a href="#" onclick="toggleAuth(\'login\')" style="color:var(--accent)">← Back to Sign In</a>'+
-    '</div>';
-  // Append inside auth card
-  var authCard=authPage&&authPage.querySelector('.auth-card');
-  if(authCard)authCard.appendChild(panel);
-  else if(authPage)authPage.appendChild(panel);
-}
-
-async function submitResetPassword(token){
-  var pw=(document.getElementById('rp-pw')||{}).value||'';
-  var pw2=(document.getElementById('rp-pw2')||{}).value||'';
-  var hint=document.getElementById('rp-pw2-hint');
-  if(pw.length<8||!/[A-Z]/.test(pw)||!/[0-9]/.test(pw)){
-    toast('Password too weak','Min 8 chars, 1 uppercase, 1 digit','warn');return;
-  }
-  if(pw!==pw2){
-    if(hint)hint.textContent='Passwords do not match';
-    toast('Passwords do not match','','warn');return;
-  }
-  if(hint)hint.textContent='';
-  var btn=document.getElementById('rp-btn');
-  if(btn){btn.disabled=true;btn.textContent='Setting password…';}
-  try{
-    await api('POST','/auth/reset-password',{token:token,password:pw});
-    toast('Password reset!','You can now sign in with your new password','success',5000);
-    // Remove reset panel and show login form
-    var rp=document.getElementById('reset-pw-panel');if(rp)rp.remove();
-    toggleAuth('login');
-  }catch(e){
-    toast('Reset failed',e.message,'error',5000);
-    if(btn){btn.disabled=false;btn.textContent='Set New Password';}
-  }
-}
+// Legacy token-based reset UI removed — now handled by showResetCodeUI / submitResetPasswordCode
+function checkResetPasswordToken(){} // no-op — URL tokens no longer issued
 
 async function revokeSession(fingerprint,btn){
   if(!fingerprint||!confirm('Log out this device?'))return;
