@@ -558,8 +558,8 @@ table{font-size:.8rem}
   <div class="auth-card" style="width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px">
     <div style="text-align:center;margin-bottom:24px">
       <div style="width:44px;height:44px;background:var(--accent);border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--df);font-weight:800;font-size:1.3rem;color:#fff;transform:rotate(-4deg)">R</div>
-      <div id="auth-hd" style="font-family:var(--df);font-size:1.4rem;font-weight:800;margin-top:12px">Welcome Back</div>
-      <div id="auth-sub" style="color:var(--text2);font-size:.85rem;margin-top:4px">Sign in to your RawFlip account</div>
+      <div id="auth-hd" style="font-family:var(--df);font-size:1.4rem;font-weight:800;margin-top:12px" data-i18n="auth.welcome">Welcome Back</div>
+      <div id="auth-sub" style="color:var(--text2);font-size:.85rem;margin-top:4px" data-i18n="auth.welcomeSub">Sign in to your RawFlip account</div>
     </div>
     <div id="login-frm">
       <div class="fg"><label class="fl" for="li-email">Email</label><input class="fc" type="email" id="li-email" placeholder="you@email.com" autocomplete="email"/></div>
@@ -569,13 +569,13 @@ table{font-size:.8rem}
           <button type="button" class="pw-eye" onclick="togglePwVis('li-pw',this)" tabindex="-1" aria-label="Show/hide password"></button>
         </div>
       </div>
-      <button type="button" class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px" onclick="handleLogin(event)">Sign In</button>
+      <button type="button" class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px" onclick="handleLogin(event)" data-i18n="auth.signIn">Sign In</button>
       <div style="text-align:center;margin-top:10px">
         <a href="#" onclick="openForgotPassword()" style="color:var(--text2);font-size:.82rem">Forgot password?</a>
       </div>
       <div id="google-login-btn">
         <div style="text-align:center;color:var(--text3);font-size:.78rem;margin:12px 0">— or —</div>
-        <button type="button" class="btn-google" onclick="loginWithGoogle()"><svg class="g-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Sign in with Google</button>
+        <button type="button" class="btn-google" onclick="loginWithGoogle()"><svg class="g-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg><span data-i18n="auth.googleSignIn">Sign in with Google</span></button>
       </div>
       <div style="text-align:center;font-size:.85rem;color:var(--text2);margin-top:10px">No account? <a href="#" onclick="toggleAuth('reg')" style="color:var(--accent);font-weight:600">Register</a></div>
     </div>
@@ -611,13 +611,13 @@ table{font-size:.8rem}
       </div>
       <div class="fg"><label class="fl" for="r-loc">Location <span style="color:var(--danger)">*</span></label><input class="fc" type="text" id="r-loc" placeholder="e.g. Lagos, Nigeria" maxlength="100" autocomplete="address-level2" required/><span style="font-size:.73rem;color:var(--text3);display:block;margin-top:3px">Your city/state — shown to buyers</span></div>
       <div class="fg"><label class="fl" for="r-ref">Referral Code <span style="color:var(--text3);font-weight:400">(optional)</span></label><input class="fc" type="text" id="r-ref" placeholder="Enter code if you have one" autocomplete="off" maxlength="12"/></div>
-      <button type="button" class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px" onclick="handleRegister(event)">Create Account</button>
+      <button type="button" class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px" onclick="handleRegister(event)" data-i18n="auth.register">Create Account</button>
       <div style="text-align:center;font-size:.85rem;color:var(--text2);margin-top:16px">Have an account? <a href="#" onclick="toggleAuth('login')" style="color:var(--accent);font-weight:600">Sign In</a></div>
       <!-- Agreement checkboxes — required before account creation -->
       <div class="reg-agree-box" id="reg-agree-section">
       <div id="google-reg-btn">
         <div style="text-align:center;color:var(--text3);font-size:.78rem;margin:12px 0">— or sign up with —</div>
-        <button type="button" class="btn-google" onclick="loginWithGoogle()"><svg class="g-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Sign up with Google</button>
+        <button type="button" class="btn-google" onclick="loginWithGoogle()"><svg class="g-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg><span data-i18n="auth.googleSignUp">Sign up with Google</span></button>
       </div>
         <div style="font-size:.75rem;font-weight:700;color:var(--text2);margin-bottom:2px">📋 Please agree before continuing</div>
         <label class="reg-agree-item">
@@ -649,24 +649,24 @@ table{font-size:.8rem}
   <!-- FAB -->
   <button id="fab" onclick="toggleFabMenu()" title="Quick actions">＋</button>
   <div id="fab-menu">
-    <div class="fab-item" onclick="closeFabMenu();openCreateListing()"><span class="fab-item-ic">🏷️</span>New Listing</div>
-    <div class="fab-item" onclick="closeFabMenu();openCreatePost()"><span class="fab-item-ic">✍️</span>New Post</div>
-    <div class="fab-item" onclick="closeFabMenu();openCreateTask()"><span class="fab-item-ic">✅</span>New Task</div>
+    <div class="fab-item" onclick="closeFabMenu();openCreateListing()"><span class="fab-item-ic">🏷️</span><span data-i18n="fab.newListing">New Listing</span></div>
+    <div class="fab-item" onclick="closeFabMenu();openCreatePost()"><span class="fab-item-ic">✍️</span><span data-i18n="fab.newPost">New Post</span></div>
+    <div class="fab-item" onclick="closeFabMenu();openCreateTask()"><span class="fab-item-ic">✅</span><span data-i18n="fab.newTask">New Task</span></div>
     <!-- PWA Install FAB item — added v20 — hidden until installable -->
-    <div class="fab-item" id="fab-install-btn" style="display:none" onclick="closeFabMenu();triggerPWAInstall()"><span class="fab-item-ic">📲</span>Install App</div>
+    <div class="fab-item" id="fab-install-btn" style="display:none" onclick="closeFabMenu();triggerPWAInstall()"><span class="fab-item-ic">📲</span><span data-i18n="btn.installApp">Install App</span></div>
   </div>
 
   <!-- Bottom navigation -->
   <nav id="bottom-nav">
     <div class="bnav-item act" data-page="home" onclick="nav('home')">
-      <span class="bnav-ic">🏠</span><span class="bnav-lbl">Home</span>
+      <span class="bnav-ic">🏠</span><span class="bnav-lbl" data-i18n="nav.market">Home</span>
     </div>
     <div class="bnav-item" data-page="search" onclick="nav('search')">
-      <span class="bnav-ic">🔍</span><span class="bnav-lbl">Search</span>
+      <span class="bnav-ic">🔍</span><span class="bnav-lbl" data-i18n="nav.search">Search</span>
     </div>
     
     <div class="bnav-item" onclick="toggleSidebar()">
-      <span class="bnav-ic">☰</span><span class="bnav-lbl">More</span>
+      <span class="bnav-ic">☰</span><span class="bnav-lbl" data-i18n="nav.more">More</span>
     </div>
   </nav>
 
@@ -681,9 +681,9 @@ table{font-size:.8rem}
         <div class="onb-dot" id="onb-d1"></div>
         <div class="onb-dot" id="onb-d2"></div>
       </div>
-      <button class="btn" style="background:var(--accent);color:#fff;width:100%;justify-content:center" onclick="nextOnboarding()">Next →</button>
+      <button class="btn" style="background:var(--accent);color:#fff;width:100%;justify-content:center" onclick="nextOnboarding()" data-i18n="btn.next">Next →</button>
     </div>
-    <button onclick="finishOnboarding()" style="color:var(--text3);background:none;border:none;padding:10px;cursor:pointer;font-size:.85rem">Skip tour</button>
+    <button onclick="finishOnboarding()" style="color:var(--text3);background:none;border:none;padding:10px;cursor:pointer;font-size:.85rem" data-i18n="btn.skip">Skip tour</button>
   </div>
 
   <header id="hdr">
@@ -697,15 +697,15 @@ table{font-size:.8rem}
           <div id="hdr-fm-badge" style="display:none"></div>
         </div>
         <div class="dd-menu" id="user-dd">
-          <div class="dd-item" onclick="nav('profile')">&#128100; Profile</div>
-          <div class="dd-item" onclick="nav('wallet')">&#128176; Wallet</div>
+          <div class="dd-item" onclick="nav('profile')">&#128100; <span data-i18n="nav.profile">Profile</span></div>
+          <div class="dd-item" onclick="nav('wallet')">&#128176; <span data-i18n="nav.wallet">Wallet</span></div>
           
-          <div class="dd-item" onclick="openCreateListing()">&#65291; New Listing</div>
+          <div class="dd-item" onclick="openCreateListing()">&#65291; <span data-i18n="btn.newListing">New Listing</span></div>
           <div class="dd-sep" id="admin-sep" style="display:none"></div>
-          <div class="dd-item" id="admin-lnk" onclick="nav('admin')" style="display:none">&#9889; Admin</div>
+          <div class="dd-item" id="admin-lnk" onclick="nav('admin')" style="display:none">&#9889; <span data-i18n="nav.admin">Admin</span></div>
           <div class="dd-sep"></div>
           <div class="dd-item" onclick="exportData()">&#128229; Export Data</div>
-          <div class="dd-item danger" onclick="handleLogout()">&#128682; Sign Out</div>
+          <div class="dd-item danger" onclick="handleLogout()">&#128682; <span data-i18n="nav.signOut">Sign Out</span></div>
         </div>
       </div>
       <button type="button" class="theme-tog" onclick="toggleTheme()" title="Toggle theme"></button>
@@ -714,18 +714,18 @@ table{font-size:.8rem}
 
   <div id="main-wrap">
     <aside id="sidebar">
-      <div class="sb-link act" data-page="home" onclick="nav('home')"><span class="ic">&#127987;</span>Marketplace</div>
+      <div class="sb-link act" data-page="home" onclick="nav('home')"><span class="ic">&#127987;</span><span data-i18n="nav.market">Marketplace</span></div>
       
-      <div class="sb-link" data-page="wallet" onclick="nav('wallet')"><span class="ic">&#128176;</span>Wallet</div>
-      <div class="sb-link" data-page="subscription" onclick="nav('subscription')"><span class="ic">💎</span>Subscription</div>
-      <div class="sb-link" data-page="referral" onclick="nav('referral')"><span class="ic">🎁</span>Referrals</div>
-      <div class="sb-link" data-page="posts" onclick="nav('posts')"><span class="ic">&#128172;</span>Community</div>
-      <div class="sb-link" data-page="tasks" onclick="nav('tasks')"><span class="ic">&#9989;</span>Tasks</div>
-      <div class="sb-link" data-page="wishlist" onclick="nav('wishlist')"><span class="ic">&#10084;</span>Wishlist</div>
-      <div class="sb-link" data-page="offers" onclick="nav('offers')"><span class="ic">&#129309;</span>Offers</div>      <div class="sb-link" data-page="notifications" onclick="nav('notifications')"><span class="ic">&#128276;</span>Notifications</div>
+      <div class="sb-link" data-page="wallet" onclick="nav('wallet')"><span class="ic">&#128176;</span><span data-i18n="nav.wallet">Wallet</span></div>
+      <div class="sb-link" data-page="subscription" onclick="nav('subscription')"><span class="ic">💎</span><span data-i18n="nav.subscription">Subscription</span></div>
+      <div class="sb-link" data-page="referral" onclick="nav('referral')"><span class="ic">🎁</span><span data-i18n="nav.referrals">Referrals</span></div>
+      <div class="sb-link" data-page="posts" onclick="nav('posts')"><span class="ic">&#128172;</span><span data-i18n="nav.forum">Community</span></div>
+      <div class="sb-link" data-page="tasks" onclick="nav('tasks')"><span class="ic">&#9989;</span><span data-i18n="nav.tasks">Tasks</span></div>
+      <div class="sb-link" data-page="wishlist" onclick="nav('wishlist')"><span class="ic">&#10084;</span><span data-i18n="nav.wishlist">Wishlist</span></div>
+      <div class="sb-link" data-page="offers" onclick="nav('offers')"><span class="ic">&#129309;</span><span data-i18n="nav.offers">Offers</span></div>      <div class="sb-link" data-page="notifications" onclick="nav('notifications')"><span class="ic">&#128276;</span><span data-i18n="nav.notifications">Notifications</span></div>
       <div class="sb-sep"></div>
       <!-- Help/Support sidebar link — added v20 ————— -->
-      <div class="sb-link" data-page="support" onclick="nav('support')"><span class="ic">🎧</span>Help &amp; Support</div>
+      <div class="sb-link" data-page="support" onclick="nav('support')"><span class="ic">🎧</span><span data-i18n="nav.support">Help &amp; Support</span></div>
       <!-- PWA Install button — shown only when browser fires beforeinstallprompt — added v20 -->
       <div id="sb-install-btn" style="display:none;margin:8px 4px 0">
         <button type="button" class="btn btn-s" style="width:100%;justify-content:center;gap:8px;font-size:.82rem" onclick="triggerPWAInstall()">
@@ -762,10 +762,10 @@ table{font-size:.8rem}
             <h1>Buy &amp; Sell <span>Anything</span></h1>
             <p>The marketplace for new and used items. Great deals or quick flips.</p>
             <div class="hero-acts">
-              <button type="button" class="btn btn-p" onclick="openCreateListing()">&#128230; Sell Something</button>
-              <button type="button" class="btn btn-s" onclick="document.getElementById('listings-sec').scrollIntoView({behavior:'smooth'})">Browse &#8594;</button>
+              <button type="button" class="btn btn-p" onclick="openCreateListing()">&#128230; <span data-i18n="btn.sell">Sell Something</span></button>
+              <button type="button" class="btn btn-s" onclick="document.getElementById('listings-sec').scrollIntoView({behavior:'smooth'})"><span data-i18n="btn.browse">Browse →</span></button>
             </div>
-            <div class="hero-stats"><div><div class="hero-stat-n" id="stat-l">—</div><div class="hero-stat-l">Active Listings</div></div><div><div class="hero-stat-n">12</div><div class="hero-stat-l">Categories</div></div></div>
+            <div class="hero-stats"><div><div class="hero-stat-n" id="stat-l">—</div><div class="hero-stat-l" data-i18n="hero.activeListings">Active Listings</div></div><div><div class="hero-stat-n">12</div><div class="hero-stat-l" data-i18n="hero.categories">Categories</div></div></div>
           </div>
         </div>
         <div class="pg" id="listings-sec">
@@ -868,37 +868,37 @@ table{font-size:.8rem}
       <!-- WALLET -->
       <div class="page" id="page-wallet">
         <div class="pg">
-          <div class="pg-hdr"><div class="pg-title">&#128176; Wallet</div><div id="wallet-plan-badge"></div></div>
+          <div class="pg-hdr"><div class="pg-title" data-i18n="page.wallet">&#128176; Wallet</div><div id="wallet-plan-badge"></div></div>
           <div class="wallet-buckets" id="wallet-buckets-inline" style="margin-bottom:20px">
             <div class="wallet-bucket available">
-              <div class="wb-label">Available</div>
+              <div class="wb-label" data-i18n="wallet.available">Available</div>
               <div class="wb-amount" id="wb-available">₦0</div>
               <div class="wb-usd" id="wb-available-usd">$0.00</div>
             </div>
             <div class="wallet-bucket reserved">
-              <div class="wb-label">Reserved (in offers)</div>
+              <div class="wb-label" data-i18n="wallet.reserved">Reserved (in offers)</div>
               <div class="wb-amount" id="wb-reserved">₦0</div>
               <div class="wb-usd" id="wb-reserved-usd">$0.00</div>
             </div>
             <div class="wallet-bucket escrow">
-              <div class="wb-label">In Escrow</div>
+              <div class="wb-label" data-i18n="wallet.escrow">In Escrow</div>
               <div class="wb-amount" id="wb-escrow">₦0</div>
               <div class="wb-usd" id="wb-escrow-usd">$0.00</div>
             </div>
             <div class="wallet-bucket withdrawable">
-              <div class="wb-label">Withdrawable</div>
+              <div class="wb-label" data-i18n="wallet.withdrawable">Withdrawable</div>
               <div class="wb-amount" id="wb-withdrawable">₦0</div>
               <div class="wb-usd" id="wb-withdrawable-usd">$0.00</div>
             </div>
             <div class="wallet-bucket" style="border-color:#f0a000">
-              <div class="wb-label" style="color:#f0a000">Referral Earnings</div>
+              <div class="wb-label" style="color:#f0a000" data-i18n="wallet.earnings">Referral Earnings</div>
               <div class="wb-amount" id="wb-earnings" style="color:#f0a000">₦0</div>
               <div class="wb-usd" id="wb-earnings-usd">$0.00</div>
             </div>
           </div>
           <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-            <button type="button" class="btn btn-p btn-sm" onclick="openDepositModal()">+ Deposit Funds</button>
-            <button type="button" class="btn btn-ok btn-sm" onclick="openWithdrawModal()">&#8659; Withdraw</button>
+            <button type="button" class="btn btn-p btn-sm" onclick="openDepositModal()" data-i18n="wallet.addFunds">+ Deposit Funds</button>
+            <button type="button" class="btn btn-ok btn-sm" onclick="openWithdrawModal()">&#8659; <span data-i18n="wallet.withdraw">Withdraw</span></button>
           </div>
           <details style="margin-bottom:20px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;font-size:.82rem">
             <summary style="cursor:pointer;font-weight:700;color:var(--text2);user-select:none">ℹ️ How do wallet balances work?</summary>
@@ -910,7 +910,7 @@ table{font-size:.8rem}
               <div><strong style="color:var(--text)">Platform fee</strong> — Deducted from the seller's payout when a transaction completes. Free plan: 20% · Basic: 15% · Pro: 10%.</div>
             </div>
           </details>
-          <div class="sec-title">Wallet Transactions</div>
+          <div class="sec-title" data-i18n="wallet.txHistory">Wallet Transactions</div>
           <div id="wallet-tx-ct"></div>
         </div>
       </div>
@@ -918,13 +918,13 @@ table{font-size:.8rem}
       <!-- POSTS -->
       <div class="page" id="page-posts">
         <div class="pg">
-          <div class="pg-hdr"><div><div class="pg-title">Community Forum</div></div><button type="button" class="btn btn-p" onclick="openCreatePost()">&#9998; New Post</button></div>
+          <div class="pg-hdr"><div><div class="pg-title" data-i18n="page.forum">Community Forum</div></div><button type="button" class="btn btn-p" onclick="openCreatePost()">&#9998; <span data-i18n="btn.newPost">New Post</span></button></div>
           <div class="tabs">
-            <button type="button" class="tab-btn act" onclick="filterPosts('',this)">All</button>
-            <button type="button" class="tab-btn" onclick="filterPosts('discussion',this)">Discussion</button>
-            <button type="button" class="tab-btn" onclick="filterPosts('question',this)">Questions</button>
-            <button type="button" class="tab-btn" onclick="filterPosts('tip',this)">Tips</button>
-            <button type="button" class="tab-btn" onclick="filterPosts('announcement',this)">Announcements</button>
+            <button type="button" class="tab-btn act" onclick="filterPosts('',this)" data-i18n="posts.all">All</button>
+            <button type="button" class="tab-btn" onclick="filterPosts('discussion',this)" data-i18n="posts.discussion">Discussion</button>
+            <button type="button" class="tab-btn" onclick="filterPosts('question',this)" data-i18n="posts.questions">Questions</button>
+            <button type="button" class="tab-btn" onclick="filterPosts('tip',this)" data-i18n="posts.tips">Tips</button>
+            <button type="button" class="tab-btn" onclick="filterPosts('announcement',this)" data-i18n="posts.announcements">Announcements</button>
           </div>
           <div id="posts-ct"></div>
         </div>
@@ -938,7 +938,7 @@ table{font-size:.8rem}
       <!-- NOTIFICATIONS -->
       <div class="page" id="page-notifications">
         <div class="pg">
-          <div class="pg-hdr"><div class="pg-title">Notifications</div><button type="button" class="btn btn-s" onclick="markAllRead()">Mark All Read</button></div>
+          <div class="pg-hdr"><div class="pg-title" data-i18n="page.notifications">Notifications</div><button type="button" class="btn btn-s" onclick="markAllRead()" data-i18n="btn.markAllRead">Mark All Read</button></div>
           <div class="card"><div id="notif-ct"></div></div>
         </div>
       </div>
@@ -949,27 +949,27 @@ table{font-size:.8rem}
       <!-- TASKS -->
       <div class="page" id="page-tasks">
         <div class="pg">
-          <div class="pg-hdr"><div class="pg-title">My Tasks</div><button type="button" class="btn btn-p" onclick="openTaskModal()">+ New Task</button></div>
+          <div class="pg-hdr"><div class="pg-title" data-i18n="page.tasks">My Tasks</div><button type="button" class="btn btn-p" onclick="openTaskModal()" data-i18n="btn.newTask">+ New Task</button></div>
           <div class="tabs">
-            <button type="button" class="tab-btn act" onclick="filterTasks('',this)">All</button>
-            <button type="button" class="tab-btn" onclick="filterTasks('todo',this)">To Do</button>
-            <button type="button" class="tab-btn" onclick="filterTasks('in_progress',this)">In Progress</button>
-            <button type="button" class="tab-btn" onclick="filterTasks('done',this)">Done</button>
+            <button type="button" class="tab-btn act" onclick="filterTasks('',this)" data-i18n="tasks.all">All</button>
+            <button type="button" class="tab-btn" onclick="filterTasks('todo',this)" data-i18n="tasks.todo">To Do</button>
+            <button type="button" class="tab-btn" onclick="filterTasks('in_progress',this)" data-i18n="tasks.inProgress">In Progress</button>
+            <button type="button" class="tab-btn" onclick="filterTasks('done',this)" data-i18n="tasks.done">Done</button>
           </div>
           <div id="tasks-ct"></div>
         </div>
       </div>
 
       <!-- WISHLIST -->
-      <div class="page" id="page-wishlist"><div class="pg"><div class="pg-hdr"><div class="pg-title">My Wishlist</div></div><div id="wishlist-ct"></div></div></div>
+      <div class="page" id="page-wishlist"><div class="pg"><div class="pg-hdr"><div class="pg-title" data-i18n="page.wishlist">My Wishlist</div></div><div id="wishlist-ct"></div></div></div>
 
       <!-- OFFERS -->
       <div class="page" id="page-offers">
         <div class="pg">
-          <div class="pg-title mb-4">Offers</div>
+          <div class="pg-title mb-4" data-i18n="page.offers">Offers</div>
           <div class="tabs">
-            <button type="button" class="tab-btn act" onclick="switchOfferTab('received',this)">Received</button>
-            <button type="button" class="tab-btn" onclick="switchOfferTab('sent',this)">Sent</button>
+            <button type="button" class="tab-btn act" onclick="switchOfferTab('received',this)" data-i18n="offers.received">Received</button>
+            <button type="button" class="tab-btn" onclick="switchOfferTab('sent',this)" data-i18n="offers.sent">Sent</button>
           </div>
           <div id="offers-ct"></div>
         </div>
@@ -1566,40 +1566,53 @@ table{font-size:.8rem}
 
 <div class="modal-ov" id="deposit-modal">
   <div class="modal" style="max-width:540px">
-    <div class="md-hdr"><div class="md-title">💰 Deposit Funds</div><button type="button" class="md-close" onclick="closeModal('deposit-modal')">✕</button></div>
+    <div class="md-hdr"><div class="md-title">💰 Add Funds</div><button type="button" class="md-close" onclick="closeModal('deposit-modal')">✕</button></div>
     <div class="md-body">
-      <!-- Step 0: Gateway notice banner -->
+
+      <!-- Step 0: Notice + disclaimer -->
       <div id="dep-step-0">
-        <div style="background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.08));border:1.5px solid rgba(245,158,11,.4);border-radius:10px;padding:18px;margin-bottom:4px">
-          <div style="font-weight:700;font-size:1rem;margin-bottom:10px;color:#f59e0b">⚠️ Manual Processing Notice</div>
-          <p style="font-size:.87rem;line-height:1.6;color:var(--text);margin:0 0 10px 0">Payment is currently processed <strong>manually</strong> because of temporary payment gateway limitations.</p>
-          <p style="font-size:.87rem;line-height:1.6;color:var(--text);margin:0">Deposit funds by following the instructions below. Upload payment proof after making transfer.</p>
+        <div style="background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(99,102,241,.08));border:1.5px solid rgba(245,158,11,.35);border-radius:12px;padding:18px;margin-bottom:14px">
+          <div style="font-weight:800;font-size:1rem;margin-bottom:10px;color:#f59e0b">⚠️ How deposits work</div>
+          <p style="font-size:.875rem;line-height:1.65;color:var(--text);margin:0 0 10px">Deposits are currently processed <strong>manually</strong> while our payment gateway is being set up. Here's how it works:</p>
+          <ol style="font-size:.85rem;line-height:2;color:var(--text2);margin:0;padding-left:18px">
+            <li>You transfer money to our bank account.</li>
+            <li>You take a screenshot of the transfer confirmation.</li>
+            <li>You tap <strong style="color:var(--text)">Submit Proof</strong> to send us the screenshot.</li>
+            <li>Our team reviews it and credits your wallet — usually within a few hours.</li>
+          </ol>
+          <div style="margin-top:12px;padding:10px 12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;font-size:.82rem;color:#fca5a5;line-height:1.6">
+            🔒 <strong>Important:</strong> Your account will <strong>not be credited</strong> until you tap "Submit Proof" and our team has verified your transfer. <strong>Submitting false or edited screenshots is a serious violation</strong> and may result in account suspension or a permanent ban.
+          </div>
         </div>
-        <!-- Disclaimer: peer-to-peer / wallet funds not insured -->
-        <div style="margin-top:14px;padding:14px 16px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.25);border-radius:10px">
+        <div style="padding:14px 16px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.25);border-radius:10px">
           <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.84rem;color:var(--text2)">
             <input type="checkbox" id="dep-disclaimer-chk" style="flex-shrink:0;margin-top:3px;accent-color:var(--accent)"/>
-            <span>I understand RawFlip is a <strong style="color:var(--text)">peer-to-peer marketplace</strong> and wallet funds are <strong style="color:var(--text)">not insured deposits</strong>. <a href="#" onclick="navLegal('about');return false" style="color:var(--accent3)">Read About Us</a></span>
+            <span>I understand RawFlip is a <strong style="color:var(--text)">peer-to-peer marketplace</strong> and wallet funds are <strong style="color:var(--text)">not insured deposits</strong>. I have read and accept the instructions above. <a href="#" onclick="navLegal('about');return false" style="color:var(--accent3)">About RawFlip</a></span>
           </label>
-          <div id="dep-disclaimer-err" style="display:none;font-size:.72rem;color:var(--danger);margin-top:6px">📋 Please acknowledge before continuing.</div>
+          <div id="dep-disclaimer-err" style="display:none;font-size:.72rem;color:var(--danger);margin-top:6px">📋 Please tick the box to continue.</div>
         </div>
       </div>
+
       <!-- Step 1: Amount entry -->
       <div id="dep-step-1" style="display:none">
-        <div class="fg"><label class="fl">Amount to Deposit (₦) *</label>
-          <input class="fc" type="number" id="dep-amt" placeholder="Enter amount" min="1" step="1" oninput="calcDepFee()"/>
+        <div style="font-size:.82rem;color:var(--text2);margin-bottom:14px;padding:10px 12px;background:var(--bg3);border-radius:8px;line-height:1.6">
+          💡 Enter the exact amount you want added to your wallet. You'll transfer this amount to our bank account in the next step.
+        </div>
+        <div class="fg"><label class="fl">Amount to deposit (₦) *</label>
+          <input class="fc" type="number" id="dep-amt" placeholder="e.g. 10000" min="1" step="1" oninput="calcDepFee()"/>
         </div>
         <div id="dep-fee-preview" style="display:none;background:var(--bg3);border-radius:8px;padding:12px;margin-top:8px;font-size:.85rem">
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Deposit Fee:</span><span id="dep-fee-val" style="color:var(--warning);font-weight:700"></span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Processing fee:</span><span id="dep-fee-val" style="color:var(--warning);font-weight:700"></span></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">You will receive:</span><span id="dep-net-val" style="color:var(--success);font-weight:700"></span></div>
-          <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)"><span style="font-weight:700">Total to transfer:</span><span id="dep-total-val" style="font-weight:800;color:var(--accent);font-size:1rem"></span></div>
-          <div style="margin-top:8px;padding:8px;background:rgba(239,68,68,.08);border-radius:6px;font-size:.78rem;color:var(--danger)">⚠️ Depositing an incorrect amount may result in your account not being credited.</div>
+          <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)"><span style="font-weight:700">Amount to transfer:</span><span id="dep-total-val" style="font-weight:800;color:var(--accent);font-size:1rem"></span></div>
+          <div style="margin-top:8px;padding:8px;background:rgba(239,68,68,.08);border-radius:6px;font-size:.78rem;color:var(--danger)">⚠️ Transfer the exact amount shown above. The wrong amount will delay or prevent your account from being credited.</div>
         </div>
       </div>
-      <!-- Step 2: Payment details + proof upload -->
+
+      <!-- Step 2: Bank details + proof upload -->
       <div id="dep-step-2" style="display:none">
-        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px">
-          <div style="font-weight:700;margin-bottom:12px;color:var(--accent)">🏦 Bank Transfer Details</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">
+          <div style="font-weight:700;margin-bottom:12px;color:var(--accent)">🏦 Transfer to this account</div>
           <div id="dep-bank-info" style="font-size:.9rem;line-height:2"></div>
           <div style="margin-top:12px;padding:10px;background:rgba(245,158,11,.1);border-radius:6px;text-align:center">
             <div style="font-size:.75rem;color:var(--text2);margin-bottom:4px">EXACT AMOUNT TO TRANSFER</div>
@@ -1607,25 +1620,31 @@ table{font-size:.8rem}
             <div style="font-size:.72rem;color:var(--text3);margin-top:4px">Reference: <span id="dep-tx-ref" style="font-family:monospace;color:var(--accent)"></span></div>
           </div>
         </div>
-        <div class="fg">
-          <label class="fl">Upload Payment Proof *</label>
-          <div class="drop-zone" id="dep-proof-drop" onclick="document.getElementById('dep-proof-file').click()" style="padding:20px;cursor:pointer">
+
+        <!-- Upload proof section -->
+        <div style="background:rgba(0,196,122,.06);border:1.5px solid rgba(0,196,122,.25);border-radius:10px;padding:16px;margin-bottom:12px">
+          <div style="font-weight:700;font-size:.9rem;margin-bottom:8px;color:var(--success)">📸 Step 2 — Upload your payment screenshot</div>
+          <p style="font-size:.83rem;color:var(--text2);line-height:1.6;margin:0 0 12px">After making the transfer, take a screenshot of your bank app or SMS confirmation and upload it here. <strong style="color:var(--text)">Without this, your wallet will not be credited.</strong></p>
+          <div class="drop-zone" id="dep-proof-drop" onclick="document.getElementById('dep-proof-file').click()" style="padding:22px;cursor:pointer;border-style:dashed">
             <input type="file" id="dep-proof-file" accept="image/*" style="display:none" onchange="handleDepProof(event)"/>
-            <div style="font-size:2rem;margin-bottom:6px">📸</div>
-            <div style="font-size:.85rem;color:var(--text2)">Click to upload payment screenshot or receipt</div>
+            <div style="font-size:2rem;margin-bottom:6px">📤</div>
+            <div style="font-size:.88rem;font-weight:600;color:var(--text)">Tap to upload screenshot</div>
+            <div style="font-size:.75rem;color:var(--text3);margin-top:4px">JPEG, PNG or screenshot from your gallery</div>
           </div>
           <div id="dep-proof-preview" style="margin-top:10px"></div>
         </div>
-        <div style="font-size:.78rem;color:var(--text3);margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px">
-          ℹ️ After submitting proof, our team will manually verify and approve your deposit. You'll receive an email notification when approved.
+
+        <div style="padding:10px 12px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;font-size:.8rem;color:#fca5a5;line-height:1.6">
+          ⚠️ Uploading a fake, edited, or unrelated screenshot is a violation of our <a href="#" onclick="navLegal('terms');return false" style="color:var(--accent3)">Terms &amp; Conditions</a> and may result in account suspension or ban. All submissions are verified.
         </div>
       </div>
+
     </div>
     <div class="md-foot">
       <button type="button" class="btn btn-s" onclick="closeModal('deposit-modal')">Cancel</button>
-      <button type="button" class="btn btn-p" id="dep-btn-ok" onclick="depositBannerOK()">OK, I Understand</button>
-      <button type="button" class="btn btn-p" id="dep-btn-1" style="display:none" onclick="submitDepositStep1()">Continue to Payment Details →</button>
-      <button type="button" class="btn btn-p" id="dep-btn-2" style="display:none" onclick="submitDepositProof()">✓ Submit Payment Proof</button>
+      <button type="button" class="btn btn-p" id="dep-btn-ok" onclick="depositBannerOK()">I Understand — Continue</button>
+      <button type="button" class="btn btn-p" id="dep-btn-1" style="display:none" onclick="submitDepositStep1()">Get Bank Details →</button>
+      <button type="button" class="btn btn-p" id="dep-btn-2" style="display:none" onclick="submitDepositProof()">✓ Submit Proof</button>
     </div>
   </div>
 </div>
@@ -1697,24 +1716,30 @@ table{font-size:.8rem}
 <div class="page" id="page-settings" style="display:none">
   <div class="pg" style="max-width:680px">
     <div class="pg-hdr"><div class="pg-title">⚙️ Settings</div></div>
-    <div class="card mb-3" id="kyc-card">
-      <div class="card-hdr"><span class="fw7">🪪 KYC Verification</span></div>
+    <div class="card mb-3" id="kyc-card" style="display:none">
+      <div class="card-hdr"><span class="fw7">🪪 Identity Verification (KYC)</span></div>
       <div class="card-body" id="kyc-card-body">
         <div id="kyc-status-display" style="margin-bottom:14px">
-          <span class="text-2">Loading KYC status...</span>
+          <span class="text-2">Loading verification status...</span>
         </div>
         <div id="kyc-form-wrap">
-          <p class="text-sm text-2" style="margin-bottom:12px">Complete KYC to enable withdrawals. All fields are required.</p>
+          <!-- Legal context banner -->
+          <div style="background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:.84rem;color:var(--text2);line-height:1.65">
+            <div style="font-weight:700;color:var(--text);margin-bottom:6px">🔐 Why we need this</div>
+            <p style="margin:0 0 8px">Nigerian law requires us to verify the identity of all users who withdraw funds. This is to <strong style="color:var(--text)">prevent fraud and money laundering</strong> and to comply with the Central Bank of Nigeria (CBN) AML/KYC regulations.</p>
+            <p style="margin:0">Your documents are reviewed by our team and stored securely. They will never be shared with third parties. Submitting false documents is a criminal offence.</p>
+          </div>
+
           <div class="form-group">
-            <label class="form-label">Full Legal Name</label>
-            <input id="kyc-fullname" class="fc" type="text" placeholder="As on your ID document">
+            <label class="form-label">Full Legal Name *</label>
+            <input id="kyc-fullname" class="fc" type="text" placeholder="Exactly as it appears on your ID">
           </div>
           <div class="form-group">
-            <label class="form-label">Date of Birth</label>
+            <label class="form-label">Date of Birth *</label>
             <input id="kyc-dob" class="fc" type="date">
           </div>
           <div class="form-group">
-            <label class="form-label">ID Type</label>
+            <label class="form-label">ID Type *</label>
             <select id="kyc-idtype" class="fc">
               <option value="">-- Select ID Type --</option>
               <option value="nin">NIN (National ID Number)</option>
@@ -1725,22 +1750,45 @@ table{font-size:.8rem}
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">ID Number</label>
+            <label class="form-label">ID Number *</label>
             <input id="kyc-idnumber" class="fc" type="text" placeholder="Enter your ID number">
           </div>
           <div class="form-group">
-            <label class="form-label">Home Address</label>
-            <input id="kyc-address" class="fc" type="text" placeholder="Full residential address">
+            <label class="form-label">Home Address *</label>
+            <input id="kyc-address" class="fc" type="text" placeholder="Your full residential address">
           </div>
+
+          <!-- ID document upload -->
           <div class="form-group">
-            <label class="form-label">ID Document URL</label>
-            <input id="kyc-iddoc-url" class="fc" type="url" placeholder="Upload your ID doc and paste link here">
+            <label class="form-label">Photo of ID Document *</label>
+            <p style="font-size:.78rem;color:var(--text3);margin:0 0 8px;line-height:1.5">Take a clear photo of your NIN slip, passport data page, driver's license, voter's card — whichever you selected above. Make sure all text is readable.</p>
+            <div class="drop-zone" id="kyc-iddoc-drop" onclick="document.getElementById('kyc-iddoc-file').click()" style="padding:20px;cursor:pointer;border-style:dashed">
+              <input type="file" id="kyc-iddoc-file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleKycFile('iddoc',event)"/>
+              <div style="font-size:2rem;margin-bottom:6px">🪪</div>
+              <div style="font-size:.88rem;font-weight:600;color:var(--text)">Tap to upload ID document photo</div>
+              <div style="font-size:.74rem;color:var(--text3);margin-top:4px">JPEG or PNG — max 10MB</div>
+            </div>
+            <div id="kyc-iddoc-preview" style="margin-top:8px"></div>
           </div>
+
+          <!-- Selfie upload -->
           <div class="form-group">
-            <label class="form-label">Selfie with ID URL</label>
-            <input id="kyc-selfie-url" class="fc" type="url" placeholder="Upload selfie holding ID and paste link here">
+            <label class="form-label">Selfie Holding Your ID *</label>
+            <p style="font-size:.78rem;color:var(--text3);margin:0 0 8px;line-height:1.5">Take a selfie of yourself holding the same ID document next to your face. Both your face and the ID must be clearly visible. No sunglasses or face coverings.</p>
+            <div class="drop-zone" id="kyc-selfie-drop" onclick="document.getElementById('kyc-selfie-file').click()" style="padding:20px;cursor:pointer;border-style:dashed">
+              <input type="file" id="kyc-selfie-file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleKycFile('selfie',event)"/>
+              <div style="font-size:2rem;margin-bottom:6px">🤳</div>
+              <div style="font-size:.88rem;font-weight:600;color:var(--text)">Tap to upload selfie with ID</div>
+              <div style="font-size:.74rem;color:var(--text3);margin-top:4px">JPEG or PNG — max 10MB</div>
+            </div>
+            <div id="kyc-selfie-preview" style="margin-top:8px"></div>
           </div>
-          <button class="btn btn-primary" onclick="submitKYC()">Submit KYC</button>
+
+          <div style="padding:10px 12px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;font-size:.8rem;color:#fca5a5;line-height:1.6;margin-bottom:14px">
+            ⚠️ Submitting false, edited, or someone else's documents is a criminal offence under Nigerian law. All submissions are reviewed by our verification team.
+          </div>
+
+          <button class="btn btn-p" onclick="submitKYC()" id="kyc-submit-btn" style="width:100%;justify-content:center">Submit for Verification</button>
         </div>
       </div>
     </div>
@@ -2773,12 +2821,12 @@ function listingCard(l, showBulk){
   return '<div class="lc" onclick="openListing(\''+esc(l._id)+'\')" style="position:relative">'+
     bulkChk+
     '<div class="lc-img">'+img+'</div>'+
-    (l.status==='sold'?'<div class="lc-badge b-sold">Sold</div>':l.condition==='new'?'<div class="lc-badge b-new">New</div>':'')+
+    (l.status==='sold'?'<div class="lc-badge b-sold">'+_('listing.sold','Sold')+'</div>':l.condition==='new'?'<div class="lc-badge b-new">'+_('listing.new','New')+'</div>':'')+
     (uid&&seller._id!==uid?'<button type="button" class="lc-fav'+(fav?' on':'')+('" onclick="event.stopPropagation();toggleFav(\''+esc(l._id)+'\',this)" aria-label="Favorite")>&#10084;</button>'):'')+
     '<div class="lc-info">'+
     '<div class="lc-title">'+esc(l.title)+'</div>'+
     '<div class="lc-price">'+fmtNGN(l.price)+'</div>'+
-    '<div class="lc-meta"><span class="cond '+condClass(l.condition)+'">'+condLabel(l.condition)+'</span>'+(l.negotiable?'<span style="color:var(--accent3);font-size:.68rem">Nego</span>':'')+(l.shipping?'<span>&#128230;</span>':'')+'</div>'+
+    '<div class="lc-meta"><span class="cond '+condClass(l.condition)+'">'+condLabel(l.condition)+'</span>'+(l.negotiable?'<span style="color:var(--accent3);font-size:.68rem">'+_('listing.nego','Nego')+'</span>':'')+(l.shipping?'<span>&#128230;</span>':'')+'</div>'+
     '<div class="lc-seller"><div class="av av-sm">'+((seller.username||'?')[0].toUpperCase())+'</div>'+esc(seller.username||'Unknown')+(seller.isVerified?'<span class="verified-badge">✓ Verified</span>':'')+
     '<span style="margin-left:auto;font-size:.68rem">'+timeAgo(l.createdAt)+'</span></div>'+
     '</div></div>';
@@ -2838,15 +2886,15 @@ function renderDetail(l){
   var actionBtns='';
   if(S.user&&!isSeller&&!isSold){
     // Always show Buy Now at full price
-    actionBtns='<button type="button" class="btn btn-p w-full mb-2" id="detail-buy-btn" style="width:100%;justify-content:center;background:rgba(0,180,110,.15);color:#00b46e;border:1px solid rgba(0,180,110,.3)">&#128722; Buy Now — '+fmtNGN(l.price||0)+'</button>';
+    actionBtns='<button type="button" class="btn btn-p w-full mb-2" id="detail-buy-btn" style="width:100%;justify-content:center;background:rgba(0,180,110,.15);color:#00b46e;border:1px solid rgba(0,180,110,.3)">&#128722; '+_('btn.buy','Buy Now')+' — '+fmtNGN(l.price||0)+'</button>';
     // Also show Make Offer if negotiable
     if(l.negotiable){
-      actionBtns+='<button type="button" class="btn btn-p w-full mb-2" id="detail-offer-btn" style="width:100%;justify-content:center">&#129309; Make Offer</button>';
+      actionBtns+='<button type="button" class="btn btn-p w-full mb-2" id="detail-offer-btn" style="width:100%;justify-content:center">&#129309; '+_('btn.offer','Make Offer')+'</button>';
     }
   }
   if(S.user&&isSeller){
-    actionBtns='<button type="button" class="btn btn-s w-full mb-2" id="detail-edit-btn" style="width:100%;justify-content:center">&#9998; Edit Listing</button>';
-    actionBtns+='<button type="button" class="btn btn-d w-full" id="detail-del-btn" style="width:100%;justify-content:center">&#128465; Delete</button>';
+    actionBtns='<button type="button" class="btn btn-s w-full mb-2" id="detail-edit-btn" style="width:100%;justify-content:center">&#9998; '+_('btn.edit','Edit')+' Listing</button>';
+    actionBtns+='<button type="button" class="btn btn-d w-full" id="detail-del-btn" style="width:100%;justify-content:center">&#128465; '+_('btn.delete','Delete')+'</button>';
   }
   // Share buttons
   var shareUrl=window.location.href.split('?')[0]+'?l='+l._id;
@@ -2856,13 +2904,13 @@ function renderDetail(l){
     '<div class="gallery"><div class="gallery-main">'+galMain+'</div>'+(galThumbs?'<div class="gallery-thumbs">'+galThumbs+'</div>':'')+
     '</div>'+
     '<div class="card mt-3"><div class="card-body">'+
-    '<div class="sec-title">About the Seller</div>'+
+    '<div class="sec-title">'+_('listing.aboutSeller','About the Seller')+'</div>'+
     '<div class="flex items-c gap-2">'+
     '<div class="av av-lg" style="cursor:pointer" onclick="nav(\'profile\',\''+esc(seller._id||'')+'\')">'+
     (seller.avatar?'<img src="'+API_BASE+esc(seller.avatar)+'" alt="avatar"/>':((seller.username||'?')[0].toUpperCase()))+
     '</div>'+
-    '<div><div class="fw7">'+esc(seller.username||'Unknown')+(seller.isVerified?'<span class="verified-badge">✓ Verified</span>':'')+
-    '</div><div class="stars">'+starStr(seller.rating||0)+'</div><div class="text-xs text-2">'+(seller.reviewCount||0)+' reviews · '+(seller.location||'No location')+'</div></div>'+
+    '<div><div class="fw7">'+esc(seller.username||'Unknown')+(seller.isVerified?'<span class="verified-badge">'+_('misc.verified','✓ Verified')+'</span>':'')+
+    '</div><div class="stars">'+starStr(seller.rating||0)+'</div><div class="text-xs text-2">'+(seller.reviewCount||0)+' '+_('misc.reviews','reviews')+' · '+(seller.location||_('profile.noLocation','No location'))+'</div></div>'+
     '</div>'+
     (S.user&&!isSeller?'<button type="button" class="btn btn-s btn-sm mt-3" id="detail-review-btn">&#11088; Leave Review</button>':'')+'</div></div>'+
     '</div>'+
@@ -2870,16 +2918,16 @@ function renderDetail(l){
     '<div style="font-size:.75rem;color:var(--text2);margin-bottom:8px">'+esc(l.category)+' · '+condLabel(l.condition)+'</div>'+
     '<h1 style="font-family:var(--df);font-size:1.4rem;font-weight:800;margin-bottom:8px">'+esc(l.title)+'</h1>'+
     '<div class="price-lg">'+fmtNGN(l.price)+'</div>'+
-    (isSold?'<div style="background:var(--bg3);border-radius:var(--r-sm);padding:8px 12px;color:var(--text2);font-size:.85rem;margin-bottom:14px">This listing has been sold</div>':'')+
+    (isSold?'<div style="background:var(--bg3);border-radius:var(--r-sm);padding:8px 12px;color:var(--text2);font-size:.85rem;margin-bottom:14px">'+_('listing.soldMsg','This listing has been sold')+'</div>':'')+
     '<div class="card"><div class="card-body" style="padding:14px">'+
     actionBtns+
     '<div class="flex items-c gap-2 mt-2" style="font-size:.8rem;color:var(--text2)">'+
-    (l.shipping?'<span>&#128230; Ships ($'+Number(l.shippingCost||0).toFixed(2)+')</span>':'<span>&#128205; Local only</span>')+
-    (l.negotiable?'<span>&#10003; Negotiable</span>':'')+
-    '<span>&#128065; '+l.views+' views</span></div>'+
+    (l.shipping?'<span>&#128230; '+_('listing.ships','Ships')+' ($'+Number(l.shippingCost||0).toFixed(2)+')</span>':'<span>&#128205; '+_('misc.localOnly','Local only')+'</span>')+
+    (l.negotiable?'<span>&#10003; '+_('misc.negotiable','Negotiable')+'</span>':'')+
+    '<span>&#128065; '+l.views+' '+_('misc.views','views')+'</span></div>'+
     '</div></div>'+
     '<div class="card mt-3"><div class="card-body">'+
-    '<div class="sec-title">Description</div>'+
+    '<div class="sec-title">'+_('listing.description','Description')+'</div>'+
     '<div style="font-size:.875rem;color:var(--text2);white-space:pre-wrap;line-height:1.7">'+esc(l.description)+'</div>'+
     (l.tags&&l.tags.length?'<div class="tags-row">'+l.tags.map(function(t){return'<span class="tag">'+esc(t)+'</span>';}).join('')+'</div>':'')+
     '</div></div>'+
@@ -3113,7 +3161,7 @@ async function loadOffers(){
   try{
     var d=await api('GET','/offers/me');
     var list=S.offerTab==='received'?d.received:d.sent;
-    if(!list||!list.length){ct.innerHTML='<div class="empty"><div class="empty-ic">&#129309;</div><div class="empty-t">No offers yet</div><div class="empty-d">Make an offer on any listing to start negotiating.</div><button type="button" class="btn btn-p" style="margin-top:10px" onclick="nav(\'home\')">Browse Listings</button></div>';return;}
+    if(!list||!list.length){ct.innerHTML='<div class="empty"><div class="empty-ic">&#129309;</div><div class="empty-t">'+_('offer.noOffers','No offers yet')+'</div><div class="empty-d">'+_('offer.buyFirst','Make an offer on any listing to start negotiating.')+'</div><button type="button" class="btn btn-p" style="margin-top:10px" onclick="nav(\'home\')">'+_('btn.browse','Browse →')+'</button></div>';return;}
     ct.innerHTML=list.map(function(o){return renderOffer(o,S.offerTab);}).join('');
   }catch(e){ct.innerHTML='<div class="empty"><div class="empty-ic">&#9888;</div><div class="empty-t">'+esc(e.message)+'</div></div>';}
 }
@@ -3126,12 +3174,12 @@ function renderOffer(o,tab){
   var actions='';
   if(tab==='received'&&o.status==='pending'){
     actions='<div style="display:flex;gap:7px;margin-top:8px">'+
-      '<button type="button" class="btn btn-ok btn-sm" onclick="respondOffer(\''+o._id+'\',\'accepted\')">Accept</button>'+
-      '<button type="button" class="btn btn-d btn-sm" onclick="respondOffer(\''+o._id+'\',\'rejected\')">Decline</button>'+
-      '<button type="button" class="btn btn-s btn-sm" onclick="openCounterModal(\''+o._id+'\')">Counter</button></div>';
+      '<button type="button" class="btn btn-ok btn-sm" onclick="respondOffer(\''+o._id+'\',\'accepted\')">'+_('offer.accept','Accept')+'</button>'+
+      '<button type="button" class="btn btn-d btn-sm" onclick="respondOffer(\''+o._id+'\',\'rejected\')">'+_('offer.decline','Decline')+'</button>'+
+      '<button type="button" class="btn btn-s btn-sm" onclick="openCounterModal(\''+o._id+'\')">'+_('offer.counter','Counter')+'</button></div>';
   }
   if(tab==='sent'&&(o.status==='pending'||o.status==='countered')){
-    actions='<div style="margin-top:8px"><button type="button" class="btn btn-s btn-sm" onclick="respondOffer(\''+o._id+'\',\'withdrawn\')">Withdraw</button></div>';
+    actions='<div style="margin-top:8px"><button type="button" class="btn btn-s btn-sm" onclick="respondOffer(\''+o._id+'\',\'withdrawn\')">'+_('offer.withdraw','Withdraw')+'</button></div>';
     if(o.status==='countered')actions+='<div style="font-size:.82rem;margin-top:6px;color:var(--accent2)">Counter: '+fmtNGN(o.counterAmount)+(o.counterMessage?' — '+esc(o.counterMessage):'')+'</div>';
   }
   return '<div class="offer-card"><div class="offer-body">'+
@@ -3140,7 +3188,7 @@ function renderOffer(o,tab){
     '<div class="fw7">'+esc(l.title||'Unknown Listing')+'</div>'+
     '<div style="font-size:.8rem;color:var(--text2)">'+esc(other.username||'?')+' · '+timeAgo(o.createdAt)+'</div>'+
     '<div style="margin-top:4px"><span style="font-family:var(--df);font-size:1.1rem;font-weight:800">'+fmtNGN(o.amount)+'</span>'+
-    ' <span class="'+statusCls+'" style="font-size:.78rem;font-weight:600;margin-left:8px">'+o.status.toUpperCase()+'</span></div>'+
+    ' <span class="'+statusCls+'" style="font-size:.78rem;font-weight:600;margin-left:8px">'+(_('offer.'+o.status, o.status.toUpperCase()))+'</span></div>'+
     (o.message?'<div style="font-size:.78rem;color:var(--text2);margin-top:3px">'+esc(o.message)+'</div>':'')+
     actions+
     '</div></div></div>';
@@ -4463,80 +4511,428 @@ var _currentLocale = localStorage.getItem('rf_lang') || 'en';
 
 var TRANSLATIONS = {
   en: {
-    'nav.market':'Marketplace','nav.forum':'Forum','nav.notifications':'Notifications',
-    'nav.analytics':'Analytics','nav.settings':'Settings',    'nav.wallet':'Wallet','nav.tasks':'Tasks','nav.wishlist':'Wishlist','nav.offers':'Offers',
-    'listing.new':'New','listing.sold':'Sold','listing.nego':'Negotiable','listing.ships':'Ships',
-    'auth.signIn':'Sign In','auth.register':'Create Account','auth.googleSignIn':'Continue with Google',
-    'auth.verifyNotice':'Please check your email to verify your account.',
+    /* nav */
+    'nav.market':'Marketplace','nav.search':'Search','nav.more':'More',
+    'nav.forum':'Community','nav.notifications':'Notifications',
+    'nav.analytics':'Analytics','nav.settings':'Settings',
+    'nav.wallet':'Wallet','nav.tasks':'Tasks','nav.wishlist':'Wishlist',
+    'nav.offers':'Offers','nav.subscription':'Subscription',
+    'nav.referrals':'Referrals','nav.support':'Help & Support',
+    'nav.signOut':'Sign Out','nav.profile':'Profile','nav.admin':'Admin',
+    /* auth */
+    'auth.welcome':'Welcome Back','auth.welcomeSub':'Sign in to your RawFlip account',
+    'auth.signIn':'Sign In','auth.register':'Create Account',
+    'auth.googleSignIn':'Sign in with Google','auth.googleSignUp':'Sign up with Google',
+    'auth.noAccount':'No account?','auth.hasAccount':'Have an account?',
+    'auth.forgotPw':'Forgot password?','auth.verifyNotice':'Please check your email to verify your account.',
     'auth.unverified':'Email not verified',
+    'auth.email':'Email','auth.password':'Password','auth.username':'Username',
+    'auth.confirmPw':'Confirm Password','auth.phone':'Phone Number',
+    'auth.whatsapp':'WhatsApp Number','auth.location':'Location',
+    'auth.referral':'Referral Code','auth.referralOpt':'(optional)',
+    /* listing */
+    'listing.new':'New','listing.sold':'Sold','listing.nego':'Negotiable','listing.ships':'Ships',
+    'listing.allListings':'All Listings','listing.createTitle':'Create Listing',
+    'listing.editTitle':'Edit Listing','listing.publish':'Publish Listing',
+    'listing.description':'Description','listing.aboutSeller':'About the Seller',
+    'listing.soldMsg':'This listing has been sold',
+    'listing.condition.new':'New','listing.condition.like_new':'Like New',
+    'listing.condition.good':'Good','listing.condition.fair':'Fair','listing.condition.poor':'Poor',
+    'listing.sort.newest':'Newest','listing.sort.price_asc':'Price ↑',
+    'listing.sort.price_desc':'Price ↓','listing.sort.popular':'Popular',
+    /* offers */
     'offer.make':'Make an Offer','offer.pending':'Pending','offer.accepted':'Accepted',
     'offer.rejected':'Rejected','offer.expired':'Expired','offer.countered':'Countered',
-    'toast.saved':'Saved','toast.deleted':'Deleted','toast.error':'Error','toast.copied':'Copied!',
-    '2fa.enable':'Enable 2FA','2fa.disable':'Disable 2FA','2fa.enabled':'2FA Active ✓',
-    'search.results':'results','search.noResults':'No results found',
-    'btn.buy':'Buy Now','btn.offer':'Make Offer','btn.msg':'Message Seller',
+    'offer.withdrawn':'Withdrawn','offer.received':'Received','offer.sent':'Sent',
+    'offer.accept':'Accept','offer.decline':'Decline','offer.counter':'Counter','offer.withdraw':'Withdraw',
+    'offer.noOffers':'No offers yet','offer.buyFirst':'Make an offer on any listing to start negotiating.',
+    /* transactions */
+    'tx.buyer':'Buyer','tx.seller':'Seller','tx.role.buyer':'Buyer','tx.role.seller':'Seller',
+    'tx.state.PENDING_OFFER':'Pending Offer','tx.state.ACCEPTED':'Accepted',
+    'tx.state.ESCROW_FUNDED':'Escrow Funded','tx.state.SHIPPED':'Shipped',
+    'tx.state.DELIVERED':'Delivered','tx.state.COMPLETED':'Completed',
+    'tx.state.DISPUTED':'Disputed','tx.state.CANCELLED':'Cancelled',
+    'tx.state.REFUNDED':'Refunded','tx.noTx':'No transactions yet.',
+    'tx.buyFirst':'Buy something to get started.',
+    /* wallet */
     'wallet.deposit':'Deposit','wallet.withdraw':'Withdraw','wallet.balance':'Balance',
-    'profile.joinDate':'Joined','profile.listings':'Listings','profile.reviews':'Reviews',
+    'wallet.available':'Available','wallet.reserved':'Reserved (in offers)',
+    'wallet.escrow':'In Escrow','wallet.withdrawable':'Withdrawable',
+    'wallet.earnings':'Referral Earnings','wallet.addFunds':'+ Deposit Funds',
+    'wallet.txHistory':'Wallet Transactions',
+    /* buttons */
+    'btn.buy':'Buy Now','btn.offer':'Make Offer','btn.msg':'Message Seller',
+    'btn.cancel':'Cancel','btn.confirm':'Confirm','btn.save':'Save','btn.edit':'Edit',
+    'btn.delete':'Delete','btn.publish':'Publish','btn.back':'Back','btn.close':'Close',
+    'btn.dispatch':'Mark as Dispatched','btn.confirmReceipt':'Confirm Receipt',
+    'btn.report':'Report Problem','btn.browse':'Browse →','btn.sell':'Sell Something',
+    'btn.newPost':'New Post','btn.newTask':'+ New Task','btn.newListing':'New Listing',
+    'btn.markAllRead':'Mark All Read','btn.saveSearch':'Save Search',
+    'btn.installApp':'Install App','btn.next':'Next →','btn.skip':'Skip tour',
+    /* pages */
+    'page.wallet':'Wallet','page.notifications':'Notifications','page.tasks':'My Tasks',
+    'page.wishlist':'My Wishlist','page.offers':'Offers','page.forum':'Community Forum',
+    'page.settings':'⚙️ Settings','page.search':'Search',
+    'page.transactions':'My Transactions','page.analytics':'Analytics',
+    /* filters */
+    'filter.sort':'Sort:','filter.condition':'Condition:','filter.price':'Price:',
+    'filter.any':'Any','filter.ships':'Ships','filter.nego':'Nego',
+    /* tasks tabs */
+    'tasks.all':'All','tasks.todo':'To Do','tasks.inProgress':'In Progress','tasks.done':'Done',
+    /* posts tabs */
+    'posts.all':'All','posts.discussion':'Discussion','posts.questions':'Questions',
+    'posts.tips':'Tips','posts.announcements':'Announcements',
+    /* offers tabs */
+    'offers.received':'Received','offers.sent':'Sent',
+    /* search */
+    'search.results':'results','search.noResults':'No results found','search.placeholder':'Search listings…',
+    /* profile */
+    'profile.joinDate':'Joined','profile.listings':'Listings',
+    'profile.reviews':'Reviews','profile.rating':'Rating','profile.followers':'Followers',
+    'profile.noBio':'No bio yet','profile.noLocation':'No location',
+    'profile.editProfile':'Edit Profile','profile.follow':'Follow',
+    'profile.block':'Block','profile.report':'Report',
+    /* onboarding */
+    'onb.title0':'Browse the Market','onb.desc0':'Scroll through listings, tap to view details, make offers or buy instantly.',
+    'onb.title1':'Bottom Navigation','onb.desc1':'Use the bar at the bottom to switch between Home, Search, Messages and Profile.',
+    'onb.title2':'Escrow Protection','onb.desc2':'Your money is held safely until you confirm receipt. Zero risk.',
+    /* hero */
+    'hero.title1':'Buy & Sell','hero.title2':'Anything',
+    'hero.sub':'The marketplace for new and used items. Great deals or quick flips.',
+    'hero.activeListings':'Active Listings','hero.categories':'Categories',
+    /* toast */
+    'toast.saved':'Saved','toast.deleted':'Deleted','toast.error':'Error','toast.copied':'Copied!',
+    /* 2fa */
+    '2fa.enable':'Enable 2FA','2fa.disable':'Disable 2FA','2fa.enabled':'2FA Active ✓',
+    /* fab */
+    'fab.newListing':'New Listing','fab.newPost':'New Post','fab.newTask':'New Task',
+    /* misc */
+    'misc.withUser':'with','misc.views':'views','misc.reviews':'reviews',
+    'misc.localOnly':'Local only','misc.negotiable':'Negotiable','misc.verified':'✓ Verified',
     'lang.name':'English',
   },
+
   ha: {
-    'nav.market':'Kasuwa','nav.forum':'Tattaunawa','nav.notifications':'Sanarwa',
-    'nav.analytics':'Bincike','nav.settings':'Saituna',    'nav.wallet':'Jakar Kudi','nav.tasks':'Ayyuka','nav.wishlist':'Jerin Bukata','nav.offers':'Tayin',
-    'listing.new':'Sabo','listing.sold':'An Sayar','listing.nego':'Ana Tattaunawa','listing.ships':'Ana Jigilar',
-    'auth.signIn':'Shiga','auth.register':'Ƙirƙiri Asusun','auth.googleSignIn':'Ci gaba da Google',
-    'auth.verifyNotice':'Don Allah duba imel ɗinka don tabbatar da asusunka.',
+    'nav.market':'Kasuwa','nav.search':'Bincika','nav.more':'Ƙari',
+    'nav.forum':'Al\'umma','nav.notifications':'Sanarwa',
+    'nav.analytics':'Bincike','nav.settings':'Saituna',
+    'nav.wallet':'Jakar Kudi','nav.tasks':'Ayyuka','nav.wishlist':'Jerin Bukata',
+    'nav.offers':'Tayin','nav.subscription':'Biyan Kuɗi',
+    'nav.referrals':'Neman Abokai','nav.support':'Taimako',
+    'nav.signOut':'Fita','nav.profile':'Bayani na','nav.admin':'Admin',
+    'auth.welcome':'Barka da Dawowar','auth.welcomeSub':'Shiga cikin asusun RawFlip ɗinka',
+    'auth.signIn':'Shiga','auth.register':'Ƙirƙiri Asusun',
+    'auth.googleSignIn':'Shiga da Google','auth.googleSignUp':'Yi rajista da Google',
+    'auth.noAccount':'Ba ka da asusu?','auth.hasAccount':'Kana da asusu?',
+    'auth.forgotPw':'Manta kalmar sirri?','auth.verifyNotice':'Don Allah duba imel ɗinka don tabbatar da asusunka.',
     'auth.unverified':'Ba a tabbatar da imel ba',
+    'auth.email':'Imel','auth.password':'Kalmar Sirri','auth.username':'Sunan Mai Amfani',
+    'auth.confirmPw':'Tabbatar Kalmar Sirri','auth.phone':'Lambar Waya',
+    'auth.whatsapp':'Lambar WhatsApp','auth.location':'Wurin Zama',
+    'auth.referral':'Lambar Neman Aboki','auth.referralOpt':'(ba tilas ba)',
+    'listing.new':'Sabo','listing.sold':'An Sayar','listing.nego':'Ana Tattaunawa','listing.ships':'Ana Jigilar',
+    'listing.allListings':'Duk Abubuwa','listing.createTitle':'Ƙirƙiri Jeri',
+    'listing.editTitle':'Gyara Jeri','listing.publish':'Buga Jeri',
+    'listing.description':'Bayani','listing.aboutSeller':'Game da Mai Sayarwa',
+    'listing.soldMsg':'An riga an sayar da wannan abu',
+    'listing.condition.new':'Sabo','listing.condition.like_new':'Kamar Sabo',
+    'listing.condition.good':'Mai Kyau','listing.condition.fair':'Matsakaici','listing.condition.poor':'Tsohon',
+    'listing.sort.newest':'Sabon','listing.sort.price_asc':'Farashi ↑',
+    'listing.sort.price_desc':'Farashi ↓','listing.sort.popular':'Mashahuri',
     'offer.make':'Yi Tayi','offer.pending':'Ana Jira','offer.accepted':'An Amince',
     'offer.rejected':'An Ƙi','offer.expired':'Ya Ƙare','offer.countered':'An Mayar da Tayi',
-    'toast.saved':'An Adana','toast.deleted':'An Share','toast.error':'Kuskure','toast.copied':'An Kwafi!',
-    'btn.buy':'Sayi Yanzu','btn.offer':'Yi Tayi','btn.msg':'Saƙo Mai Sayarwa',
+    'offer.withdrawn':'An Ja Baya','offer.received':'Da Aka Karɓa','offer.sent':'Da Aka Aika',
+    'offer.accept':'Amince','offer.decline':'Ƙi','offer.counter':'Mayar da Tayi','offer.withdraw':'Ja Baya',
+    'offer.noOffers':'Babu tayin tukuna','offer.buyFirst':'Yi tayi kan kowane abu don fara tattaunawa.',
+    'tx.buyer':'Mai Saya','tx.seller':'Mai Sayarwa','tx.role.buyer':'Mai Saya','tx.role.seller':'Mai Sayarwa',
+    'tx.state.PENDING_OFFER':'Ana Jiran Tayi','tx.state.ACCEPTED':'An Amince',
+    'tx.state.ESCROW_FUNDED':'Kuɗi a Amana','tx.state.SHIPPED':'An Aika',
+    'tx.state.DELIVERED':'An Isar','tx.state.COMPLETED':'An Gama',
+    'tx.state.DISPUTED':'Ana Takaddama','tx.state.CANCELLED':'An Soke',
+    'tx.state.REFUNDED':'An Mayar da Kuɗi','tx.noTx':'Babu ma\'amaloli tukuna.',
+    'tx.buyFirst':'Saya wani abu don fara.',
     'wallet.deposit':'Ajiya','wallet.withdraw':'Cire Kudi','wallet.balance':'Daidai',
+    'wallet.available':'Mai Amfani','wallet.reserved':'A Ajiye (a cikin tayin)',
+    'wallet.escrow':'A Amana','wallet.withdrawable':'Za a iya cire',
+    'wallet.earnings':'Ribar Neman Abokai','wallet.addFunds':'+ Ajiye Kuɗi',
+    'wallet.txHistory':'Tarihin Ma\'amaloli',
+    'btn.buy':'Sayi Yanzu','btn.offer':'Yi Tayi','btn.msg':'Saƙo Mai Sayarwa',
+    'btn.cancel':'Soke','btn.confirm':'Tabbatar','btn.save':'Ajiye','btn.edit':'Gyara',
+    'btn.delete':'Share','btn.publish':'Buga','btn.back':'Baya','btn.close':'Rufe',
+    'btn.dispatch':'Nuna An Aika','btn.confirmReceipt':'Tabbatar An Karɓa',
+    'btn.report':'Bayar da Rahoto','btn.browse':'Duba →','btn.sell':'Sayar da Wani Abu',
+    'btn.newPost':'Post Sabon','btn.newTask':'+ Sabon Aiki','btn.newListing':'Sabon Jeri',
+    'btn.markAllRead':'Nuna Duka An Karanta','btn.saveSearch':'Adana Bincike',
+    'btn.installApp':'Shigar da App','btn.next':'Gaba →','btn.skip':'Tsallake yawon bude ido',
+    'page.wallet':'Jakar Kudi','page.notifications':'Sanarwa','page.tasks':'Ayyukana',
+    'page.wishlist':'Jerin Bukatan','page.offers':'Tayin','page.forum':'Dandalin Al\'umma',
+    'page.settings':'⚙️ Saituna','page.search':'Bincika',
+    'page.transactions':'Ma\'amalolina','page.analytics':'Bincike',
+    'filter.sort':'Tsari:','filter.condition':'Yanayi:','filter.price':'Farashi:',
+    'filter.any':'Komai','filter.ships':'Ana Jigilar','filter.nego':'Ana Tattaunawa',
+    'tasks.all':'Duka','tasks.todo':'Aiki','tasks.inProgress':'Ana Aiki','tasks.done':'An Gama',
+    'posts.all':'Duka','posts.discussion':'Tattaunawa','posts.questions':'Tambayoyi',
+    'posts.tips':'Shawarwari','posts.announcements':'Sanarwa',
+    'offers.received':'Da Aka Karɓa','offers.sent':'Da Aka Aika',
+    'search.results':'sakamako','search.noResults':'Ba a samu sakamako','search.placeholder':'Bincika kaya…',
     'profile.joinDate':'Shiga','profile.listings':'Abubuwa','profile.reviews':'Sharhi',
+    'profile.rating':'Ƙima','profile.followers':'Mabiya','profile.noBio':'Babu bayanin kai',
+    'profile.noLocation':'Babu wurin zama','profile.editProfile':'Gyara Bayani',
+    'profile.follow':'Bi','profile.block':'Toshe','profile.report':'Bayar da Rahoto',
+    'onb.title0':'Duba Kasuwa','onb.desc0':'Zage cikin jerin, taɓa don duba bayani, yi tayi ko saya nan take.',
+    'onb.title1':'Kewayawa na ƙasa','onb.desc1':'Yi amfani da mashigin ƙasa don canzawa tsakanin gida, bincike da bayani.',
+    'onb.title2':'Kariyar Amana','onb.desc2':'Ana riƙe kuɗinka lafiya har sai ka tabbatar da karɓa. Babu haɗari.',
+    'hero.title1':'Saya &amp; Sayar','hero.title2':'Komai',
+    'hero.sub':'Kasuwar kayayyaki sabo da tsofaffi. Kyawawan farashi ko saurin sayarwa.',
+    'hero.activeListings':'Jerin Ayyuka','hero.categories':'Nau\'o\'i',
+    'toast.saved':'An Adana','toast.deleted':'An Share','toast.error':'Kuskure','toast.copied':'An Kwafi!',
+    '2fa.enable':'Kunna 2FA','2fa.disable':'Kashe 2FA','2fa.enabled':'2FA Aiki ✓',
+    'fab.newListing':'Sabon Jeri','fab.newPost':'Sabon Post','fab.newTask':'Sabon Aiki',
+    'misc.withUser':'tare da','misc.views':'ra\'ayoyi','misc.reviews':'sharhi',
+    'misc.localOnly':'Na gida kawai','misc.negotiable':'Ana tattaunawa','misc.verified':'✓ An Tabbatar',
     'lang.name':'Hausa',
   },
+
   yo: {
-    'nav.market':'Ọjà','nav.forum':'Ìjíròrò','nav.notifications':'Ìwífún',
-    'nav.analytics':'Ìtúpalẹ̀','nav.settings':'Ìtòsílẹ̀',    'nav.wallet':'Àpò Owó','nav.tasks':'Iṣẹ́','nav.wishlist':'Àkójọ Fẹ́','nav.offers':'Àwọn Ìdánilójú',
-    'listing.new':'Tuntun','listing.sold':'Ti Tà','listing.nego':'A lè Ṣòwò','listing.ships':'Gbigbe',
-    'auth.signIn':'Wọlé','auth.register':'Ṣẹ̀dá Àkáǹtì','auth.googleSignIn':'Tẹ̀síwájú pẹ̀lú Google',
-    'auth.verifyNotice':'Jọ̀wọ́ ṣàyẹ̀wò ìmèyìl rẹ láti jẹ́rìí ṣe àkáǹtì rẹ.',
+    'nav.market':'Ọjà','nav.search':'Ṣàwárí','nav.more':'Síwájú',
+    'nav.forum':'Àwùjọ','nav.notifications':'Ìwífún',
+    'nav.analytics':'Ìtúpalẹ̀','nav.settings':'Ìtòsílẹ̀',
+    'nav.wallet':'Àpò Owó','nav.tasks':'Iṣẹ́','nav.wishlist':'Àkójọ Fẹ́',
+    'nav.offers':'Àwọn Ìdánilójú','nav.subscription':'Ìforúkọsilẹ̀',
+    'nav.referrals':'Ìdásílẹ̀ Ọ̀rẹ́','nav.support':'Ìrànlọ́wọ́',
+    'nav.signOut':'Jáde','nav.profile':'Àlàyé mi','nav.admin':'Admin',
+    'auth.welcome':'Ẹ káàbọ̀ Padà','auth.welcomeSub':'Wọlé sí àkáǹtì RawFlip rẹ',
+    'auth.signIn':'Wọlé','auth.register':'Ṣẹ̀dá Àkáǹtì',
+    'auth.googleSignIn':'Wọlé pẹ̀lú Google','auth.googleSignUp':'Forúkọ pẹ̀lú Google',
+    'auth.noAccount':'Kò sí àkáǹtì?','auth.hasAccount':'Ní àkáǹtì?',
+    'auth.forgotPw':'Gbàgbé ọ̀rọ̀ aṣínà?','auth.verifyNotice':'Jọ̀wọ́ ṣàyẹ̀wò ìmèyìl rẹ láti jẹ́rìí ṣe àkáǹtì rẹ.',
     'auth.unverified':'Ìmèyìl kò tíì jẹ́rìí',
+    'auth.email':'Ìmèyìl','auth.password':'Ọ̀rọ̀ Aṣínà','auth.username':'Orúkọ Olùmúlò',
+    'auth.confirmPw':'Jẹ́rìí Ọ̀rọ̀ Aṣínà','auth.phone':'Nọ́mbà Fóònù',
+    'auth.whatsapp':'Nọ́mbà WhatsApp','auth.location':'Ibùdó',
+    'auth.referral':'Kóòdù Ìdásílẹ̀','auth.referralOpt':'(kò jẹ́ dandan)',
+    'listing.new':'Tuntun','listing.sold':'Ti Tà','listing.nego':'A lè Ṣòwò','listing.ships':'Gbigbe',
+    'listing.allListings':'Gbogbo Àkójọ','listing.createTitle':'Ṣẹ̀dá Àkójọ',
+    'listing.editTitle':'Ṣàtúnṣe Àkójọ','listing.publish':'Ṣàtẹ̀jáde',
+    'listing.description':'Àpèjúwe','listing.aboutSeller':'Nípa Olùtajà',
+    'listing.soldMsg':'A ti tà ohun àpẹẹrẹ yìí',
+    'listing.condition.new':'Tuntun','listing.condition.like_new':'Bíi Tuntun',
+    'listing.condition.good':'Dára','listing.condition.fair':'Ó Wà','listing.condition.poor':'Àtijọ́',
+    'listing.sort.newest':'Tuntun','listing.sort.price_asc':'Iye ↑',
+    'listing.sort.price_desc':'Iye ↓','listing.sort.popular':'Gbajúmọ̀',
     'offer.make':'Ṣe Àdéhùn','offer.pending':'Ó Ń Dúró','offer.accepted':'Gbà',
     'offer.rejected':'Kọ̀','offer.expired':'Parí','offer.countered':'Fèsì Sí',
-    'toast.saved':'Fipamọ́','toast.deleted':'Parẹ́','toast.error':'Àṣìṣe','toast.copied':'Daakọ!',
-    'btn.buy':'Ra Báyìí','btn.offer':'Ṣe Àdéhùn','btn.msg':'Firanṣẹ́ Olùtajà',
+    'offer.withdrawn':'Yọ Padà','offer.received':'Tí A Gba','offer.sent':'Tí A Rán',
+    'offer.accept':'Gbà','offer.decline':'Kọ̀','offer.counter':'Fèsì','offer.withdraw':'Yọ Padà',
+    'offer.noOffers':'Kò sí àdéhùn títí','offer.buyFirst':'Ṣe àdéhùn lórí àkójọ kankan láti bẹ̀rẹ̀.',
+    'tx.buyer':'Olùràn','tx.seller':'Olùtajà','tx.role.buyer':'Olùràn','tx.role.seller':'Olùtajà',
+    'tx.state.PENDING_OFFER':'Ń Dúró Fún Àdéhùn','tx.state.ACCEPTED':'Gbà',
+    'tx.state.ESCROW_FUNDED':'Owó Ń Ṣọ́','tx.state.SHIPPED':'Tí A Rán',
+    'tx.state.DELIVERED':'Tí A Gbà','tx.state.COMPLETED':'Parí',
+    'tx.state.DISPUTED':'Ìjiyàn','tx.state.CANCELLED':'Fagilé',
+    'tx.state.REFUNDED':'A Dá Owó Padà','tx.noTx':'Kò sí ìdúnàádúrà títí.',
+    'tx.buyFirst':'Ra nkankan láti bẹ̀rẹ̀.',
     'wallet.deposit':'Fipamọ́','wallet.withdraw':'Yọ Owó','wallet.balance':'Iye Owó',
+    'wallet.available':'Tí Ó Wà','wallet.reserved':'Ní Ìpamọ́ (ní àdéhùn)',
+    'wallet.escrow':'Ní Ìṣọ́','wallet.withdrawable':'Tí a lè yọ',
+    'wallet.earnings':'Ère Ìdásílẹ̀','wallet.addFunds':'+ Fipamọ́ Owó',
+    'wallet.txHistory':'Ìtàn Ìdúnàádúrà',
+    'btn.buy':'Ra Báyìí','btn.offer':'Ṣe Àdéhùn','btn.msg':'Firanṣẹ́ Olùtajà',
+    'btn.cancel':'Fagilé','btn.confirm':'Jẹ́rìí','btn.save':'Fipamọ́','btn.edit':'Ṣàtúnṣe',
+    'btn.delete':'Parẹ́','btn.publish':'Ṣàtẹ̀jáde','btn.back':'Padà','btn.close':'Pa',
+    'btn.dispatch':'Tọ́ka sí Tí A Rán','btn.confirmReceipt':'Jẹ́rìí Tí A Gbà',
+    'btn.report':'Ròyìn Ìṣòro','btn.browse':'Wò →','btn.sell':'Tà Nkankan',
+    'btn.newPost':'Àkọlé Tuntun','btn.newTask':'+ Iṣẹ́ Tuntun','btn.newListing':'Àkójọ Tuntun',
+    'btn.markAllRead':'Tọ́ka Gbogbo Tí A Kà','btn.saveSearch':'Fipamọ́ Àwárí',
+    'btn.installApp':'Fi App Sórí','btn.next':'Tẹ̀síwájú →','btn.skip':'Fò ìrìn àjò',
+    'page.wallet':'Àpò Owó','page.notifications':'Ìwífún','page.tasks':'Iṣẹ́ Mi',
+    'page.wishlist':'Àkójọ Fẹ́ Mi','page.offers':'Àwọn Àdéhùn','page.forum':'Àpéjọ Àwùjọ',
+    'page.settings':'⚙️ Ìtòsílẹ̀','page.search':'Ṣàwárí',
+    'page.transactions':'Ìdúnàádúrà Mi','page.analytics':'Ìtúpalẹ̀',
+    'filter.sort':'Ìtò:','filter.condition':'Ipò:','filter.price':'Iye:',
+    'filter.any':'Èyíkéyìí','filter.ships':'Gbigbe','filter.nego':'A lè Ṣòwò',
+    'tasks.all':'Gbogbo','tasks.todo':'Iṣẹ́','tasks.inProgress':'Ń Ṣe','tasks.done':'Parí',
+    'posts.all':'Gbogbo','posts.discussion':'Ìjíròrò','posts.questions':'Àwọn Ìbéèrè',
+    'posts.tips':'Àwọn Ìmọ̀ràn','posts.announcements':'Ìkéde',
+    'offers.received':'Tí A Gba','offers.sent':'Tí A Rán',
+    'search.results':'àbájáde','search.noResults':'Kò sí àbájáde','search.placeholder':'Wá àkójọ…',
     'profile.joinDate':'Darapọ̀','profile.listings':'Àkójọ','profile.reviews':'Àwọn Àyẹ̀wò',
+    'profile.rating':'Ìpele','profile.followers':'Àwọn Alátẹ̀lé','profile.noBio':'Kò sí àlàyé',
+    'profile.noLocation':'Kò sí ibùdó','profile.editProfile':'Ṣàtúnṣe Àlàyé',
+    'profile.follow':'Tẹ̀lé','profile.block':'Dínà','profile.report':'Ròyìn',
+    'onb.title0':'Wò Ọjà','onb.desc0':'Yípo àwọn àkójọ, tẹ láti wò àlàyé, ṣe àdéhùn tàbí ra lẹ́sẹ̀kẹsẹ̀.',
+    'onb.title1':'Kẹ̀wọ̀n Ìsàlẹ̀','onb.desc1':'Lo ọ̀pá ìsàlẹ̀ láti yí padà láàárín Ilé, Ṣàwárí àti Àlàyé.',
+    'onb.title2':'Ìdáàbòbò Escrow','onb.desc2':'A mọ́ owó rẹ létí títí o fi jẹ́rìí gbà. Kò sí ewu.',
+    'hero.title1':'Ra &amp; Tà','hero.title2':'Ohunkóhun',
+    'hero.sub':'Ọjà fún àwọn nǹkan tuntun àti ti ìgbàanì. Àwọn ìdá dára tàbí tita yára.',
+    'hero.activeListings':'Àwọn Àkójọ Tó Wà','hero.categories':'Àwọn Ẹ̀ka',
+    'toast.saved':'Fipamọ́','toast.deleted':'Parẹ́','toast.error':'Àṣìṣe','toast.copied':'Daakọ!',
+    '2fa.enable':'Mú 2FA Ṣiṣẹ́','2fa.disable':'Pa 2FA Dánù','2fa.enabled':'2FA Ń Ṣiṣẹ́ ✓',
+    'fab.newListing':'Àkójọ Tuntun','fab.newPost':'Àkọlé Tuntun','fab.newTask':'Iṣẹ́ Tuntun',
+    'misc.withUser':'pẹ̀lú','misc.views':'àwọn ìwòran','misc.reviews':'àwọn àyẹ̀wò',
+    'misc.localOnly':'Àdúgbò nìkan','misc.negotiable':'A lè ṣòwò','misc.verified':'✓ Jẹ́rìí',
     'lang.name':'Yorùbá',
   },
+
   ig: {
-    'nav.market':'Ahịa','nav.forum':'Mkparịta ụka','nav.notifications':'Ọkwa',
-    'nav.analytics':'Nyocha','nav.settings':'Ntọala',    'nav.wallet':'Akpa ego','nav.tasks':'Ọrụ','nav.wishlist':'Ndepụta afọ ofuofo','nav.offers':'Ntụnye',
-    'listing.new':'Ọhụrụ','listing.sold':'Ere ọcha','listing.nego':'Enwere ike ịgbazinye','listing.ships':'Ebufe',
-    'auth.signIn':'Banye','auth.register':'Mepụta akaụntụ','auth.googleSignIn':'Gaa n\'ihu na Google',
-    'auth.verifyNotice':'Biko lelee ozi-e gị iji nọgide na akaụntụ gị.',
+    'nav.market':'Ahịa','nav.search':'Chọọ','nav.more':'Ọzọ',
+    'nav.forum':'Obodo','nav.notifications':'Ọkwa',
+    'nav.analytics':'Nyocha','nav.settings':'Ntọala',
+    'nav.wallet':'Akpa ego','nav.tasks':'Ọrụ','nav.wishlist':'Ndepụta afọ ofuofo',
+    'nav.offers':'Ntụnye','nav.subscription':'Ndebanye aha',
+    'nav.referrals':'Iduzi ndị ọzọ','nav.support':'Enyemaka',
+    'nav.signOut':'Pụọ','nav.profile':'Nkọwa m','nav.admin':'Admin',
+    'auth.welcome':'Nnọọ Azụ','auth.welcomeSub':'Banye na akaụntụ RawFlip gị',
+    'auth.signIn':'Banye','auth.register':'Mepụta akaụntụ',
+    'auth.googleSignIn':'Banye site na Google','auth.googleSignUp':'Debanye aha site na Google',
+    'auth.noAccount':'Enweghị akaụntụ?','auth.hasAccount':'Nwere akaụntụ?',
+    'auth.forgotPw':'Chefuo paswọọdụ?','auth.verifyNotice':'Biko lelee ozi-e gị iji nọgide na akaụntụ gị.',
     'auth.unverified':'E jikwasịghị ozi-e',
+    'auth.email':'Ozi-e','auth.password':'Paswọọdụ','auth.username':'Aha onye ọrụ',
+    'auth.confirmPw':'Gosi Paswọọdụ','auth.phone':'Nọmba ekwentị',
+    'auth.whatsapp':'Nọmba WhatsApp','auth.location':'Ebe obibi',
+    'auth.referral':'Koodu ntụziaka','auth.referralOpt':'(ọ dịghị mkpa)',
+    'listing.new':'Ọhụrụ','listing.sold':'Ere ọcha','listing.nego':'Enwere ike ịgbazinye','listing.ships':'Ebufe',
+    'listing.allListings':'Ndepụta niile','listing.createTitle':'Mepụta Ndepụta',
+    'listing.editTitle':'Dezie Ndepụta','listing.publish':'Bipụta',
+    'listing.description':'Nkọwa','listing.aboutSeller':'Maka onye ọrere',
+    'listing.soldMsg':'Anachara ere ihe a',
+    'listing.condition.new':'Ọhụrụ','listing.condition.like_new':'Dị ka ọhụrụ',
+    'listing.condition.good':'Dị mma','listing.condition.fair':'Nkezi','listing.condition.poor':'Ochie',
+    'listing.sort.newest':'Ọhụrụ','listing.sort.price_asc':'Ọnụ ahịa ↑',
+    'listing.sort.price_desc':'Ọnụ ahịa ↓','listing.sort.popular':'Ama ama',
     'offer.make':'Nye ọchịchọ','offer.pending':'Na-atọ ntụ','offer.accepted':'Natara',
     'offer.rejected':'Jụrụ','offer.expired':'Gwụrụ','offer.countered':'Zaghachi ntụnye',
-    'toast.saved':'Echekwara','toast.deleted':'Ehichara','toast.error':'Njehie','toast.copied':'Depụtara!',
-    'btn.buy':'Zụta Ugbu a','btn.offer':'Nye ọchịchọ','btn.msg':'Zipu ozi ọnye na-ere',
+    'offer.withdrawn':'Weghachitere','offer.received':'Natara','offer.sent':'Ziputara',
+    'offer.accept':'Nata','offer.decline':'Jụ','offer.counter':'Zaghachi','offer.withdraw':'Weghachi',
+    'offer.noOffers':'Enweghị ọchịchọ ọ bụla','offer.buyFirst':'Nye ọchịchọ n\'ihe ọ bụla iji malite.',
+    'tx.buyer':'Onye ịzụ ahịa','tx.seller':'Onye ọrere','tx.role.buyer':'Onye ịzụ ahịa','tx.role.seller':'Onye ọrere',
+    'tx.state.PENDING_OFFER':'Na-echere Ọchịchọ','tx.state.ACCEPTED':'Natara',
+    'tx.state.ESCROW_FUNDED':'Ego dị na Escrow','tx.state.SHIPPED':'Ezipụtara',
+    'tx.state.DELIVERED':'Ewebara','tx.state.COMPLETED':'Mechara',
+    'tx.state.DISPUTED':'Esemokwu','tx.state.CANCELLED':'Kagbuo',
+    'tx.state.REFUNDED':'Eweghachitere ego','tx.noTx':'Enweghị azụmahịa ọ bụla.',
+    'tx.buyFirst':'Zụọ ihe iji malite.',
     'wallet.deposit':'Itinye ego','wallet.withdraw':'Iwepụ ego','wallet.balance':'Ego dị',
+    'wallet.available':'Dị ndụ','wallet.reserved':'Echekwara (n\'ọchịchọ)',
+    'wallet.escrow':'Na Escrow','wallet.withdrawable':'Enwere ike ịwepụ',
+    'wallet.earnings':'Ọla iduzi','wallet.addFunds':'+ Tinye Ego',
+    'wallet.txHistory':'Akụkọ Azụmahịa',
+    'btn.buy':'Zụta Ugbu a','btn.offer':'Nye ọchịchọ','btn.msg':'Zipu ozi ọnye na-ere',
+    'btn.cancel':'Kagbuo','btn.confirm':'Kwenye','btn.save':'Chekwa','btn.edit':'Dezie',
+    'btn.delete':'Hichapụ','btn.publish':'Bipụta','btn.back':'Laghachi','btn.close':'Mechie',
+    'btn.dispatch':'Tọọ dịka Ezipụtara','btn.confirmReceipt':'Kwenye Ịnata',
+    'btn.report':'Kọọ Nsogbu','btn.browse':'Lele →','btn.sell':'Ree Ihe',
+    'btn.newPost':'Post Ọhụrụ','btn.newTask':'+ Ọrụ Ọhụrụ','btn.newListing':'Ndepụta Ọhụrụ',
+    'btn.markAllRead':'Tọọ Niile dị ka Agụọla','btn.saveSearch':'Chekwa Ọchọ',
+    'btn.installApp':'Wụnye App','btn.next':'Gaa n\'ihu →','btn.skip':'Wụfuo njem',
+    'page.wallet':'Akpa ego','page.notifications':'Ọkwa','page.tasks':'Ọrụ M',
+    'page.wishlist':'Ndepụta afọ ofuofo m','page.offers':'Ntụnye','page.forum':'Ulo mgbakọ obodo',
+    'page.settings':'⚙️ Ntọala','page.search':'Chọọ',
+    'page.transactions':'Azụmahịa M','page.analytics':'Nyocha',
+    'filter.sort':'Nhazi:','filter.condition':'Ọnọdụ:','filter.price':'Ọnụ ahịa:',
+    'filter.any':'Ọ bụla','filter.ships':'Ebufe','filter.nego':'Enwere ike ịgbazinye',
+    'tasks.all':'Niile','tasks.todo':'Ọrụ','tasks.inProgress':'Na-arụ ọrụ','tasks.done':'Mechara',
+    'posts.all':'Niile','posts.discussion':'Mkparịta ụka','posts.questions':'Ajụjụ',
+    'posts.tips':'Ndụmọdụ','posts.announcements':'Ọkwa',
+    'offers.received':'Natara','offers.sent':'Ziputara',
+    'search.results':'nsonaazụ','search.noResults':'Achọtaghị ihe ọ bụla','search.placeholder':'Chọọ ihe…',
     'profile.joinDate':'Sonyere','profile.listings':'Ndepụta','profile.reviews':'Nyochaa',
+    'profile.rating':'Ọkwa','profile.followers':'Ndị na-eso','profile.noBio':'Enweghị nkọwa',
+    'profile.noLocation':'Enweghị ebe obibi','profile.editProfile':'Dezie Nkọwa',
+    'profile.follow':'Soo','profile.block':'Gbochie','profile.report':'Kọọ',
+    'onb.title0':'Lelee Ahịa','onb.desc0':'Gaa n\'ime ndepụta, pịa iji hụ nkọwa, nye ọchịchọ ma ọ bụ zụọ ozugbo.',
+    'onb.title1':'Nọdụ N\'ala','onb.desc1':'Jiri ogwe n\'ala iji gbanwee n\'etiti Ụlọ, Ọchọ na Nkọwa.',
+    'onb.title2':'Nchedo Escrow','onb.desc2':'A na-echekwa ego gị nke ọma ruo mgbe ị kwenye ịnata. Enweghị ihe ize ndụ.',
+    'hero.title1':'Zụọ &amp; Ree','hero.title2':'Ihe ọ bụla',
+    'hero.sub':'Ahịa maka ihe ọhụrụ na ochie. Azụmahịa dị mma ma ọ bụ ọrere ngwa ngwa.',
+    'hero.activeListings':'Ndepụta Ndụ','hero.categories':'Ụdị',
+    'toast.saved':'Echekwara','toast.deleted':'Ehichara','toast.error':'Njehie','toast.copied':'Depụtara!',
+    '2fa.enable':'Mee 2FA ka ọ rụọ ọrụ','2fa.disable':'Gbochie 2FA','2fa.enabled':'2FA Na-arụ ọrụ ✓',
+    'fab.newListing':'Ndepụta Ọhụrụ','fab.newPost':'Post Ọhụrụ','fab.newTask':'Ọrụ Ọhụrụ',
+    'misc.withUser':'na','misc.views':'nlele','misc.reviews':'nyocha',
+    'misc.localOnly':'Mpaghara naanị','misc.negotiable':'Enwere ike ịgbazinye','misc.verified':'✓ Kwenyere',
     'lang.name':'Igbo',
   },
+
   pc: {
-    'nav.market':'Market','nav.forum':'Forum','nav.notifications':'Notification',
-    'nav.analytics':'Analytics','nav.settings':'Settings',    'nav.wallet':'Wallet','nav.tasks':'Task','nav.wishlist':'Wishlist','nav.offers':'Offer dem',
-    'listing.new':'New','listing.sold':'Dem don sell am','listing.nego':'Price negotiable','listing.ships':'Dem go send am',
-    'auth.signIn':'Enter','auth.register':'Register','auth.googleSignIn':'Use Google enter',
-    'auth.verifyNotice':'Check your email make dem verify your account.',
+    'nav.market':'Market','nav.search':'Search','nav.more':'More',
+    'nav.forum':'Community','nav.notifications':'Notification',
+    'nav.analytics':'Analytics','nav.settings':'Settings',
+    'nav.wallet':'Wallet','nav.tasks':'Task','nav.wishlist':'Wishlist',
+    'nav.offers':'Offer dem','nav.subscription':'Subscription',
+    'nav.referrals':'Refer people','nav.support':'Help',
+    'nav.signOut':'Comot','nav.profile':'My profile','nav.admin':'Admin',
+    'auth.welcome':'Welcome back','auth.welcomeSub':'Enter your RawFlip account',
+    'auth.signIn':'Enter','auth.register':'Register',
+    'auth.googleSignIn':'Enter with Google','auth.googleSignUp':'Register with Google',
+    'auth.noAccount':'No get account?','auth.hasAccount':'Get account?',
+    'auth.forgotPw':'Forget password?','auth.verifyNotice':'Check your email make dem verify your account.',
     'auth.unverified':'Email never verify',
+    'auth.email':'Email','auth.password':'Password','auth.username':'Username',
+    'auth.confirmPw':'Confirm Password','auth.phone':'Phone number',
+    'auth.whatsapp':'WhatsApp number','auth.location':'Where you dey',
+    'auth.referral':'Referral code','auth.referralOpt':'(no force)',
+    'listing.new':'New','listing.sold':'Dem don sell am','listing.nego':'Price negotiable','listing.ships':'Dem go send am',
+    'listing.allListings':'All listings','listing.createTitle':'Create listing',
+    'listing.editTitle':'Edit listing','listing.publish':'Publish listing',
+    'listing.description':'Description','listing.aboutSeller':'About the seller',
+    'listing.soldMsg':'Dem don sell dis one already',
+    'listing.condition.new':'New','listing.condition.like_new':'Like new',
+    'listing.condition.good':'Good','listing.condition.fair':'Fair','listing.condition.poor':'Bad condition',
+    'listing.sort.newest':'Newest','listing.sort.price_asc':'Price ↑',
+    'listing.sort.price_desc':'Price ↓','listing.sort.popular':'Popular',
     'offer.make':'Make offer','offer.pending':'E dey wait','offer.accepted':'Dem accept am',
     'offer.rejected':'Dem reject am','offer.expired':'E don expire','offer.countered':'Dem counter am',
-    'toast.saved':'E don save','toast.deleted':'E don delete','toast.error':'Error happen','toast.copied':'E don copy!',
-    'btn.buy':'Buy am now','btn.offer':'Make offer','btn.msg':'Message seller',
+    'offer.withdrawn':'Dem withdraw am','offer.received':'Wey dem send you','offer.sent':'Wey you send',
+    'offer.accept':'Accept am','offer.decline':'Reject am','offer.counter':'Counter am','offer.withdraw':'Withdraw am',
+    'offer.noOffers':'No offer yet','offer.buyFirst':'Make offer for any listing to start.',
+    'tx.buyer':'Buyer','tx.seller':'Seller','tx.role.buyer':'Buyer','tx.role.seller':'Seller',
+    'tx.state.PENDING_OFFER':'E dey wait for offer','tx.state.ACCEPTED':'Dem accept am',
+    'tx.state.ESCROW_FUNDED':'Money dey escrow','tx.state.SHIPPED':'Dem don send am',
+    'tx.state.DELIVERED':'E don reach','tx.state.COMPLETED':'E don finish',
+    'tx.state.DISPUTED':'Wahala dey','tx.state.CANCELLED':'E don cancel',
+    'tx.state.REFUNDED':'Dem return the money','tx.noTx':'No transaction yet.',
+    'tx.buyFirst':'Buy something to start.',
     'wallet.deposit':'Put money','wallet.withdraw':'Take money','wallet.balance':'Balance',
-    'profile.joinDate':'Join date','profile.listings':'Listings','profile.reviews':'Reviews',
+    'wallet.available':'Available','wallet.reserved':'Dem hold am (for offer)',
+    'wallet.escrow':'Dey escrow','wallet.withdrawable':'You fit take am',
+    'wallet.earnings':'Referral money','wallet.addFunds':'+ Add money',
+    'wallet.txHistory':'Transaction history',
+    'btn.buy':'Buy am now','btn.offer':'Make offer','btn.msg':'Message seller',
+    'btn.cancel':'Cancel','btn.confirm':'Confirm','btn.save':'Save','btn.edit':'Edit',
+    'btn.delete':'Delete','btn.publish':'Publish','btn.back':'Go back','btn.close':'Close',
+    'btn.dispatch':'Mark as sent','btn.confirmReceipt':'Confirm say you receive am',
+    'btn.report':'Report problem','btn.browse':'Browse →','btn.sell':'Sell something',
+    'btn.newPost':'New post','btn.newTask':'+ New task','btn.newListing':'New listing',
+    'btn.markAllRead':'Mark all as read','btn.saveSearch':'Save search',
+    'btn.installApp':'Install app','btn.next':'Next →','btn.skip':'Skip tour',
+    'page.wallet':'Wallet','page.notifications':'Notification','page.tasks':'My tasks',
+    'page.wishlist':'My wishlist','page.offers':'Offer dem','page.forum':'Community forum',
+    'page.settings':'⚙️ Settings','page.search':'Search',
+    'page.transactions':'My transactions','page.analytics':'Analytics',
+    'filter.sort':'Sort:','filter.condition':'Condition:','filter.price':'Price:',
+    'filter.any':'Any','filter.ships':'Dem go send','filter.nego':'Price negotiable',
+    'tasks.all':'All','tasks.todo':'To do','tasks.inProgress':'Dey work','tasks.done':'Done',
+    'posts.all':'All','posts.discussion':'Discussion','posts.questions':'Questions',
+    'posts.tips':'Tips','posts.announcements':'Announcement',
+    'offers.received':'Wey dem send you','offers.sent':'Wey you send',
+    'search.results':'results','search.noResults':'No result','search.placeholder':'Search listings…',
+    'profile.joinDate':'Join','profile.listings':'Listings','profile.reviews':'Reviews',
+    'profile.rating':'Rating','profile.followers':'Followers','profile.noBio':'No bio yet',
+    'profile.noLocation':'No location','profile.editProfile':'Edit profile',
+    'profile.follow':'Follow','profile.block':'Block','profile.report':'Report',
+    'onb.title0':'Browse the market','onb.desc0':'Scroll through listings, tap to see details, make offer or buy quick quick.',
+    'onb.title1':'Bottom menu','onb.desc1':'Use the bar for down to switch between Home, Search and Profile.',
+    'onb.title2':'Escrow protection','onb.desc2':'Dem go hold your money until you confirm say you receive am. No risk.',
+    'hero.title1':'Buy &amp; Sell','hero.title2':'Anything',
+    'hero.sub':'The market for new and used things. Good price or quick sell.',
+    'hero.activeListings':'Active listings','hero.categories':'Categories',
+    'toast.saved':'E don save','toast.deleted':'E don delete','toast.error':'Error happen','toast.copied':'E don copy!',
+    '2fa.enable':'Turn on 2FA','2fa.disable':'Turn off 2FA','2fa.enabled':'2FA on ✓',
+    'fab.newListing':'New listing','fab.newPost':'New post','fab.newTask':'New task',
+    'misc.withUser':'with','misc.views':'views','misc.reviews':'reviews',
+    'misc.localOnly':'Local only','misc.negotiable':'Price negotiable','misc.verified':'✓ Verified',
     'lang.name':'Pidgin',
   },
 };
@@ -4574,10 +4970,31 @@ function setLang(locale) {
         btn.style.color = isActive ? 'var(--accent)' : '';
       });
     }
-    // Re-render current page content that uses _() for dynamic text
+    // Re-render dynamic content on the current page
     if (typeof updateHdrUser === 'function') updateHdrUser();
+    var page = S && S.currentPage;
+    if (page) {
+      // Re-run the current page's loader to rebuild JS-rendered HTML in the new language
+      var reloadMap = {
+        'home':         function(){ if(typeof loadListings==='function') loadListings(); },
+        'search':       function(){ if(typeof runSearch==='function') runSearch(); },
+        'offers':       function(){ if(typeof loadOffers==='function') loadOffers(); },
+        'wallet':       function(){ if(typeof loadWallet==='function') loadWallet(); },
+        'notifications':function(){ if(typeof loadNotifications==='function') loadNotifications(); },
+        'tasks':        function(){ if(typeof loadTasks==='function') loadTasks(); },
+        'wishlist':     function(){ if(typeof loadWishlist==='function') loadWishlist(); },
+        'posts':        function(){ if(typeof loadPosts==='function') loadPosts(); },
+        'profile':      function(){ if(typeof loadProfile==='function') loadProfile(S.profileId); },
+        'subscription': function(){ if(typeof loadSubscriptionPage==='function') loadSubscriptionPage(); },
+        'referral':     function(){ if(typeof loadReferralDashboard==='function') loadReferralDashboard(); },
+        'settings':     function(){ if(typeof loadSettings==='function') loadSettings(); },
+        'analytics':    function(){ if(typeof loadAnalytics==='function') loadAnalytics(); },
+        'transactions': function(){ if(typeof loadTransactions==='function') loadTransactions(); },
+      };
+      if (reloadMap[page]) reloadMap[page]();
+    }
     var langName = TRANSLATIONS[locale] ? TRANSLATIONS[locale]['lang.name'] || locale : locale;
-    toast('Language changed', langName, 'success', 2000);
+    toast(_('toast.saved','Saved'), langName, 'success', 2000);
   });
 }
 
@@ -5034,11 +5451,33 @@ loadAnalytics = function() { ensureChartJS(function() { _loadAnalyticsOrig(); })
 async function loadSettings() {
   // Inject language picker
   if (typeof injectLangPicker === 'function') injectLangPicker('lang-picker-container');
-  // Load KYC status
-  loadKYCStatus().then(function(d){
-    var display = document.getElementById('kyc-status-display');
+
+  // Hide KYC card by default until we know wallet status
+  var kycCard = document.getElementById('kyc-card');
+  if (kycCard) kycCard.style.display = 'none';
+
+  // Load wallet balance and KYC status in parallel
+  Promise.all([
+    loadKYCStatus(),
+    api('GET', '/wallet').catch(function(){ return null; }),
+  ]).then(function(results) {
+    var d        = results[0] || {};
+    var wallet   = results[1] || {};
+    var withdrawable = wallet.withdrawableBalance || 0;
+
+    var display  = document.getElementById('kyc-status-display');
     var formWrap = document.getElementById('kyc-form-wrap');
-    if(!display) return;
+    if (!display) return;
+
+    // Only show the KYC card once the user has earned something to withdraw
+    if (withdrawable <= 0) {
+      if (kycCard) kycCard.style.display = 'none';
+      return;
+    }
+
+    // User has a withdrawable balance — show the card
+    if (kycCard) kycCard.style.display = '';
+
     var status = d.kycStatus || 'none';
     var badges = {
       none:     '<span style="color:var(--text2)">⬜ Not submitted</span>',
@@ -5047,9 +5486,10 @@ async function loadSettings() {
       rejected: '<span style="color:#ef4444">❌ Rejected'+(d.kycRejectionNote?' — '+d.kycRejectionNote:'')+'<br>Please resubmit with correct documents.</span>',
     };
     display.innerHTML = badges[status] || badges.none;
-    if(formWrap){
+
+    if (formWrap) {
       // Hide form if pending or approved; show for none or rejected
-      formWrap.style.display = (status==='pending'||status==='approved') ? 'none' : 'block';
+      formWrap.style.display = (status === 'pending' || status === 'approved') ? 'none' : 'block';
     }
   });
   // Load 2FA status
@@ -5399,15 +5839,15 @@ function loadTransactions(){
     el.innerHTML=alertBanner+d.transactions.map(function(tx){
       var bId2=tx.buyerId&&(tx.buyerId._id||tx.buyerId)||'';
       var isBuyer=!!(uid&&String(bId2)===String(uid));
-      var role=isBuyer?'Buyer':'Seller';
+      var role=isBuyer?_('tx.role.buyer','Buyer'):_('tx.role.seller','Seller');
       var other=isBuyer?(tx.sellerId&&tx.sellerId.username):(tx.buyerId&&tx.buyerId.username);
       return '<div class="tx-card" onclick="openTxDetail(\''+tx._id+'\')">' +
         '<div class="tx-card-hdr">' +
           '<div>' +
             '<div style="font-weight:700;color:#eeeef8;margin-bottom:4px">'+esc(tx.itemId&&tx.itemId.title||tx.itemTitle||'Item')+'</div>' +
-            '<div style="font-size:.8rem;color:#6b7fa3">'+role+' · with '+esc(other||'')+'</div>' +
+            '<div style="font-size:.8rem;color:#6b7fa3">'+role+' · '+_('misc.withUser','with')+' '+esc(other||'')+'</div>' +
           '</div>' +
-          '<div><span class="tx-state-badge '+tx.state+'">'+tx.state.replace(/_/g,' ')+'</span></div>' +
+          '<div><span class="tx-state-badge '+tx.state+'">'+(_('tx.state.'+tx.state, tx.state.replace(/_/g,' ')))+'</span></div>' +
         '</div>' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">' +
           '<div>'+fmtCur(tx.amount)+'</div>' +
@@ -6701,7 +7141,7 @@ async function submitDepositStep1() {
   var amt = parseFloat(document.getElementById('dep-amt').value)||0;
   if (amt < 1) {toast('Enter a valid amount','','warn');return;}
   var btn = document.getElementById('dep-btn-1');
-  btn.disabled = true; btn.textContent = 'Creating request…';
+  btn.disabled = true; btn.textContent = 'Loading bank details…';
   try {
     var disclaimerChk = document.getElementById('dep-disclaimer-chk');
     var d = await api('POST','/wallet/deposit/request',{
@@ -6728,7 +7168,7 @@ async function submitDepositStep1() {
     document.getElementById('dep-btn-1').style.display = 'none';
     document.getElementById('dep-btn-2').style.display = '';
   } catch(e){toast('Failed',e.message,'error');}
-  finally{btn.disabled=false;btn.textContent='Next: Payment Instructions';}
+  finally{btn.disabled=false;btn.textContent='Get Bank Details →';}
 }
 
 function handleDepProof(event) {
@@ -6752,7 +7192,7 @@ async function submitDepositProof() {
     var fd = new FormData();
     fd.append('proof', _depProofFile);
     await api('POST','/wallet/deposit/'+_depTxId+'/proof', fd, true);
-    toast('Proof submitted! ✅','Admin will approve within 24h','success',5000);
+    toast('Proof submitted! ✅','Your transfer is being verified. We\'ll credit your wallet soon.','success',6000);
     closeModal('deposit-modal');
     if (S.currentPage==='wallet') loadWallet();
   } catch(e){toast('Submit failed',e.message,'error');}
@@ -7365,7 +7805,7 @@ function syncBottomNav(page){
           offers:       function(){if(typeof loadOffers==='function')loadOffers();},
           wishlist:     function(){if(typeof loadWishlist==='function')loadWishlist();},
           profile:      function(){if(typeof loadProfile==='function')loadProfile(S.profileUserId||(S.user&&(S.user._id||S.user.id)));},
-          search:       function(){if(typeof loadSearchResults==='function')loadSearchResults();},
+          search:       function(){if(typeof runSearch==='function')runSearch();},
           tasks:        function(){if(typeof loadTasks==='function')loadTasks();},
           referral:     function(){if(typeof loadReferralDashboard==='function')loadReferralDashboard();},
           analytics:    function(){if(typeof loadAnalytics==='function')loadAnalytics();},
@@ -8251,23 +8691,69 @@ async function loadKYCStatus(){
   } catch(e) { return { kycStatus:'none' }; }
 }
 
+// KYC file state
+var _kycIdDocFile = null, _kycSelfieFile = null;
+
+function handleKycFile(type, event) {
+  var f = event.target.files && event.target.files[0];
+  if (!f) return;
+  var previewId = type === 'iddoc' ? 'kyc-iddoc-preview' : 'kyc-selfie-preview';
+  var dropId    = type === 'iddoc' ? 'kyc-iddoc-drop'    : 'kyc-selfie-drop';
+  if (type === 'iddoc') _kycIdDocFile = f;
+  else _kycSelfieFile = f;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var preview = document.getElementById(previewId);
+    if (preview) preview.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:8px;background:rgba(0,196,122,.08);border:1px solid rgba(0,196,122,.25);border-radius:8px;font-size:.8rem;color:var(--success)">' +
+      '<img src="'+ev.target.result+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0"/>' +
+      '<div><div style="font-weight:600">✅ '+esc(f.name)+'</div><div style="color:var(--text3);font-size:.72rem;margin-top:2px">'+Math.round(f.size/1024)+' KB — tap the upload area to change</div></div>' +
+      '</div>';
+    // Update drop zone label to show selected
+    var drop = document.getElementById(dropId);
+    if (drop) drop.style.borderColor = 'var(--success)';
+  };
+  reader.readAsDataURL(f);
+}
+
 async function submitKYC(){
-  var fullName   = (document.getElementById('kyc-fullname')||{}).value||'';
-  var dob        = (document.getElementById('kyc-dob')||{}).value||'';
-  var idType     = (document.getElementById('kyc-idtype')||{}).value||'';
-  var idNumber   = (document.getElementById('kyc-idnumber')||{}).value||'';
-  var address    = (document.getElementById('kyc-address')||{}).value||'';
-  var idDocUrl   = (document.getElementById('kyc-iddoc-url')||{}).value||'';
-  var selfieUrl  = (document.getElementById('kyc-selfie-url')||{}).value||'';
-  if(!fullName||!dob||!idType||!idNumber||!address||!idDocUrl||!selfieUrl){
-    toast('Missing Fields','Please fill in all KYC fields.','warning'); return;
+  var fullName  = (document.getElementById('kyc-fullname')||{}).value||'';
+  var dob       = (document.getElementById('kyc-dob')||{}).value||'';
+  var idType    = (document.getElementById('kyc-idtype')||{}).value||'';
+  var idNumber  = (document.getElementById('kyc-idnumber')||{}).value||'';
+  var address   = (document.getElementById('kyc-address')||{}).value||'';
+
+  if(!fullName||!dob||!idType||!idNumber||!address){
+    toast('Missing details','Please fill in all personal information fields.','warning'); return;
   }
+  if(!_kycIdDocFile){
+    toast('ID document required','Please upload a photo of your ID document.','warning'); return;
+  }
+  if(!_kycSelfieFile){
+    toast('Selfie required','Please upload a selfie holding your ID.','warning'); return;
+  }
+
+  var btn = document.getElementById('kyc-submit-btn');
+  if (btn){ btn.disabled = true; btn.textContent = 'Submitting…'; }
+
   try {
-    await api('POST','/kyc/submit',{fullName,dob,idType,idNumber,address,idDocUrl,selfieUrl});
-    toast('KYC Submitted','Your documents are under review. We will notify you.','success');
+    var fd = new FormData();
+    fd.append('fullName', fullName);
+    fd.append('dob', dob);
+    fd.append('idType', idType);
+    fd.append('idNumber', idNumber);
+    fd.append('address', address);
+    fd.append('idDoc', _kycIdDocFile);
+    fd.append('selfie', _kycSelfieFile);
+
+    await api('POST', '/kyc/submit', fd, true);
+    _kycIdDocFile = null; _kycSelfieFile = null;
+    toast('Verification submitted ✅','Our team will review your documents. You\'ll be notified once verified.','success', 6000);
     loadSettings();
   } catch(e) {
-    toast('Error', e.message||'Failed to submit KYC','error');
+    toast('Submission failed', e.message||'Please try again.','error');
+  } finally {
+    if (btn){ btn.disabled = false; btn.textContent = 'Submit for Verification'; }
   }
 }
 
