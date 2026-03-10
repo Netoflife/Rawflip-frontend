@@ -2038,6 +2038,10 @@ function esc(v){
     .replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
 }
 
+// imgUrl: returns the correct full URL whether the value is already a
+// Cloudinary https:// URL (new uploads) or a legacy /uploads/ path (old data)
+function imgUrl(v){ if(!v)return''; return /^https?:\/\//.test(v)?v:API_BASE+v; }
+
 /* ── API ─────────────────────────────────────────────────── */
 
 /* Silent token refresh — one in-flight at a time.
@@ -2303,6 +2307,16 @@ function toggleAuth(mode){
   var rf=document.getElementById('reg-frm');if(rf)rf.style.display=isL?'none':'block';
   document.getElementById('auth-hd').textContent=isL?'Welcome Back':'Join RawFlip';
   document.getElementById('auth-sub').textContent=isL?'Sign in to your account':'Create your free account';
+  // If switching to register, pre-fill ref code from sessionStorage if field is empty
+  if (!isL) {
+    try {
+      var pendingRef = sessionStorage.getItem('rf_pending_ref');
+      if (pendingRef) {
+        var refInp = document.getElementById('r-ref');
+        if (refInp && !refInp.value) refInp.value = pendingRef;
+      }
+    } catch(e) {}
+  }
 }
 window._toggleAuth = toggleAuth; // guard alias
 
@@ -2366,6 +2380,8 @@ async function handleRegister(event){
   if(btn){btn.disabled=true;btn.textContent='Creating account…';}
   try{
     var refCode=(document.getElementById('r-ref')&&document.getElementById('r-ref').value.trim())||'';
+    // Fallback: pick up ref code persisted from ?ref= URL param if field is empty
+    if (!refCode) { try { refCode = sessionStorage.getItem('rf_pending_ref')||''; } catch(e){} }
     var d=await api('POST','/auth/register',{
       username:username, email:email, password:pw,
       phone:phone, whatsapp:whatsapp, location:location,
@@ -2374,6 +2390,8 @@ async function handleRegister(event){
       agreePrivacy: !!(document.getElementById('r-agree-privacy')&&document.getElementById('r-agree-privacy').checked),
       agreeTerms:   !!(document.getElementById('r-agree-terms')&&document.getElementById('r-agree-terms').checked),
     });
+    // Clear persisted ref code after successful registration
+    try { sessionStorage.removeItem('rf_pending_ref'); } catch(e) {}
     showRegisterSuccess(email);
   }catch(e){toast('Registration failed',e.message,'error',5000);}
   finally{if(btn){btn.disabled=false;btn.textContent='Create Account';}}
@@ -2542,10 +2560,10 @@ function showResetCodeUI(email, expiresAt) {
     '<div class="fg" style="margin-top:4px"><label class="fl" for="rp-pw2">Confirm Password</label>'+
       '<input class="fc" type="password" id="rp-pw2" placeholder="Repeat your new password" autocomplete="new-password"/>'+
       '<span id="rp-pw2-hint" style="font-size:.75rem;margin-top:3px;display:block;color:var(--danger)"></span></div>'+
-    '<button type="button" class="btn btn-p" id="rp-btn" style="width:100%;justify-content:center;margin-top:14px" onclick="submitResetPasswordCode('+emailJ+')">Set New Password</button>'+
+    '<button type="button" class="btn btn-p" id="rp-btn" style="width:100%;justify-content:center;margin-top:14px">Set New Password</button>'+
     '<div style="margin-top:12px;text-align:center">'+
       '<div id="rp-timer" class="text-sm text-2" style="margin-bottom:6px"></div>'+
-      '<button type="button" class="btn btn-s" id="rp-resend" disabled onclick="resendResetCode('+emailJ+')">Resend Code</button>'+
+      '<button type="button" class="btn btn-s" id="rp-resend" disabled>Resend Code</button>'+
       '<div id="rp-resend-timer" style="font-size:.75rem;color:var(--text3);margin-top:4px"></div>'+
     '</div>'+
     '<div style="text-align:center;font-size:.82rem;color:var(--text2);margin-top:12px">'+
@@ -2553,6 +2571,11 @@ function showResetCodeUI(email, expiresAt) {
     '</div>';
   var card=authPage&&authPage.querySelector('.auth-card');
   (card||authPage).appendChild(panel);
+  // Wire buttons via addEventListener — inline onclick breaks when email contains quotes
+  var rpBtn = document.getElementById('rp-btn');
+  if (rpBtn) rpBtn.addEventListener('click', function(){ submitResetPasswordCode(email); });
+  var rpResend = document.getElementById('rp-resend');
+  if (rpResend) rpResend.addEventListener('click', function(){ resendResetCode(email); });
   var ci=document.getElementById('rp-code');
   if(ci){ci.focus();ci.addEventListener('input',function(){this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');});}
   /* Wire up password strength with correct rp- element IDs */
@@ -2687,7 +2710,7 @@ function updateHdrUser(){
   if(!S.user)return;
   var av=document.getElementById('hdr-av');
   if(av){
-    if(S.user.avatar){av.innerHTML='<img src="'+API_BASE+esc(S.user.avatar)+'" alt="avatar"/>';}
+    if(S.user.avatar){av.innerHTML='<img src="'+esc(imgUrl(S.user.avatar))+'" alt="avatar"/>';}
     else av.textContent=(S.user.username||'?')[0].toUpperCase();
   }
   var adminLnk=document.getElementById('admin-lnk');
@@ -2810,7 +2833,7 @@ function timeAgo(d){
 }
 
 function listingCard(l, showBulk){
-  var img=l.images&&l.images[0]?'<img data-src="'+API_BASE+esc(l.images[0])+'" alt="'+esc(l.title)+'" loading="lazy"/>':'<div class="lc-no-img">&#128247;</div>';
+  var img=l.images&&l.images[0]?'<img data-src="'+esc(imgUrl(l.images[0]))+'" alt="'+esc(l.title)+'" loading="lazy"/>':'<div class="lc-no-img">&#128247;</div>';
   var uid=S.user&&(S.user._id||S.user.id);
   var fav=l.favoritedBy&&uid&&l.favoritedBy.includes(uid);
   var seller=l.seller||{};
@@ -2877,10 +2900,10 @@ function renderDetail(l){
   var isSeller=uid&&seller._id===uid;
   var isSold=l.status==='sold';
   // Gallery
-  var galMain=l.images&&l.images.length?'<img id="gal-main-img" src="'+API_BASE+esc(l.images[0])+'" alt="'+esc(l.title)+'"/>':'<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:4rem;color:var(--text3)">&#128247;</div>';
+  var galMain=l.images&&l.images.length?'<img id="gal-main-img" src="'+esc(imgUrl(l.images[0]))+'" alt="'+esc(l.title)+'"/>':'<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:4rem;color:var(--text3)">&#128247;</div>';
   var galThumbs='';
   if(l.images&&l.images.length>1){
-    l.images.forEach(function(img,i){galThumbs+='<div class="g-thumb'+(i===0?' act':'')+'" id="gt-'+i+'" onclick="switchGalImg(\''+API_BASE+esc(img)+'\','+i+')"><img src="'+API_BASE+esc(img)+'" alt="Image '+i+'"/></div>';});
+    l.images.forEach(function(img,i){galThumbs+='<div class="g-thumb'+(i===0?' act':'')+'" id="gt-'+i+'" onclick="switchGalImg(\''+esc(imgUrl(img))+'\','+i+')"><img src="'+esc(imgUrl(img))+'" alt="Image '+i+'"/></div>';});
   }
   // Action buttons
   var actionBtns='';
@@ -2907,7 +2930,7 @@ function renderDetail(l){
     '<div class="sec-title">'+_('listing.aboutSeller','About the Seller')+'</div>'+
     '<div class="flex items-c gap-2">'+
     '<div class="av av-lg" style="cursor:pointer" onclick="nav(\'profile\',\''+esc(seller._id||'')+'\')">'+
-    (seller.avatar?'<img src="'+API_BASE+esc(seller.avatar)+'" alt="avatar"/>':((seller.username||'?')[0].toUpperCase()))+
+    (seller.avatar?'<img src="'+esc(imgUrl(seller.avatar))+'" alt="avatar"/>':((seller.username||'?')[0].toUpperCase()))+
     '</div>'+
     '<div><div class="fw7">'+esc(seller.username||'Unknown')+(seller.isVerified?'<span class="verified-badge">'+_('misc.verified','✓ Verified')+'</span>':'')+
     '</div><div class="stars">'+starStr(seller.rating||0)+'</div><div class="text-xs text-2">'+(seller.reviewCount||0)+' '+_('misc.reviews','reviews')+' · '+(seller.location||_('profile.noLocation','No location'))+'</div></div>'+
@@ -3169,7 +3192,7 @@ async function loadOffers(){
 function renderOffer(o,tab){
   var l=o.listing||{};var buyer=o.buyer||{};var seller=o.seller||{};
   var other=tab==='received'?buyer:seller;
-  var img=l.images&&l.images[0]?'<img src="'+API_BASE+esc(l.images[0])+'" alt="listing"/>':'';
+  var img=l.images&&l.images[0]?'<img src="'+esc(imgUrl(l.images[0]))+'" alt="listing"/>':'';
   var statusCls='sd-'+o.status;
   var actions='';
   if(tab==='received'&&o.status==='pending'){
@@ -3621,7 +3644,7 @@ async function loadProfile(userId){
     var listings = resp.listings || [];
     var reviews  = resp.reviews  || [];
     ct.innerHTML='<div class="prof-hdr">'+
-      '<div class="av av-lg">'+(user.avatar?'<img src="'+API_BASE+esc(user.avatar)+'" alt="avatar"/>':((user.username||'?')[0].toUpperCase()))+'</div>'+
+      '<div class="av av-lg">'+(user.avatar?'<img src="'+esc(imgUrl(user.avatar))+'" alt="avatar"/>':((user.username||'?')[0].toUpperCase()))+'</div>'+
       '<div class="prof-info">'+
       '<div class="prof-name">'+esc(user.username||'?')+'</div>'+
       (user.isVerified?'<div class="prof-badge-row"><span class="verified-badge">✓ Verified</span>'+
@@ -3710,7 +3733,7 @@ function openEditProfile(){
       '</div>'+
       '<div class="md-foot">'+
       '<button type="button" class="btn btn-s" onclick="closeModal(\'edit-profile-modal\')">Cancel</button>'+
-      '<button type="button" class="btn btn-p" onclick="submitEditProfile()">Save Changes</button>'+
+      '<button type="button" class="btn btn-p" id="ep-save-btn" onclick="submitEditProfile()">Save Changes</button>'+
       '</div></div>';
     document.body.appendChild(el);
   }
@@ -3732,19 +3755,26 @@ async function submitEditProfile(){
   if(epPhone){ epPhone = normalizeNG(epPhone); if(epPhone && !/^\+234[0-9]{10}$/.test(epPhone)){toast('Invalid phone','Must be +234 followed by 10 digits','warn');return;} }
   if(epWa){ epWa = normalizeNG(epWa); if(epWa && !/^\+234[0-9]{10}$/.test(epWa)){toast('Invalid WhatsApp','Must be +234 followed by 10 digits','warn');return;} }
   var fd=new FormData();
-  // Username is locked — do NOT send it to BE
   fd.append('location',location);
   fd.append('bio',bio);
   fd.append('phone',epPhone);
   fd.append('whatsapp',epWa);
   if(avatarFile)fd.append('avatar',avatarFile);
+  var saveBtn = document.getElementById('ep-save-btn') || document.querySelector('#edit-profile-modal .btn-p');
+  var origText = saveBtn ? saveBtn.textContent : '';
+  if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='Saving…'; }
   try{
     var r=await api('PUT','/users/me',fd,true);
     if(S.user){S.user.username=r.username||username;S.user.location=r.location||location;S.user.bio=r.bio||bio;if(r.avatar)S.user.avatar=r.avatar;S.user.phone=r.phone||epPhone;S.user.whatsapp=r.whatsapp||epWa;}
-    toast('Profile updated!','','success');
+    toast('Profile updated! ✅','Your changes have been saved.','success');
     closeModal('edit-profile-modal');
     if(S.currentPage==='profile')loadProfile(S.user._id||S.user.id);
-  }catch(e){console.error('[toggleFav]',e);toast('Error',e.message||'Could not update wishlist','error');}
+  }catch(e){
+    console.error('[submitEditProfile]',e);
+    toast('Could not save profile',e.message||'Please try again.','error');
+  }finally{
+    if(saveBtn){ saveBtn.disabled=false; saveBtn.textContent=origText||'Save Changes'; }
+  }
 }
 
 /* ── Reviews ─────────────────────────────────────────────── */
@@ -3834,8 +3864,8 @@ async function loadAdminDeposits() {
             '</div>'+
             '<div class="text-xs text-2" style="margin-top:6px">'+new Date(dep.createdAt).toLocaleString()+'</div>'+
           '</div>'+
-          (dep.proofImageUrl ? '<div style="flex-shrink:0"><a href="'+API_BASE+esc(dep.proofImageUrl)+'" target="_blank" rel="noopener">'+
-            '<img src="'+API_BASE+esc(dep.proofImageUrl)+'" style="width:110px;height:110px;object-fit:cover;border-radius:8px;border:2px solid var(--border);cursor:zoom-in" alt="proof">'+
+          (dep.proofImageUrl ? '<div style="flex-shrink:0"><a href="'+esc(imgUrl(dep.proofImageUrl))+'" target="_blank" rel="noopener">'+
+            '<img src="'+esc(imgUrl(dep.proofImageUrl))+'" style="width:110px;height:110px;object-fit:cover;border-radius:8px;border:2px solid var(--border);cursor:zoom-in" alt="proof">'+
             '</a><div class="text-xs text-2" style="text-align:center;margin-top:3px">Click to view</div></div>' :
             '<div style="flex-shrink:0;width:110px;height:110px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:.75rem;text-align:center">No proof uploaded</div>')+
         '</div>'+
@@ -5134,6 +5164,16 @@ function checkOAuthCallback() {
     history.replaceState({}, '', window.location.pathname);
     toast('Google sign-in failed', 'Please try again.', 'error');
   }
+  // Capture ?ref= referral code from shared link — pre-fill registration form
+  var refParam = params.get('ref');
+  if (refParam) {
+    history.replaceState({}, '', window.location.pathname);
+    try { sessionStorage.setItem('rf_pending_ref', refParam); } catch(e) {}
+    var refInp = document.getElementById('r-ref');
+    if (refInp) refInp.value = refParam;
+    // Auto-open register tab so they see the pre-filled code
+    if (typeof toggleAuth === 'function') toggleAuth('reg');
+  }
 }
 
 /* ── Patch auth page to add Google button + 2FA flow ─────── */
@@ -5272,7 +5312,7 @@ async function runLiveSearch(q, dd) {
     var d = await api('GET', '/search?q=' + encodeURIComponent(q) + '&limit=6');
     if (!d.listings || !d.listings.length) { dd.classList.remove('open'); return; }
     dd.innerHTML = d.listings.map(function(l) {
-      var img = l.images && l.images[0] ? '<img src="' + API_BASE + esc(l.images[0]) + '" alt=""/>' : '';
+      var img = l.images && l.images[0] ? '<img src="' + esc(imgUrl(l.images[0])) + '" alt=""/>' : '';
       return '<div class="sdd-item" onclick="openListing(\'' + esc(l._id) + '\');document.getElementById(\'search-dd\').classList.remove(\'open\')">' +
         '<div class="sdd-thumb">' + img + '</div>' +
         '<div><div class="text-sm fw7">' + esc(l.title) + '</div>' +
@@ -7464,7 +7504,7 @@ async function loadAdminWalletTx() {
           '<td style="padding:8px"><span class="wtx-badge '+(tx.status||'pending')+'">'+esc(tx.status||'pending')+'</span></td>'+
           '<td style="padding:8px;font-size:.72rem;color:var(--text3)">'+new Date(tx.createdAt).toLocaleDateString()+'</td>'+
           '<td style="padding:8px">'+
-            (hasProof?'<a href="'+API_BASE+esc(tx.proofImageUrl)+'" target="_blank" class="btn btn-s btn-sm" style="font-size:.7rem">View</a>':
+            (hasProof?'<a href="'+esc(imgUrl(tx.proofImageUrl))+'" target="_blank" class="btn btn-s btn-sm" style="font-size:.7rem">View</a>':
               (tx.status==='proof_submitted'?'Submitted':'-'))+
           '</td>'+
           '<td style="padding:8px">'+
@@ -9102,7 +9142,7 @@ function dismissAccessGranted() {
       ct.innerHTML =
         '<div class="prof-hdr">' +
           /* 1. Avatar */
-          '<div class="av av-lg">' + (user.avatar ? '<img src="' + API_BASE + esc(user.avatar) + '" alt="avatar"/>' : ((user.username||'?')[0].toUpperCase())) + '</div>' +
+          '<div class="av av-lg">' + (user.avatar ? '<img src="' + esc(imgUrl(user.avatar)) + '" alt="avatar"/>' : ((user.username||'?')[0].toUpperCase())) + '</div>' +
           '<div class="prof-info">' +
             /* 2. Username */
             '<div class="prof-name">' + esc(user.username || '?') + '</div>' +
