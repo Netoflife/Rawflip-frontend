@@ -2774,6 +2774,14 @@ function showApp(){
     var intent=sessionStorage.getItem('rf_post_login_nav');
     if(intent){sessionStorage.removeItem('rf_post_login_nav');setTimeout(function(){if(typeof navLegal==='function')navLegal(intent);},300);}
   }catch(e){}
+  // Flush any queued PWA actions (shortcuts, share target, protocol handler)
+  window._appReady = true;
+  if (window._actionQueue && window._actionQueue.length) {
+    var q = window._actionQueue.splice(0);
+    setTimeout(function() {
+      q.forEach(function(item) { _runAction(item.action, item.params); });
+    }, 300);
+  }
 }
 
 function showAuth(){
@@ -2790,6 +2798,14 @@ function showLanding(){
   lp.style.display='block';
   loadLandingListings();
   loadLandingStats();
+  // Flush unauthenticated PWA actions (share target, shortcuts when not logged in)
+  window._appReady = false; // keep false — _runAction handles unauth routing
+  if (window._actionQueue && window._actionQueue.length) {
+    var q = window._actionQueue.splice(0);
+    setTimeout(function() {
+      q.forEach(function(item) { _runAction(item.action, item.params); });
+    }, 200);
+  }
 }
 
 function landingShowAuth(mode){
@@ -4942,17 +4958,82 @@ function triggerPWAInstall() {
   });
 }
 
-// Handle manifest shortcuts (?action=...)
-(function checkShortcuts() {
+// ── PWA action handler (shortcuts, share target, protocol handler) ──────
+// Uses a queue — actions fire immediately if app is ready, else queue until showApp() calls S._flushActions()
+window._actionQueue = [];
+window._appReady    = false;
+
+function _dispatchAction(action, params) {
+  if (window._appReady) {
+    _runAction(action, params);
+  } else {
+    window._actionQueue.push({ action: action, params: params });
+  }
+}
+
+function _runAction(action, params) {
+  params = params || {};
+  if (action === 'sell') {
+    if (S.user) {
+      openCreateListing();
+      // Pre-fill title/description from Web Share Target if present
+      if (params.title || params.text) {
+        setTimeout(function() {
+          var ti = document.getElementById('cl-title');
+          var de = document.getElementById('cl-desc');
+          if (ti && params.title) ti.value = decodeURIComponent(params.title);
+          if (de && params.text)  de.value = decodeURIComponent(params.text);
+        }, 400);
+      }
+    } else {
+      landingShowAuth('reg');
+    }
+  } else if (action === 'wallet') {
+    if (S.user) nav('wallet'); else landingShowAuth('login');
+  } else if (action === 'notifications') {
+    if (S.user) nav('notifications'); else landingShowAuth('login');
+  } else if (action === 'listing' && params.id) {
+    if (S.user) openListing(params.id); else landingShowAuth('reg');
+  }
+}
+
+(function checkStartupActions() {
   var p = new URLSearchParams(window.location.search);
+
+  // ── Web Share Target: /share?title=&text=&url= ──────────────────────
+  // Manifest share_target points here; browser opens app with these params
+  if (window.location.pathname === '/share' || p.has('share_target')) {
+    var shTitle = p.get('title') || '';
+    var shText  = p.get('text')  || '';
+    var shUrl   = p.get('url')   || '';
+    history.replaceState({}, '', '/');
+    // Treat a shared URL/item as "create a listing" intent
+    _dispatchAction('sell', { title: shTitle, text: shText || shUrl });
+    return;
+  }
+
+  // ── Manifest shortcuts & protocol handler: ?action= ─────────────────
   var action = p.get('action');
-  if (!action) return;
-  history.replaceState({}, '', window.location.pathname);
-  // These run after initApp so we use a small delay
-  setTimeout(function() {
-    if (action === 'sell')     { if (S.user) openCreateListing(); else showAuth(); }
-    if (action === 'wallet')   nav('wallet');
-  }, 600);
+  if (action) {
+    history.replaceState({}, '', window.location.pathname);
+    // Parse extra params (e.g. ?action=listing&id=abc123)
+    var extra = {};
+    p.forEach(function(v, k) { if (k !== 'action') extra[k] = v; });
+    _dispatchAction(action, extra);
+  }
+
+  // ── web+rawflip:// protocol handler ─────────────────────────────────
+  // Manifest registers web+rawflip; browser encodes URL as ?action=rawflip%3A%2F%2F...
+  // We also intercept the raw protocol string if it arrives via postMessage
+  if (window.location.protocol === 'web+rawflip:') {
+    var raw = window.location.pathname + window.location.search;
+    // e.g. web+rawflip:listing/abc123 → action=listing, id=abc123
+    var parts = raw.replace(/^\/+/, '').split('/');
+    var pAction = parts[0] || 'sell';
+    var pId     = parts[1] || '';
+    history.replaceState({}, '', '/');
+    _dispatchAction(pAction, pId ? { id: pId } : {});
+  }
 })();
 
 /* ════════════════════════════════════════════════════════════
@@ -10662,4 +10743,3 @@ function checkFMRetentionAlerts() {
   });
 })();
 </script>
-
