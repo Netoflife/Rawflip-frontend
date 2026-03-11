@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.rawflip.marketplace",
+        "sha256_cert_fingerprints": ["7E:86:FB:7F:FE:21:69:32:7B:CC:7F:40:7B:9F:1B:36:23:DD:B8:F3:5B:A8:E0:1A:99:F8:B6:3B:D1:AD:35:CC"]
+      }
+    }]
